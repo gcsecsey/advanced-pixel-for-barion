@@ -1,5 +1,5 @@
 === Barion Pixel for WooCommerce ===
-Contributors: gcsecsey
+Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 6.7
@@ -47,6 +47,10 @@ Direct fallback integration with Cookie Law Info is also included.
 * Romanian (ro_RO)
 * Slovenian (sl_SI)
 * Serbian (sr_RS)
+
+= Privacy =
+
+This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all frontend pages. Page view and e-commerce event data is sent to Barion's servers. On purchase completion, the billing email address is passed to bp.js which encrypts it with SHA1 before transmission — no plaintext email leaves your server.
 
 = Key Features =
 
@@ -102,6 +106,10 @@ Yes. Just uncheck "Enable Full Pixel Tracking" in the settings. The base pixel w
 = How does the plugin handle page caching? =
 
 The addToCart event uses client-side JavaScript instead of PHP sessions, so it works correctly with all page caching setups (WP Super Cache, W3 Total Cache, LiteSpeed, WordPress.com hosting, etc.). Other events fire on dynamic pages that are not cached.
+
+== Screenshots ==
+
+1. Settings page — enter your Barion Pixel ID and configure tracking options.
 
 == Changelog ==
 

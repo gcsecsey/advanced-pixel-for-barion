@@ -1,0 +1,7 @@
+.git
+.gitignore
+.distignore
+.github
+.context
+docs/
+README.md
