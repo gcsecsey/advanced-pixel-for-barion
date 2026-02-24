@@ -1,0 +1,19 @@
+{
+	"name": "gcsecsey/woocommerce-barion-pixel",
+	"description": "Barion Pixel for WooCommerce",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require-dev": {
+		"wp-cli/i18n-command": "^2.6"
+	},
+	"scripts": {
+		"i18n:pot": "wp i18n make-pot . languages/woocommerce-barion-pixel.pot --slug=woocommerce-barion-pixel --domain=woocommerce-barion-pixel --package-name='Barion Pixel for WooCommerce'",
+		"i18n:mo": "wp i18n make-mo languages/",
+		"i18n:build": ["@i18n:pot", "@i18n:mo"]
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}

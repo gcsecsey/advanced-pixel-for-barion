@@ -1,0 +1,88 @@
+# Copyright (C) 2026 Gergely Csecsey
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Barion Pixel for WooCommerce 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-barion-pixel\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-02-24T20:24:18+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: woocommerce-barion-pixel\n"
+
+#. Plugin Name of the plugin
+#: woocommerce-barion-pixel.php
+msgid "Barion Pixel for WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: woocommerce-barion-pixel.php
+msgid "https://github.com/gcsecsey/woocommerce-barion-pixel"
+msgstr ""
+
+#. Description of the plugin
+#: woocommerce-barion-pixel.php
+msgid "Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility."
+msgstr ""
+
+#. Author of the plugin
+#: woocommerce-barion-pixel.php
+msgid "Gergely Csecsey"
+msgstr ""
+
+#. Author URI of the plugin
+#: woocommerce-barion-pixel.php
+msgid "https://github.com/gcsecsey"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:121
+msgid "Barion Pixel Settings"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:122
+msgid "Barion Pixel"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:139
+msgid "Barion Pixel Configuration"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:146
+msgid "Pixel ID"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:154
+msgid "Enable Full Pixel Tracking"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:162
+msgid "Debug Mode"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:214
+msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
+msgstr ""
+
+#: woocommerce-barion-pixel.php:231
+msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:248
+msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:250
+msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
+msgstr ""
+
+#: woocommerce-barion-pixel.php:267
+msgid "Enable debug mode (logs events to browser console)"
+msgstr ""
+
+#: woocommerce-barion-pixel.php:708
+msgid "Barion Pixel for WooCommerce: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
+msgstr ""
