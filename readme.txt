@@ -1,0 +1,111 @@
+=== Barion Pixel for WooCommerce ===
+Contributors: gcsecsey
+Tags: barion, pixel, woocommerce, tracking, e-commerce
+Requires at least: 5.0
+Tested up to: 6.7
+Stable tag: 1.0.0
+Requires PHP: 7.2
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
+
+== Description ==
+
+Barion Pixel for WooCommerce adds Barion Pixel tracking to your WooCommerce store. It supports two modes:
+
+**Base Pixel** (always active): Loads the Barion tracking script on all pages. Fires `pageView` automatically for fraud prevention and basic analytics.
+
+**Full Tracking** (optional): Tracks all mandatory e-commerce events per the Barion Pixel documentation:
+
+* **contentView** - Product page views
+* **addToCart** - Add to cart actions (client-side, compatible with page caching)
+* **initiateCheckout** - Checkout page views
+* **purchase** - Completed orders with full revenue tracking
+* **setEncryptedEmail** - Encrypted billing email for user identification
+
+= Cookie Consent =
+
+The plugin integrates with the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), supporting all major cookie consent plugins:
+
+* CookieYes
+* Complianz
+* Real Cookie Banner
+* GDPR Cookie Compliance (Moove)
+* Cookie Notice by dFactory
+
+Direct fallback integration with Cookie Law Info is also included.
+
+= Key Features =
+
+* Base Pixel with automatic pageView tracking
+* Full e-commerce event tracking with all required fields
+* WP Consent API integration for universal cookie consent support
+* Client-side add-to-cart tracking (compatible with page caching)
+* Variable product support (tracks variation prices)
+* Duplicate purchase prevention
+* Debug mode with console logging
+* Detects other plugins loading bp.js to avoid double-loading
+
+== Installation ==
+
+1. Upload the `woocommerce-barion-pixel` folder to `/wp-content/plugins/`
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Go to Settings > Barion Pixel and enter your Barion Pixel ID
+4. Optionally enable or disable Full Pixel Tracking
+
+= Requirements =
+
+* WordPress 5.0 or higher
+* PHP 7.2 or higher
+* WooCommerce 5.0 or higher (for full event tracking)
+
+= Optional =
+
+* [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) for universal cookie consent support
+* Any WP Consent API compatible cookie plugin (CookieYes, Complianz, etc.)
+
+== Frequently Asked Questions ==
+
+= Do I need WooCommerce? =
+
+The Base Pixel (pageView) works without WooCommerce. Full event tracking (contentView, addToCart, initiateCheckout, purchase, setEncryptedEmail) requires WooCommerce.
+
+= I already use the Barion Payment Gateway plugin. Will this conflict? =
+
+No. The [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) is a payment processor only — it doesn't implement Barion Pixel event tracking. Both plugins coexist perfectly. If both have a Pixel ID configured, Barion Pixel for WooCommerce detects that bp.js is already loaded and skips re-loading it.
+
+= Which cookie consent plugins are supported? =
+
+All plugins that implement the WP Consent API standard: CookieYes, Complianz, Real Cookie Banner, GDPR Cookie Compliance (Moove), Cookie Notice by dFactory, and others. Direct fallback integration with Cookie Law Info is also built in.
+
+= What is the difference between Base Pixel and Full Tracking? =
+
+**Base Pixel** loads bp.js and fires pageView on every page. This is used by Barion for fraud prevention and basic analytics. **Full Tracking** adds e-commerce events (product views, add to cart, checkout, purchase) that enable marketing analytics and may qualify your store for lower Barion commission rates.
+
+= Can I use only the Base Pixel? =
+
+Yes. Just uncheck "Enable Full Pixel Tracking" in the settings. The base pixel will still load and fire pageView events.
+
+= How does the plugin handle page caching? =
+
+The addToCart event uses client-side JavaScript instead of PHP sessions, so it works correctly with all page caching setups (WP Super Cache, W3 Total Cache, LiteSpeed, WordPress.com hosting, etc.). Other events fire on dynamic pages that are not cached.
+
+== Changelog ==
+
+= 1.0.0 =
+* Initial release
+* Base Barion Pixel (pageView) implementation
+* Full event tracking: contentView, addToCart, initiateCheckout, purchase, setEncryptedEmail
+* WP Consent API integration (supports CookieYes, Complianz, Real Cookie Banner, and others)
+* Cookie Law Info fallback integration
+* Admin settings panel with debug mode
+* Client-side addToCart tracking (compatible with page caching)
+* Variable product support (tracks variation prices)
+* Duplicate purchase prevention
+* bp.js double-load detection
+
+== Upgrade Notice ==
+
+= 1.0.0 =
+Initial release.
