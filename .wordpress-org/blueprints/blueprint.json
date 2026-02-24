@@ -1,0 +1,49 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/shop/",
+	"preferredVersions": {
+		"php": "8.1",
+		"wp": "latest"
+	},
+	"features": {
+		"networking": true
+	},
+	"steps": [
+		{
+			"step": "login"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "woocommerce"
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php require '/wordpress/wp-load.php'; delete_transient( '_wc_activation_redirect' ); update_option( 'woocommerce_onboarding_profile', array( 'completed' => true ) ); ?>"
+		},
+		{
+			"step": "setSiteOptions",
+			"options": {
+				"blogname": "Barion Pixel Demo Store",
+				"woocommerce_currency": "EUR",
+				"woocommerce_store_address": "Váci út 1",
+				"woocommerce_store_city": "Budapest",
+				"woocommerce_store_postcode": "1132",
+				"woocommerce_default_country": "HU"
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php require '/wordpress/wp-load.php'; update_option( 'wc_barion_pixel_settings', array( 'pixel_id' => 'BP-DemoPixelId-00', 'enable_full_tracking' => true, 'debug_mode' => true ) ); ?>"
+		},
+		{
+			"step": "importWxr",
+			"file": {
+				"resource": "url",
+				"url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce/sample-data/sample_products.xml"
+			}
+		}
+	]
+}
