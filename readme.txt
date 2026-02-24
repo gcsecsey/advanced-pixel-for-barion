@@ -36,6 +36,18 @@ The plugin integrates with the [WP Consent API](https://wordpress.org/plugins/wp
 
 Direct fallback integration with Cookie Law Info is also included.
 
+= Supported Languages =
+
+* English (default)
+* Hungarian (hu_HU)
+* Czech (cs_CZ)
+* Slovak (sk_SK)
+* German (de_DE)
+* Croatian (hr)
+* Romanian (ro_RO)
+* Slovenian (sl_SI)
+* Serbian (sr_RS)
+
 = Key Features =
 
 * Base Pixel with automatic pageView tracking
