@@ -23,7 +23,7 @@
 			"step": "installPlugin",
 			"pluginZipFile": {
 				"resource": "url",
-				"url": "https://github.com/gcsecsey/woocommerce-barion-pixel/archive/refs/heads/main.zip"
+				"url": "https://github.com/gcsecsey/barion-pixel-for-woocommerce/archive/refs/heads/main.zip"
 			}
 		},
 		{

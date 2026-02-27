@@ -560,6 +560,11 @@ add_action('before_woocommerce_init', function() {
 
 // Initialize plugin
 function wc_barion_pixel_init() {
+    load_plugin_textdomain(
+        'barion-pixel-for-woocommerce',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
     WC_Barion_Pixel::get_instance();
 }
 add_action('plugins_loaded', 'wc_barion_pixel_init');

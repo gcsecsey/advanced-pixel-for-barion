@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Barion Pixel for WooCommerce 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-barion-pixel\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/barion-pixel-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,79 +12,79 @@ msgstr ""
 "POT-Creation-Date: 2026-02-24T20:21:54+00:00\n"
 "PO-Revision-Date: 2026-02-24 20:21+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: woocommerce-barion-pixel\n"
+"X-Domain: barion-pixel-for-woocommerce\n"
 "Language: sk_SK\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #. Plugin Name of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Barion Pixel for WooCommerce"
 msgstr "Barion Pixel pre WooCommerce"
 
 #. Plugin URI of the plugin
-#: woocommerce-barion-pixel.php
-msgid "https://github.com/gcsecsey/woocommerce-barion-pixel"
+#: barion-pixel-for-woocommerce.php
+msgid "https://github.com/gcsecsey/barion-pixel-for-woocommerce"
 msgstr ""
 
 #. Description of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility."
 msgstr "Integrácia Barion Pixel pre WooCommerce s kompletným sledovaním e-commerce udalostí, podporou súhlasu s cookies a kompatibilitou s WP Consent API."
 
 #. Author of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Gergely Csecsey"
 msgstr ""
 
 #. Author URI of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "https://github.com/gcsecsey"
 msgstr ""
 
-#: woocommerce-barion-pixel.php:121
+#: barion-pixel-for-woocommerce.php:121
 msgid "Barion Pixel Settings"
 msgstr "Nastavenia Barion Pixel"
 
-#: woocommerce-barion-pixel.php:122
+#: barion-pixel-for-woocommerce.php:122
 msgid "Barion Pixel"
 msgstr "Barion Pixel"
 
-#: woocommerce-barion-pixel.php:139
+#: barion-pixel-for-woocommerce.php:139
 msgid "Barion Pixel Configuration"
 msgstr "Konfigurácia Barion Pixel"
 
-#: woocommerce-barion-pixel.php:146
+#: barion-pixel-for-woocommerce.php:146
 msgid "Pixel ID"
 msgstr "Pixel ID"
 
-#: woocommerce-barion-pixel.php:154
+#: barion-pixel-for-woocommerce.php:154
 msgid "Enable Full Pixel Tracking"
 msgstr "Povoliť úplné sledovanie Pixel"
 
-#: woocommerce-barion-pixel.php:162
+#: barion-pixel-for-woocommerce.php:162
 msgid "Debug Mode"
 msgstr "Režim ladenia"
 
-#: woocommerce-barion-pixel.php:214
+#: barion-pixel-for-woocommerce.php:214
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
 msgstr "Nakonfiguruj integráciu Barion Pixel. Základný Pixel sa načíta na všetkých stránkach, keď je zadané Pixel ID. Úplné sledovanie zahŕňa e-commerce udalosti ako zobrazenie produktu, pridanie do košíka, pokladňa a nákup."
 
-#: woocommerce-barion-pixel.php:231
+#: barion-pixel-for-woocommerce.php:231
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr "Zadaj svoje Barion Pixel ID (napr. BP-0000000000-00)"
 
-#: woocommerce-barion-pixel.php:248
+#: barion-pixel-for-woocommerce.php:248
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
 msgstr "Povoliť úplné sledovanie udalostí Barion Pixel (contentView, addToCart, initiateCheckout, purchase)"
 
-#: woocommerce-barion-pixel.php:250
+#: barion-pixel-for-woocommerce.php:250
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
 msgstr "Základný Pixel skript sa načíta vždy. Povoľ túto možnosť na sledovanie e-commerce udalostí."
 
-#: woocommerce-barion-pixel.php:267
+#: barion-pixel-for-woocommerce.php:267
 msgid "Enable debug mode (logs events to browser console)"
 msgstr "Povoliť režim ladenia (zaznamenáva udalosti do konzoly prehliadača)"
 
-#: woocommerce-barion-pixel.php:708
+#: barion-pixel-for-woocommerce.php:708
 msgid "Barion Pixel for WooCommerce: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
 msgstr "Barion Pixel pre WooCommerce: Plugin Barion Payment Gateway má tiež nakonfigurované Pixel ID. Oba pluginy budú správne fungovať spoločne — základný pixel skript sa načíta iba raz. Môžeš odstrániť Pixel ID z nastavení platobnej brány, aby si mal konfiguráciu na jednom mieste."
