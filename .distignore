@@ -3,5 +3,6 @@
 .distignore
 .github
 .context
+.wordpress-org
 docs/
 README.md

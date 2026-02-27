@@ -1,0 +1,61 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/shop/",
+	"preferredVersions": {
+		"php": "8.1",
+		"wp": "latest"
+	},
+	"features": {
+		"networking": true
+	},
+	"steps": [
+		{
+			"step": "login"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "woocommerce"
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginZipFile": {
+				"resource": "url",
+				"url": "https://github.com/gcsecsey/woocommerce-barion-pixel/archive/refs/heads/main.zip"
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php require '/wordpress/wp-load.php'; delete_transient( '_wc_activation_redirect' ); update_option( 'woocommerce_onboarding_profile', array( 'completed' => true ) ); ?>"
+		},
+		{
+			"step": "setSiteOptions",
+			"options": {
+				"blogname": "Barion Pixel Demo Store",
+				"woocommerce_currency": "EUR",
+				"woocommerce_store_address": "Váci út 1",
+				"woocommerce_store_city": "Budapest",
+				"woocommerce_store_postcode": "1132",
+				"woocommerce_default_country": "HU"
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php require '/wordpress/wp-load.php'; update_option( 'wc_barion_pixel_settings', array( 'pixel_id' => 'BP-DemoPixelId-00', 'enable_full_tracking' => true, 'debug_mode' => true ) ); ?>"
+		},
+		{
+			"step": "writeFile",
+			"path": "/wordpress/wp-content/mu-plugins/blueprint-demo-notice.php",
+			"data": "<?php add_action('wp_body_open', function() { if (is_admin()) return; echo '<div style=\"background:#1e1e2e;color:#cdd6f4;padding:12px 20px;text-align:center;font-family:system-ui,sans-serif;font-size:14px;\">Open your browser\\'s <strong>Developer Console</strong> (F12) to see <code style=\"background:#313244;padding:2px 6px;border-radius:3px;color:#89b4fa;\">[Barion Pixel]</code> debug logs as you browse the store.</div>'; });"
+		},
+		{
+			"step": "importWxr",
+			"file": {
+				"resource": "url",
+				"url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce/sample-data/sample_products.xml"
+			}
+		}
+	]
+}
