@@ -21,9 +21,9 @@
 		},
 		{
 			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "woocommerce-barion-pixel"
+			"pluginZipFile": {
+				"resource": "url",
+				"url": "https://github.com/gcsecsey/woocommerce-barion-pixel/archive/refs/heads/main.zip"
 			}
 		},
 		{
