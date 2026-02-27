@@ -2,7 +2,7 @@
 Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 6.9
 Stable tag: 1.0.0
 Requires PHP: 7.2
 License: GPLv2 or later
@@ -65,7 +65,7 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 
 == Installation ==
 
-1. Upload the `woocommerce-barion-pixel` folder to `/wp-content/plugins/`
+1. Upload the `barion-pixel-for-woocommerce` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Go to Settings > Barion Pixel and enter your Barion Pixel ID
 4. Optionally enable or disable Full Pixel Tracking
