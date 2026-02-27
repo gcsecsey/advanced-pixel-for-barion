@@ -442,7 +442,7 @@ class WC_Barion_Pixel {
         }
 
         // Check if already tracked to prevent duplicate tracking
-        if (get_post_meta($order_id, '_wc_barion_tracked', true)) {
+        if ($order->get_meta('_wc_barion_tracked', true)) {
             return;
         }
 
@@ -481,7 +481,8 @@ class WC_Barion_Pixel {
         $this->queue_event('purchase', $event_data);
 
         // Mark as tracked
-        update_post_meta($order_id, '_wc_barion_tracked', true);
+        $order->update_meta_data('_wc_barion_tracked', true);
+        $order->save();
     }
 
     /**
@@ -550,6 +551,13 @@ class WC_Barion_Pixel {
     }
 
 }
+
+// Declare HPOS compatibility
+add_action('before_woocommerce_init', function() {
+    if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+    }
+});
 
 // Initialize plugin
 function wc_barion_pixel_init() {
