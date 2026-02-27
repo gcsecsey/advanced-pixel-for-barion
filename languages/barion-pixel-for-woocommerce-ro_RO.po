@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Barion Pixel for WooCommerce 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-barion-pixel\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/barion-pixel-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,79 +12,79 @@ msgstr ""
 "POT-Creation-Date: 2026-02-24T20:21:54+00:00\n"
 "PO-Revision-Date: 2026-02-24 20:21+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: woocommerce-barion-pixel\n"
+"X-Domain: barion-pixel-for-woocommerce\n"
 "Language: ro_RO\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n==0 || (n%100>0 && n%100<20)) ? 1 : 2;\n"
 
 #. Plugin Name of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Barion Pixel for WooCommerce"
 msgstr "Barion Pixel pentru WooCommerce"
 
 #. Plugin URI of the plugin
-#: woocommerce-barion-pixel.php
-msgid "https://github.com/gcsecsey/woocommerce-barion-pixel"
+#: barion-pixel-for-woocommerce.php
+msgid "https://github.com/gcsecsey/barion-pixel-for-woocommerce"
 msgstr ""
 
 #. Description of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility."
 msgstr "Integrare Barion Pixel pentru WooCommerce cu urmărirea completă a evenimentelor de e-commerce, suport pentru consimțământul cookie-urilor și compatibilitate cu WP Consent API."
 
 #. Author of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Gergely Csecsey"
 msgstr ""
 
 #. Author URI of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "https://github.com/gcsecsey"
 msgstr ""
 
-#: woocommerce-barion-pixel.php:121
+#: barion-pixel-for-woocommerce.php:121
 msgid "Barion Pixel Settings"
 msgstr "Setări Barion Pixel"
 
-#: woocommerce-barion-pixel.php:122
+#: barion-pixel-for-woocommerce.php:122
 msgid "Barion Pixel"
 msgstr "Barion Pixel"
 
-#: woocommerce-barion-pixel.php:139
+#: barion-pixel-for-woocommerce.php:139
 msgid "Barion Pixel Configuration"
 msgstr "Configurare Barion Pixel"
 
-#: woocommerce-barion-pixel.php:146
+#: barion-pixel-for-woocommerce.php:146
 msgid "Pixel ID"
 msgstr "ID Pixel"
 
-#: woocommerce-barion-pixel.php:154
+#: barion-pixel-for-woocommerce.php:154
 msgid "Enable Full Pixel Tracking"
 msgstr "Activează urmărirea completă cu Pixel"
 
-#: woocommerce-barion-pixel.php:162
+#: barion-pixel-for-woocommerce.php:162
 msgid "Debug Mode"
 msgstr "Mod depanare"
 
-#: woocommerce-barion-pixel.php:214
+#: barion-pixel-for-woocommerce.php:214
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
 msgstr "Configurează integrarea Barion Pixel. Pixelul de bază va fi încărcat pe toate paginile atunci când este furnizat un ID Pixel. Urmărirea completă include evenimente de e-commerce precum vizualizări de produse, adăugare în coș, finalizare comandă și achiziție."
 
-#: woocommerce-barion-pixel.php:231
+#: barion-pixel-for-woocommerce.php:231
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr "Introdu ID-ul Barion Pixel (de ex., BP-0000000000-00)"
 
-#: woocommerce-barion-pixel.php:248
+#: barion-pixel-for-woocommerce.php:248
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
 msgstr "Activează urmărirea completă a evenimentelor Barion Pixel (contentView, addToCart, initiateCheckout, purchase)"
 
-#: woocommerce-barion-pixel.php:250
+#: barion-pixel-for-woocommerce.php:250
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
 msgstr "Scriptul Pixelului de bază va fi întotdeauna încărcat. Activează această opțiune pentru a urmări evenimentele de e-commerce."
 
-#: woocommerce-barion-pixel.php:267
+#: barion-pixel-for-woocommerce.php:267
 msgid "Enable debug mode (logs events to browser console)"
 msgstr "Activează modul de depanare (înregistrează evenimentele în consola browserului)"
 
-#: woocommerce-barion-pixel.php:708
+#: barion-pixel-for-woocommerce.php:708
 msgid "Barion Pixel for WooCommerce: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
 msgstr "Barion Pixel pentru WooCommerce: Pluginul Barion Payment Gateway are, de asemenea, un ID Pixel configurat. Ambele pluginuri vor funcționa corect împreună — scriptul pixelului de bază va fi încărcat o singură dată. Poți elimina ID-ul Pixel din setările gateway-ului de plată pentru a păstra configurația într-un singur loc."

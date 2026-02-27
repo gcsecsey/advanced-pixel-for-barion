@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Barion Pixel for WooCommerce 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-barion-pixel\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/barion-pixel-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,79 +12,79 @@ msgstr ""
 "POT-Creation-Date: 2026-02-24T20:21:54+00:00\n"
 "PO-Revision-Date: 2026-02-24 20:21+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: woocommerce-barion-pixel\n"
-"Language: hr\n"
+"X-Domain: barion-pixel-for-woocommerce\n"
+"Language: sr_RS\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11) ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)) ? 1 : 2;\n"
 
 #. Plugin Name of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Barion Pixel for WooCommerce"
 msgstr "Barion Pixel za WooCommerce"
 
 #. Plugin URI of the plugin
-#: woocommerce-barion-pixel.php
-msgid "https://github.com/gcsecsey/woocommerce-barion-pixel"
+#: barion-pixel-for-woocommerce.php
+msgid "https://github.com/gcsecsey/barion-pixel-for-woocommerce"
 msgstr ""
 
 #. Description of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility."
-msgstr "Integracija Barion Pixela za WooCommerce s potpunim praćenjem e-trgovinskih događaja, podrškom za pristanak na kolačiće i kompatibilnošću s WP Consent API-jem."
+msgstr "Integracija Barion Pixel za WooCommerce sa potpunim praćenjem događaja e-trgovine, podrškom za saglasnost za kolačiće i kompatibilnošću sa WP Consent API."
 
 #. Author of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "Gergely Csecsey"
 msgstr ""
 
 #. Author URI of the plugin
-#: woocommerce-barion-pixel.php
+#: barion-pixel-for-woocommerce.php
 msgid "https://github.com/gcsecsey"
 msgstr ""
 
-#: woocommerce-barion-pixel.php:121
+#: barion-pixel-for-woocommerce.php:121
 msgid "Barion Pixel Settings"
-msgstr "Postavke Barion Pixela"
+msgstr "Podešavanja Barion Pixel"
 
-#: woocommerce-barion-pixel.php:122
+#: barion-pixel-for-woocommerce.php:122
 msgid "Barion Pixel"
 msgstr "Barion Pixel"
 
-#: woocommerce-barion-pixel.php:139
+#: barion-pixel-for-woocommerce.php:139
 msgid "Barion Pixel Configuration"
-msgstr "Konfiguracija Barion Pixela"
+msgstr "Konfiguracija Barion Pixel"
 
-#: woocommerce-barion-pixel.php:146
+#: barion-pixel-for-woocommerce.php:146
 msgid "Pixel ID"
-msgstr "Pixel ID"
+msgstr "ID piksela"
 
-#: woocommerce-barion-pixel.php:154
+#: barion-pixel-for-woocommerce.php:154
 msgid "Enable Full Pixel Tracking"
-msgstr "Omogući potpuno praćenje Pixelom"
+msgstr "Omogući potpuno praćenje piksela"
 
-#: woocommerce-barion-pixel.php:162
+#: barion-pixel-for-woocommerce.php:162
 msgid "Debug Mode"
-msgstr "Način rada za otklanjanje pogrešaka"
+msgstr "Režim za otklanjanje grešaka"
 
-#: woocommerce-barion-pixel.php:214
+#: barion-pixel-for-woocommerce.php:214
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
-msgstr "Konfiguriraj svoju Barion Pixel integraciju. Osnovni Pixel učitat će se na svim stranicama kada je naveden Pixel ID. Potpuno praćenje uključuje e-trgovinske događaje kao što su pregledi proizvoda, dodavanje u košaricu, naplata i kupnja."
+msgstr "Konfiguriši svoju integraciju Barion Pixel. Osnovni piksel će se učitati na svim stranicama kada je ID piksela unet. Potpuno praćenje uključuje događaje e-trgovine kao što su pregledi proizvoda, dodavanje u korpu, završetak porudžbine i kupovina."
 
-#: woocommerce-barion-pixel.php:231
+#: barion-pixel-for-woocommerce.php:231
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr "Unesi svoj Barion Pixel ID (npr. BP-0000000000-00)"
 
-#: woocommerce-barion-pixel.php:248
+#: barion-pixel-for-woocommerce.php:248
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
-msgstr "Omogući potpuno praćenje događaja Barion Pixelom (contentView, addToCart, initiateCheckout, purchase)"
+msgstr "Omogući potpuno praćenje događaja Barion Pixel (contentView, addToCart, initiateCheckout, purchase)"
 
-#: woocommerce-barion-pixel.php:250
+#: barion-pixel-for-woocommerce.php:250
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
-msgstr "Skripta osnovnog Pixela uvijek će se učitati. Omogući ovo za praćenje e-trgovinskih događaja."
+msgstr "Skripta osnovnog piksela će uvek biti učitana. Omogući ovo za praćenje događaja e-trgovine."
 
-#: woocommerce-barion-pixel.php:267
+#: barion-pixel-for-woocommerce.php:267
 msgid "Enable debug mode (logs events to browser console)"
-msgstr "Omogući način rada za otklanjanje pogrešaka (zapisuje događaje u konzolu preglednika)"
+msgstr "Omogući režim za otklanjanje grešaka (beleži događaje u konzolu pregledača)"
 
-#: woocommerce-barion-pixel.php:708
+#: barion-pixel-for-woocommerce.php:708
 msgid "Barion Pixel for WooCommerce: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
-msgstr "Barion Pixel za WooCommerce: Dodatak Barion Payment Gateway također ima konfiguriran Pixel ID. Oba dodatka radit će ispravno zajedno — skripta osnovnog Pixela učitat će se samo jednom. Možeš ukloniti Pixel ID iz postavki platnog pristupnika kako bi konfiguraciju držao na jednom mjestu."
+msgstr "Barion Pixel za WooCommerce: Dodatak Barion Payment Gateway takođe ima konfigurisan ID piksela. Oba dodatka će ispravno raditi zajedno — skripta osnovnog piksela će se učitati samo jednom. Možeš ukloniti ID piksela iz podešavanja platnog prolaza kako bi konfigurisao sve na jednom mestu."
