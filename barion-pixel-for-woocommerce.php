@@ -85,7 +85,6 @@ class WC_Barion_Pixel {
         // Admin hooks
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
-        add_action('admin_init', array($this, 'check_barion_gateway_pixel'));
 
         // Register as WP Consent API compatible
         add_filter('wp_consent_api_registered_' . plugin_basename(__FILE__), '__return_true');
@@ -225,6 +224,11 @@ class WC_Barion_Pixel {
      */
     public function render_section_description() {
         echo '<p>' . esc_html__('Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase.', 'barion-pixel-for-woocommerce') . '</p>';
+
+        $barion_settings = get_option('woocommerce_barion_settings', array());
+        if (!empty($barion_settings['barion_pixel_id']) && !empty($this->options['pixel_id'])) {
+            echo '<p>' . esc_html__('The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place.', 'barion-pixel-for-woocommerce') . '</p>';
+        }
     }
 
     /**
@@ -509,30 +513,6 @@ class WC_Barion_Pixel {
         }
 
         $this->encrypted_email = $email;
-    }
-
-    /**
-     * Check if Barion Payment Gateway also has a Pixel ID configured (WordPress admin_init hook callback)
-     * Shows an informational admin notice if both plugins have pixel IDs to help avoid redundancy.
-     *
-     * @return void
-     */
-    public function check_barion_gateway_pixel() {
-        $barion_settings = get_option('woocommerce_barion_settings', array());
-        if (!empty($barion_settings['barion_pixel_id']) && !empty($this->options['pixel_id'])) {
-            add_action('admin_notices', function () {
-                ?>
-                <div class="notice notice-info is-dismissible">
-                    <p>
-                        <?php esc_html_e(
-                            'Barion Pixel for WooCommerce: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place.',
-                            'barion-pixel-for-woocommerce'
-                        ); ?>
-                    </p>
-                </div>
-                <?php
-            });
-        }
     }
 
     /**
