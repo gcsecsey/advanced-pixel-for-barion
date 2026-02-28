@@ -1,5 +1,9 @@
 > 🌐 To je samodejni prevod. Popravki skupnosti so dobrodošli!
 
+# Barion Pixel for WooCommerce
+
+Integracija Barion Pixel za WooCommerce s popolnim sledenjem dogodkov e-trgovine, podporo za soglasje s piškotki in združljivostjo z WP Consent API.
+
 <p align="center">
   <a href="../../README.md">English</a> |
   <a href="README.hu.md">Magyar</a> |
@@ -11,10 +15,6 @@
   <strong>Slovenščina</strong> |
   <a href="README.sr.md">Srpski</a>
 </p>
-
-# Barion Pixel for WooCommerce
-
-Integracija Barion Pixel za WooCommerce s popolnim sledenjem dogodkov e-trgovine, podporo za soglasje s piškotki in združljivostjo z WP Consent API.
 
 ## Funkcionalnosti
 

@@ -1,3 +1,7 @@
+# Barion Pixel for WooCommerce
+
+Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
+
 <p align="center">
   <strong>English</strong> |
   <a href="docs/i18n/README.hu.md">Magyar</a> |
@@ -9,10 +13,6 @@
   <a href="docs/i18n/README.sl.md">Slovenščina</a> |
   <a href="docs/i18n/README.sr.md">Srpski</a>
 </p>
-
-# Barion Pixel for WooCommerce
-
-Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
 
 ## Features
 
