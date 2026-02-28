@@ -1,3 +1,15 @@
+<p align="center">
+  <strong>English</strong> |
+  <a href="docs/i18n/README.hu.md">Magyar</a> |
+  <a href="docs/i18n/README.cs.md">Čeština</a> |
+  <a href="docs/i18n/README.sk.md">Slovenčina</a> |
+  <a href="docs/i18n/README.de.md">Deutsch</a> |
+  <a href="docs/i18n/README.hr.md">Hrvatski</a> |
+  <a href="docs/i18n/README.ro.md">Română</a> |
+  <a href="docs/i18n/README.sl.md">Slovenščina</a> |
+  <a href="docs/i18n/README.sr.md">Srpski</a>
+</p>
+
 # Barion Pixel for WooCommerce
 
 Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
@@ -46,6 +58,8 @@ Detailed documentation is available in the [`docs/`](docs/) folder:
 - [Cookie Consent Integration](docs/cookie-consent.md) — WP Consent API, Cookie Law Info, and manual integration
 - [Compatibility](docs/compatibility.md) — WooCommerce, Barion Payment Gateway, caching plugins
 - [Testing Notes](docs/testing-notes.md) — bp.js quirks, debug mode, testing checklist
+
+Documentation is also available in [Magyar](docs/i18n/hu/), [Čeština](docs/i18n/cs/), [Slovenčina](docs/i18n/sk/), [Deutsch](docs/i18n/de/), [Hrvatski](docs/i18n/hr/), [Română](docs/i18n/ro/), [Slovenščina](docs/i18n/sl/), and [Srpski](docs/i18n/sr/).
 
 ## Compatibility
 
