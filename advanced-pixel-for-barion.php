@@ -3,7 +3,7 @@
  * Plugin Name: Advanced Pixel for Barion
  * Plugin URI: https://github.com/gcsecsey/advanced-pixel-for-barion
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
- * Author: Gergely Csecsey
+ * Author: Gergely Csécsey
  * Author URI: https://github.com/gcsecsey
  * Version: 1.0.0
  * Requires at least: 5.0
@@ -537,6 +537,14 @@ add_action('before_woocommerce_init', function() {
     if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
     }
+});
+
+// Add Settings link to plugin action links
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
+    $settings_link = '<a href="' . admin_url('options-general.php?page=advanced-pixel-for-barion') . '">'
+        . __('Settings', 'advanced-pixel-for-barion') . '</a>';
+    array_unshift($links, $settings_link);
+    return $links;
 });
 
 // Initialize plugin

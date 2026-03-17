@@ -85,6 +85,10 @@ msgstr "Az Alap Pixel szkript mindig betöltődik. Engedélyezd ezt az e-kereske
 msgid "Enable debug mode (logs events to browser console)"
 msgstr "Hibakeresési mód engedélyezése (eseményeket naplóz a böngésző konzolba)"
 
+#: advanced-pixel-for-barion.php
+msgid "Settings"
+msgstr "Beállítások"
+
 #: advanced-pixel-for-barion.php:708
 msgid "Advanced Pixel for Barion: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
 msgstr "Barion Pixel WooCommerce-hez: A Barion Payment Gateway bővítményben is be van állítva Pixel azonosító. Mindkét bővítmény megfelelően fog működni együtt — az alap pixel szkript csak egyszer töltődik be. A Pixel azonosítót eltávolíthatod a fizetési átjáró beállításaiból, hogy a konfiguráció egy helyen legyen."
