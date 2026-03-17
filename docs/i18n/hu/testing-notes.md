@@ -34,7 +34,7 @@ Engedélyezd a hibakeresési módot a **Beállítások > Barion Pixel** menüpon
 Nyisd meg a böngésző konzolt (F12 > Konzol), és keresd a `[Barion Pixel]` előtaggal ellátott üzeneteket:
 
 ```
-[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce
+[Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
 [Barion Pixel] Event: contentView { contentType: "Product", ... }

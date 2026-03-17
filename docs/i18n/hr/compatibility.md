@@ -19,15 +19,15 @@
 
 Dodatak [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) od szelpe je **isključivo procesor plaćanja** — dodaje Barion kao način plaćanja u WooCommerce blagajnu. Ne implementira praćenje Barion Pixel događaja.
 
-**Supostojanje:** Oba dodatka rade zajedno bez konflikta. Barion Pixel for WooCommerce dodatak obrađuje praćenje; platni pristupnik obrađuje plaćanja.
+**Supostojanje:** Oba dodatka rade zajedno bez konflikta. Advanced Pixel for Barion dodatak obrađuje praćenje; platni pristupnik obrađuje plaćanja.
 
 **Preklapanje Pixel ID-a:** Platni pristupnik ima neobavezno polje Pixel ID za učitavanje osnovnog pixela. Ako oba dodatka imaju konfiguriran Pixel ID:
 
-- Barion Pixel for WooCommerce otkriva je li `bp.js` već učitan i preskače ponovno učitavanje skripte
+- Advanced Pixel for Barion otkriva je li `bp.js` već učitan i preskače ponovno učitavanje skripte
 - Informativna administratorska obavijest predlaže konsolidaciju konfiguracije Pixel ID-a na jedno mjesto
 - Oba dodatka nastavljaju ispravno funkcionirati bez obzira na to
 
-**Preporuka:** Ako koristiš oba dodatka, konfiguriraj Pixel ID samo u postavkama Barion Pixel for WooCommerce i ostavi ga praznim u postavkama platnog pristupnika.
+**Preporuka:** Ako koristiš oba dodatka, konfiguriraj Pixel ID samo u postavkama Advanced Pixel for Barion i ostavi ga praznim u postavkama platnog pristupnika.
 
 ---
 

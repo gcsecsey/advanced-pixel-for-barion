@@ -19,15 +19,15 @@
 
 Vtičnik [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) avtorja szelpe je **samo procesor plačil** — dodaja Barion kot način plačila na WooCommerce blagajno. Ne implementira sledenja dogodkov Barion Pixel.
 
-**Sobivanje:** Oba vtičnika delujeta skupaj brez konfliktov. Vtičnik Barion Pixel for WooCommerce skrbi za sledenje; plačilni prehod skrbi za plačila.
+**Sobivanje:** Oba vtičnika delujeta skupaj brez konfliktov. Vtičnik Advanced Pixel for Barion skrbi za sledenje; plačilni prehod skrbi za plačila.
 
 **Prekrivanje ID piksla:** Plačilni prehod ima izbirno polje za ID piksla za nalaganje osnovnega piksla. Če imata oba vtičnika konfiguriran ID piksla:
 
-- Barion Pixel for WooCommerce zazna, ali je `bp.js` že naložen, in preskoči ponovno nalaganje skripta
+- Advanced Pixel for Barion zazna, ali je `bp.js` že naložen, in preskoči ponovno nalaganje skripta
 - Informacijsko skrbniško obvestilo predlaga konsolidacijo konfiguracije ID piksla na eno mesto
 - Oba vtičnika nadaljujeta pravilno delovanje ne glede na to
 
-**Priporočilo:** Če uporabljate oba vtičnika, konfigurirajte ID piksla samo v nastavitvah Barion Pixel for WooCommerce in ga pustite praznega v nastavitvah plačilnega prehoda.
+**Priporočilo:** Če uporabljate oba vtičnika, konfigurirajte ID piksla samo v nastavitvah Advanced Pixel for Barion in ga pustite praznega v nastavitvah plačilnega prehoda.
 
 ---
 

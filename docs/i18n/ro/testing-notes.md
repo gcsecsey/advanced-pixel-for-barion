@@ -34,7 +34,7 @@ Activează modul de depanare în **Setări > Barion Pixel** pentru a înregistra
 Deschide consola browserului (F12 > Consolă) și caută mesajele prefixate cu `[Barion Pixel]`:
 
 ```
-[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce
+[Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
 [Barion Pixel] Event: contentView { contentType: "Product", ... }

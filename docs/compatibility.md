@@ -15,15 +15,15 @@
 
 The [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) plugin by szelpe is a **payment processor only** — it adds Barion as a payment method to WooCommerce checkout. It does not implement Barion Pixel event tracking.
 
-**Coexistence:** Both plugins work together without conflict. The Barion Pixel for WooCommerce plugin handles tracking; the payment gateway handles payments.
+**Coexistence:** Both plugins work together without conflict. The Advanced Pixel for Barion plugin handles tracking; the payment gateway handles payments.
 
 **Pixel ID overlap:** The payment gateway has an optional Pixel ID field for loading the base pixel. If both plugins have a Pixel ID configured:
 
-- Barion Pixel for WooCommerce detects if `bp.js` is already loaded and skips re-loading the script
+- Advanced Pixel for Barion detects if `bp.js` is already loaded and skips re-loading the script
 - An informational admin notice suggests consolidating the Pixel ID configuration to one place
 - Both plugins continue to function correctly regardless
 
-**Recommendation:** If you use both plugins, configure the Pixel ID only in Barion Pixel for WooCommerce settings and leave it empty in the payment gateway settings.
+**Recommendation:** If you use both plugins, configure the Pixel ID only in Advanced Pixel for Barion settings and leave it empty in the payment gateway settings.
 
 ---
 

@@ -19,15 +19,15 @@
 
 A szelpe által fejlesztett [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) bővítmény **kizárólag fizetési feldolgozó** — a Barion-t fizetési módként adja hozzá a WooCommerce pénztárhoz. Nem valósítja meg a Barion Pixel eseménykövetést.
 
-**Együttélés:** Mindkét bővítmény ütközés nélkül működik együtt. A Barion Pixel for WooCommerce bővítmény kezeli a követést; a fizetési átjáró kezeli a fizetéseket.
+**Együttélés:** Mindkét bővítmény ütközés nélkül működik együtt. A Advanced Pixel for Barion bővítmény kezeli a követést; a fizetési átjáró kezeli a fizetéseket.
 
 **Pixel azonosító átfedés:** A fizetési átjáróban van egy opcionális Pixel azonosító mező az alap pixel betöltéséhez. Ha mindkét bővítményben be van állítva a Pixel azonosító:
 
-- A Barion Pixel for WooCommerce észleli, ha a `bp.js` már betöltődött, és kihagyja a szkript újratöltését
+- A Advanced Pixel for Barion észleli, ha a `bp.js` már betöltődött, és kihagyja a szkript újratöltését
 - Egy tájékoztató adminisztrációs értesítés javasolja a Pixel azonosító konfigurációjának egy helyre konszolidálását
 - Mindkét bővítmény helyesen működik tovább ettől függetlenül
 
-**Javaslat:** Ha mindkét bővítményt használod, csak a Barion Pixel for WooCommerce beállításaiban állítsd be a Pixel azonosítót, és hagyd üresen a fizetési átjáró beállításaiban.
+**Javaslat:** Ha mindkét bővítményt használod, csak a Advanced Pixel for Barion beállításaiban állítsd be a Pixel azonosítót, és hagyd üresen a fizetési átjáró beállításaiban.
 
 ---
 

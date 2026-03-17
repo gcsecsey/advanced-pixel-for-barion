@@ -19,15 +19,15 @@
 
 Plugin-ul [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) creat de szelpe este **exclusiv un procesor de plăți** — adaugă Barion ca metodă de plată la finalizarea comenzii în WooCommerce. Nu implementează urmărirea evenimentelor Barion Pixel.
 
-**Coexistență:** Ambele plugin-uri funcționează împreună fără conflicte. Plugin-ul Barion Pixel for WooCommerce gestionează urmărirea; gateway-ul de plată gestionează plățile.
+**Coexistență:** Ambele plugin-uri funcționează împreună fără conflicte. Plugin-ul Advanced Pixel for Barion gestionează urmărirea; gateway-ul de plată gestionează plățile.
 
 **Suprapunere ID Pixel:** Gateway-ul de plată are un câmp opțional pentru ID Pixel pentru încărcarea pixelului de bază. Dacă ambele plugin-uri au un ID Pixel configurat:
 
-- Barion Pixel for WooCommerce detectează dacă `bp.js` este deja încărcat și omite reîncărcarea scriptului
+- Advanced Pixel for Barion detectează dacă `bp.js` este deja încărcat și omite reîncărcarea scriptului
 - O notificare informativă în administrare sugerează consolidarea configurației ID Pixel într-un singur loc
 - Ambele plugin-uri continuă să funcționeze corect indiferent de situație
 
-**Recomandare:** Dacă folosești ambele plugin-uri, configurează ID-ul Pixel doar în setările Barion Pixel for WooCommerce și lasă-l gol în setările gateway-ului de plată.
+**Recomandare:** Dacă folosești ambele plugin-uri, configurează ID-ul Pixel doar în setările Advanced Pixel for Barion și lasă-l gol în setările gateway-ului de plată.
 
 ---
 

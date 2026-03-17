@@ -19,15 +19,15 @@
 
 Plugin [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) od szelpe je **pouze platební procesor** — přidává Barion jako platební metodu do pokladny WooCommerce. Neimplementuje sledování událostí Barion Pixel.
 
-**Koexistence:** Oba pluginy fungují společně bez konfliktu. Plugin Barion Pixel for WooCommerce se stará o sledování; platební brána zpracovává platby.
+**Koexistence:** Oba pluginy fungují společně bez konfliktu. Plugin Advanced Pixel for Barion se stará o sledování; platební brána zpracovává platby.
 
 **Překrytí ID Pixelu:** Platební brána obsahuje volitelné pole pro ID Pixelu pro načtení základního pixelu. Pokud mají oba pluginy nakonfigurované ID Pixelu:
 
-- Barion Pixel for WooCommerce zjistí, zda je `bp.js` již načteno, a přeskočí opětovné načtení skriptu
+- Advanced Pixel for Barion zjistí, zda je `bp.js` již načteno, a přeskočí opětovné načtení skriptu
 - Informační upozornění správce navrhuje sloučit konfiguraci ID Pixelu na jedno místo
 - Oba pluginy nadále fungují správně bez ohledu na situaci
 
-**Doporučení:** Pokud používáte oba pluginy, nakonfigurujte ID Pixelu pouze v nastavení Barion Pixel for WooCommerce a v nastavení platební brány ho nechte prázdné.
+**Doporučení:** Pokud používáte oba pluginy, nakonfigurujte ID Pixelu pouze v nastavení Advanced Pixel for Barion a v nastavení platební brány ho nechte prázdné.
 
 ---
 

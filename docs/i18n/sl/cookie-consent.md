@@ -49,7 +49,7 @@ Vsak vtičnik, ki implementira WP Consent API, bo deloval samodejno:
 
 1. Namesti in aktiviraj vtičnik [WP Consent API](https://wordpress.org/plugins/wp-consent-api/)
 2. Namesti in konfiguriraj želeni vtičnik za soglasje s piškotki (glejte tabelo zgoraj)
-3. Namesti in konfiguriraj Barion Pixel for WooCommerce
+3. Namesti in konfiguriraj Advanced Pixel for Barion
 4. Nobena dodatna konfiguracija ni potrebna — soglasje se obravnava samodejno
 
 ### Kategorija soglasja

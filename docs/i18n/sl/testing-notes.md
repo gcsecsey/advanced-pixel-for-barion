@@ -34,7 +34,7 @@ Omogočite način za odpravljanje napak v **Nastavitve > Barion Pixel**, da bele
 Odprite konzolo brskalnika (F12 > Konzola) in poiščite sporočila s predpono `[Barion Pixel]`:
 
 ```
-[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce
+[Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
 [Barion Pixel] Event: contentView { contentType: "Product", ... }

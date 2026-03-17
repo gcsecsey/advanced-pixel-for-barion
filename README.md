@@ -1,4 +1,4 @@
-# Barion Pixel for WooCommerce
+# Advanced Pixel for Barion
 
 Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
 
@@ -31,7 +31,7 @@ Barion Pixel integration for WooCommerce with full e-commerce event tracking, co
 
 ## Installation
 
-1. Upload the `barion-pixel-for-woocommerce` folder to `/wp-content/plugins/`
+1. Upload the `advanced-pixel-for-barion` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Navigate to Settings > Barion Pixel to configure
 
