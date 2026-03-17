@@ -49,7 +49,7 @@ Bármely bővítmény, amely megvalósítja a WP Consent API-t, automatikusan m�
 
 1. Telepítsd és aktiváld a [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) bővítményt
 2. Telepítsd és konfiguráld a preferált cookie hozzájárulás bővítményedet (lásd a fenti táblázatot)
-3. Telepítsd és konfiguráld a Barion Pixel for WooCommerce bővítményt
+3. Telepítsd és konfiguráld a Advanced Pixel for Barion bővítményt
 4. Nincs szükség további konfigurációra — a hozzájárulás kezelése automatikus
 
 ### Hozzájárulási kategória

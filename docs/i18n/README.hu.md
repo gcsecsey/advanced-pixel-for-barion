@@ -1,6 +1,6 @@
 > 🌐 Ez egy automatikus fordítás. Közösségi javítások szívesen fogadottak!
 
-# Barion Pixel for WooCommerce
+# Advanced Pixel for Barion
 
 Barion Pixel integráció WooCommerce-hez teljes e-kereskedelmi eseménykövetéssel, cookie-hozzájárulás támogatással és WP Consent API kompatibilitással.
 
@@ -33,7 +33,7 @@ Barion Pixel integráció WooCommerce-hez teljes e-kereskedelmi eseményköveté
 
 ## Telepítés
 
-1. Töltsd fel a `barion-pixel-for-woocommerce` mappát a `/wp-content/plugins/` könyvtárba
+1. Töltsd fel a `advanced-pixel-for-barion` mappát a `/wp-content/plugins/` könyvtárba
 2. Aktiváld a bővítményt a WordPress 'Bővítmények' menüjén keresztül
 3. Navigálj a Beállítások > Barion Pixel menüponthoz a konfiguráláshoz
 

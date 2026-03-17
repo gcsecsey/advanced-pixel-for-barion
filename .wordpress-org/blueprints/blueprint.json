@@ -23,7 +23,7 @@
 			"step": "installPlugin",
 			"pluginZipFile": {
 				"resource": "url",
-				"url": "https://github.com/gcsecsey/barion-pixel-for-woocommerce/archive/refs/heads/main.zip"
+				"url": "https://github.com/gcsecsey/advanced-pixel-for-barion/archive/refs/heads/main.zip"
 			}
 		},
 		{
@@ -33,7 +33,7 @@
 		{
 			"step": "setSiteOptions",
 			"options": {
-				"blogname": "Barion Pixel Demo Store",
+				"blogname": "Advanced Pixel for Barion Demo Store",
 				"woocommerce_currency": "EUR",
 				"woocommerce_store_address": "Váci út 1",
 				"woocommerce_store_city": "Budapest",

@@ -34,7 +34,7 @@ Omogući način otklanjanja pogrešaka u **Postavke > Barion Pixel** za bilježe
 Otvori konzolu preglednika (F12 > Console) i traži poruke s prefiksom `[Barion Pixel]`:
 
 ```
-[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce
+[Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
 [Barion Pixel] Event: contentView { contentType: "Product", ... }

@@ -1,6 +1,6 @@
 > 🌐 Ovo je automatski prevod. Ispravke zajednice su dobrodošle!
 
-# Barion Pixel for WooCommerce
+# Advanced Pixel for Barion
 
 Integracija Barion Pixel za WooCommerce sa potpunim praćenjem događaja e-trgovine, podrškom za saglasnost za kolačiće i kompatibilnošću sa WP Consent API.
 
@@ -33,7 +33,7 @@ Integracija Barion Pixel za WooCommerce sa potpunim praćenjem događaja e-trgov
 
 ## Instalacija
 
-1. Otpremi fasciklu `barion-pixel-for-woocommerce` u `/wp-content/plugins/`
+1. Otpremi fasciklu `advanced-pixel-for-barion` u `/wp-content/plugins/`
 2. Aktiviraj dodatak kroz meni 'Dodaci' u WordPress-u
 3. Idi na Podešavanja > Barion Pixel da konfigurišeš
 

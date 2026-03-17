@@ -34,7 +34,7 @@ Omogući režim za otklanjanje grešaka u **Podešavanja > Barion Pixel** da se 
 Otvori konzolu pregledača (F12 > Konzola) i traži poruke sa prefiksom `[Barion Pixel]`:
 
 ```
-[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce
+[Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
 [Barion Pixel] Event: contentView { contentType: "Product", ... }

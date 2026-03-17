@@ -34,7 +34,7 @@ Aktiviere den Debug-Modus unter **Einstellungen > Barion Pixel**, um alle Barion
 Öffne die Browser-Konsole (F12 > Konsole) und achte auf Meldungen mit dem Präfix `[Barion Pixel]`:
 
 ```
-[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce
+[Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
 [Barion Pixel] Event: contentView { contentType: "Product", ... }

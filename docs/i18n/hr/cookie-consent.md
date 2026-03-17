@@ -49,7 +49,7 @@ Svaki dodatak koji implementira WP Consent API radit će automatski:
 
 1. Instaliraj i aktiviraj dodatak [WP Consent API](https://wordpress.org/plugins/wp-consent-api/)
 2. Instaliraj i konfiguriraj željeni dodatak za pristanak na kolačiće (vidi tablicu iznad)
-3. Instaliraj i konfiguriraj Barion Pixel for WooCommerce
+3. Instaliraj i konfiguriraj Advanced Pixel for Barion
 4. Nije potrebna dodatna konfiguracija — pristanak se obrađuje automatski
 
 ### Kategorija pristanka

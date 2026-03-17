@@ -1,13 +1,13 @@
 {
-	"name": "gcsecsey/barion-pixel-for-woocommerce",
-	"description": "Barion Pixel for WooCommerce",
+	"name": "gcsecsey/advanced-pixel-for-barion",
+	"description": "Advanced Pixel for Barion",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
 	"require-dev": {
 		"wp-cli/i18n-command": "^2.6"
 	},
 	"scripts": {
-		"i18n:pot": "wp i18n make-pot . languages/barion-pixel-for-woocommerce.pot --slug=barion-pixel-for-woocommerce --domain=barion-pixel-for-woocommerce --package-name='Barion Pixel for WooCommerce'",
+		"i18n:pot": "wp i18n make-pot . languages/advanced-pixel-for-barion.pot --slug=advanced-pixel-for-barion --domain=advanced-pixel-for-barion --package-name='Advanced Pixel for Barion'",
 		"i18n:mo": "wp i18n make-mo languages/",
 		"i18n:build": ["@i18n:pot", "@i18n:mo"]
 	},

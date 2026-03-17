@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: Barion Pixel for WooCommerce
- * Plugin URI: https://github.com/gcsecsey/barion-pixel-for-woocommerce
+ * Plugin Name: Advanced Pixel for Barion
+ * Plugin URI: https://github.com/gcsecsey/advanced-pixel-for-barion
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
  * Author: Gergely Csecsey
  * Author URI: https://github.com/gcsecsey
@@ -11,7 +11,7 @@
  * Requires PHP: 7.2
  * WC requires at least: 5.0
  * WC tested up to: 9.6
- * Text Domain: barion-pixel-for-woocommerce
+ * Text Domain: advanced-pixel-for-barion
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -130,10 +130,10 @@ class WC_Barion_Pixel {
      */
     public function add_admin_menu() {
         add_options_page(
-            __('Barion Pixel Settings', 'barion-pixel-for-woocommerce'),
-            __('Barion Pixel', 'barion-pixel-for-woocommerce'),
+            __('Barion Pixel Settings', 'advanced-pixel-for-barion'),
+            __('Barion Pixel', 'advanced-pixel-for-barion'),
             'manage_options',
-            'barion-pixel-for-woocommerce',
+            'advanced-pixel-for-barion',
             array($this, 'render_settings_page')
         );
     }
@@ -148,32 +148,32 @@ class WC_Barion_Pixel {
 
         add_settings_section(
             'wc_barion_pixel_main_section',
-            __('Barion Pixel Configuration', 'barion-pixel-for-woocommerce'),
+            __('Barion Pixel Configuration', 'advanced-pixel-for-barion'),
             array($this, 'render_section_description'),
-            'barion-pixel-for-woocommerce'
+            'advanced-pixel-for-barion'
         );
 
         add_settings_field(
             'pixel_id',
-            __('Pixel ID', 'barion-pixel-for-woocommerce'),
+            __('Pixel ID', 'advanced-pixel-for-barion'),
             array($this, 'render_pixel_id_field'),
-            'barion-pixel-for-woocommerce',
+            'advanced-pixel-for-barion',
             'wc_barion_pixel_main_section'
         );
 
         add_settings_field(
             'enable_full_tracking',
-            __('Enable Full Pixel Tracking', 'barion-pixel-for-woocommerce'),
+            __('Enable Full Pixel Tracking', 'advanced-pixel-for-barion'),
             array($this, 'render_enable_tracking_field'),
-            'barion-pixel-for-woocommerce',
+            'advanced-pixel-for-barion',
             'wc_barion_pixel_main_section'
         );
 
         add_settings_field(
             'debug_mode',
-            __('Debug Mode', 'barion-pixel-for-woocommerce'),
+            __('Debug Mode', 'advanced-pixel-for-barion'),
             array($this, 'render_debug_mode_field'),
-            'barion-pixel-for-woocommerce',
+            'advanced-pixel-for-barion',
             'wc_barion_pixel_main_section'
         );
     }
@@ -209,7 +209,7 @@ class WC_Barion_Pixel {
             <form method="post" action="options.php">
                 <?php
                 settings_fields('wc_barion_pixel_group');
-                do_settings_sections('barion-pixel-for-woocommerce');
+                do_settings_sections('advanced-pixel-for-barion');
                 submit_button();
                 ?>
             </form>
@@ -223,11 +223,11 @@ class WC_Barion_Pixel {
      * @return void
      */
     public function render_section_description() {
-        echo '<p>' . esc_html__('Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase.', 'barion-pixel-for-woocommerce') . '</p>';
+        echo '<p>' . esc_html__('Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase.', 'advanced-pixel-for-barion') . '</p>';
 
         $barion_settings = get_option('woocommerce_barion_settings', array());
         if (!empty($barion_settings['barion_pixel_id']) && !empty($this->options['pixel_id'])) {
-            echo '<p>' . esc_html__('The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place.', 'barion-pixel-for-woocommerce') . '</p>';
+            echo '<p>' . esc_html__('The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place.', 'advanced-pixel-for-barion') . '</p>';
         }
     }
 
@@ -245,7 +245,7 @@ class WC_Barion_Pixel {
                class="regular-text"
                placeholder="BP-0000000000-00"
                required>
-        <p class="description"><?php esc_html_e('Enter your Barion Pixel ID (e.g., BP-0000000000-00)', 'barion-pixel-for-woocommerce'); ?></p>
+        <p class="description"><?php esc_html_e('Enter your Barion Pixel ID (e.g., BP-0000000000-00)', 'advanced-pixel-for-barion'); ?></p>
         <?php
     }
 
@@ -262,9 +262,9 @@ class WC_Barion_Pixel {
                    name="wc_barion_pixel_settings[enable_full_tracking]"
                    value="1"
                    <?php checked($value, true); ?>>
-            <?php esc_html_e('Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)', 'barion-pixel-for-woocommerce'); ?>
+            <?php esc_html_e('Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)', 'advanced-pixel-for-barion'); ?>
         </label>
-        <p class="description"><?php esc_html_e('Base Pixel script will always be loaded. Enable this to track e-commerce events.', 'barion-pixel-for-woocommerce'); ?></p>
+        <p class="description"><?php esc_html_e('Base Pixel script will always be loaded. Enable this to track e-commerce events.', 'advanced-pixel-for-barion'); ?></p>
         <?php
     }
 
@@ -281,7 +281,7 @@ class WC_Barion_Pixel {
                    name="wc_barion_pixel_settings[debug_mode]"
                    value="1"
                    <?php checked($value, true); ?>>
-            <?php esc_html_e('Enable debug mode (logs events to browser console)', 'barion-pixel-for-woocommerce'); ?>
+            <?php esc_html_e('Enable debug mode (logs events to browser console)', 'advanced-pixel-for-barion'); ?>
         </label>
         <?php
     }

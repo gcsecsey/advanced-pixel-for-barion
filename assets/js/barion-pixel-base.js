@@ -25,7 +25,7 @@
 			p.parentNode.insertBefore(n, p);
 		})(window, document, 'script', 'https://pixel.barion.com/bp.js', 'bp');
 		if (debug) {
-			console.log('[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce');
+			console.log('[Barion Pixel] bp.js loaded by Advanced Pixel for Barion');
 		}
 	} else if (debug) {
 		console.log('[Barion Pixel] bp.js already loaded by another plugin, skipping script load');

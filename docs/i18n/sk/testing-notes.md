@@ -34,7 +34,7 @@ Povolí režim ladenia v **Nastavenia > Barion Pixel**, aby sa všetky udalosti 
 Otvor konzolu prehliadača (F12 > Console) a hľadaj správy s predponou `[Barion Pixel]`:
 
 ```
-[Barion Pixel] bp.js loaded by Barion Pixel for WooCommerce
+[Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
 [Barion Pixel] Event: contentView { contentType: "Product", ... }

@@ -1,4 +1,4 @@
-=== Barion Pixel for WooCommerce ===
+=== Advanced Pixel for Barion ===
 Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
@@ -12,7 +12,7 @@ Barion Pixel integration for WooCommerce with full e-commerce event tracking, co
 
 == Description ==
 
-Barion Pixel for WooCommerce adds Barion Pixel tracking to your WooCommerce store. It supports two modes:
+Advanced Pixel for Barion adds Barion Pixel tracking to your WooCommerce store. It supports two modes:
 
 **Base Pixel** (always active): Loads the Barion tracking script on all pages. Fires `pageView` automatically for fraud prevention and basic analytics.
 
@@ -65,7 +65,7 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 
 == Installation ==
 
-1. Upload the `barion-pixel-for-woocommerce` folder to `/wp-content/plugins/`
+1. Upload the `advanced-pixel-for-barion` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Go to Settings > Barion Pixel and enter your Barion Pixel ID
 4. Optionally enable or disable Full Pixel Tracking
@@ -89,7 +89,7 @@ The Base Pixel (pageView) works without WooCommerce. Full event tracking (conten
 
 = I already use the Barion Payment Gateway plugin. Will this conflict? =
 
-No. The [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) is a payment processor only — it doesn't implement Barion Pixel event tracking. Both plugins coexist perfectly. If both have a Pixel ID configured, Barion Pixel for WooCommerce detects that bp.js is already loaded and skips re-loading it.
+No. The [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) is a payment processor only — it doesn't implement Barion Pixel event tracking. Both plugins coexist perfectly. If both have a Pixel ID configured, Advanced Pixel for Barion detects that bp.js is already loaded and skips re-loading it.
 
 = Which cookie consent plugins are supported? =
 

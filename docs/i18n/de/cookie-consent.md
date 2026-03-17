@@ -49,7 +49,7 @@ Jedes Plugin, das die WP Consent API implementiert, funktioniert automatisch:
 
 1. Installiere und aktiviere das Plugin [WP Consent API](https://wordpress.org/plugins/wp-consent-api/)
 2. Installiere und konfiguriere dein bevorzugtes Cookie-Consent-Plugin (siehe Tabelle oben)
-3. Installiere und konfiguriere Barion Pixel for WooCommerce
+3. Installiere und konfiguriere Advanced Pixel for Barion
 4. Keine weitere Konfiguration erforderlich — die Einwilligung wird automatisch verarbeitet
 
 ### Consent-Kategorie

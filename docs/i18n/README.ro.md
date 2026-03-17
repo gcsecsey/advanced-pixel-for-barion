@@ -1,6 +1,6 @@
 > 🌐 Aceasta este o traducere automată. Corecțiile comunității sunt binevenite!
 
-# Barion Pixel for WooCommerce
+# Advanced Pixel for Barion
 
 Integrare Barion Pixel pentru WooCommerce cu urmărirea completă a evenimentelor de e-commerce, suport pentru consimțământul cookie-urilor și compatibilitate cu WP Consent API.
 
@@ -33,7 +33,7 @@ Integrare Barion Pixel pentru WooCommerce cu urmărirea completă a evenimentelo
 
 ## Instalare
 
-1. Încarcă dosarul `barion-pixel-for-woocommerce` în `/wp-content/plugins/`
+1. Încarcă dosarul `advanced-pixel-for-barion` în `/wp-content/plugins/`
 2. Activează plugin-ul prin meniul „Plugin-uri" din WordPress
 3. Navighează la Setări > Barion Pixel pentru configurare
 
