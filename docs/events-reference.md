@@ -30,11 +30,11 @@ Fires automatically when `bp.js` loads. No configuration needed beyond setting t
 
 ### grantConsent
 
-Fires when the user accepts marketing cookies. Handled automatically via WP Consent API or Cookie Law Info, or manually via `window.wcBarionGrantConsent()`.
+Fires when the user accepts marketing cookies. Handled automatically via WP Consent API or Cookie Law Info, or manually via `window.abpwGrantConsent()`.
 
 ### rejectConsent
 
-Fires when the user rejects marketing cookies. Handled automatically via WP Consent API or Cookie Law Info, or manually via `window.wcBarionRejectConsent()`. Both `grantConsent` and `rejectConsent` are mandatory per Barion's requirements.
+Fires when the user rejects marketing cookies. Handled automatically via WP Consent API or Cookie Law Info, or manually via `window.abpwRejectConsent()`. Both `grantConsent` and `rejectConsent` are mandatory per Barion's requirements.
 
 See [Cookie Consent Integration](cookie-consent.md) for details.
 
@@ -120,7 +120,7 @@ See [Cookie Consent Integration](cookie-consent.md) for details.
 
 **Trigger:** Thank-you page (`woocommerce_thankyou` hook)
 
-**Duplicate prevention:** Uses `_wc_barion_tracked` post meta to prevent firing on page reload.
+**Duplicate prevention:** Uses `_abpw_tracked` post meta to prevent firing on page reload.
 
 **Fields sent:**
 

@@ -5,7 +5,7 @@
  * Fired when the plugin is uninstalled via the WordPress admin.
  * Cleans up plugin options from the database.
  *
- * @package WC_Barion_Pixel
+ * @package ABPW
  */
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -13,4 +13,4 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Remove plugin settings
-delete_option( 'wc_barion_pixel_settings' );
+delete_option( 'abpw_settings' );

@@ -34,11 +34,11 @@ Se declanșează automat când se încarcă `bp.js`. Nu este necesară nicio con
 
 ### grantConsent
 
-Se declanșează când utilizatorul acceptă cookie-urile de marketing. Gestionat automat prin WP Consent API sau Cookie Law Info, sau manual prin `window.wcBarionGrantConsent()`.
+Se declanșează când utilizatorul acceptă cookie-urile de marketing. Gestionat automat prin WP Consent API sau Cookie Law Info, sau manual prin `window.abpwGrantConsent()`.
 
 ### rejectConsent
 
-Se declanșează când utilizatorul refuză cookie-urile de marketing. Gestionat automat prin WP Consent API sau Cookie Law Info, sau manual prin `window.wcBarionRejectConsent()`. Atât `grantConsent`, cât și `rejectConsent` sunt obligatorii conform cerințelor Barion.
+Se declanșează când utilizatorul refuză cookie-urile de marketing. Gestionat automat prin WP Consent API sau Cookie Law Info, sau manual prin `window.abpwRejectConsent()`. Atât `grantConsent`, cât și `rejectConsent` sunt obligatorii conform cerințelor Barion.
 
 Vezi [Integrare consimțământ cookie](cookie-consent.md) pentru detalii.
 
@@ -124,7 +124,7 @@ Vezi [Integrare consimțământ cookie](cookie-consent.md) pentru detalii.
 
 **Declanșator:** Pagina de mulțumire (hook `woocommerce_thankyou`)
 
-**Prevenirea dublurilor:** Folosește meta `_wc_barion_tracked` din post pentru a preveni declanșarea la reîncărcarea paginii.
+**Prevenirea dublurilor:** Folosește meta `_abpw_tracked` din post pentru a preveni declanșarea la reîncărcarea paginii.
 
 **Câmpuri trimise:**
 

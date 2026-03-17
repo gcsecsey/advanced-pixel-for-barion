@@ -85,15 +85,15 @@ Pre vlastných správcov súhlasu alebo prostredia, kde nie je k dispozícii ani
 ```javascript
 // Keď používateľ prijme marketingové cookies
 function onMarketingConsentGranted() {
-    if (typeof window.wcBarionGrantConsent === 'function') {
-        window.wcBarionGrantConsent();
+    if (typeof window.abpwGrantConsent === 'function') {
+        window.abpwGrantConsent();
     }
 }
 
 // Keď používateľ odmietne marketingové cookies
 function onMarketingConsentRejected() {
-    if (typeof window.wcBarionRejectConsent === 'function') {
-        window.wcBarionRejectConsent();
+    if (typeof window.abpwRejectConsent === 'function') {
+        window.abpwRejectConsent();
     }
 }
 ```
@@ -102,17 +102,17 @@ function onMarketingConsentRejected() {
 
 ```javascript
 // Udeliť súhlas
-document.dispatchEvent(new Event('wcBarionGrantConsent'));
+document.dispatchEvent(new Event('abpwGrantConsent'));
 
 // Odmietnuť súhlas
-document.dispatchEvent(new Event('wcBarionRejectConsent'));
+document.dispatchEvent(new Event('abpwRejectConsent'));
 ```
 
 ### Metóda 3: WordPress action hook
 
 ```php
 // V plugine správcu súhlasu alebo téme
-add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
+add_action('abpw_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
@@ -129,13 +129,13 @@ function my_barion_consent_handler() {
 ```javascript
 window.addEventListener('CookiebotOnAccept', function() {
     if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 });
 window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
+    window.abpwRejectConsent();
 });
 ```
 
@@ -143,9 +143,9 @@ window.addEventListener('CookiebotOnDecline', function() {
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 }
 ```

@@ -129,4 +129,4 @@ bp.js beleži svoje validacijske napake s številčno predpono. Pogoste napake:
 
 - **WP Consent API**: Zagotovite, da je vtičnik WP Consent API nameščen in da ga vaš vtičnik za piškotke podpira
 - **Cookie Law Info**: Zagotovite, da je vtičnik aktiven in da je globalni objekt `CLI` na voljo
-- **Ročno**: Pokličite `window.wcBarionGrantConsent()` iz povratnega klica vašega upravljavca soglasja
+- **Ročno**: Pokličite `window.abpwGrantConsent()` iz povratnega klica vašega upravljavca soglasja

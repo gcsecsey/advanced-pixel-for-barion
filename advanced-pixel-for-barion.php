@@ -12,6 +12,7 @@
  * WC requires at least: 5.0
  * WC tested up to: 9.6
  * Text Domain: advanced-pixel-for-barion
+ * Requires Plugins: woocommerce
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -22,19 +23,19 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_BARION_PIXEL_VERSION', '1.0.0');
-define('WC_BARION_PIXEL_PATH', plugin_dir_path(__FILE__));
-define('WC_BARION_PIXEL_URL', plugin_dir_url(__FILE__));
+define('ABPW_VERSION', '1.0.0');
+define('ABPW_PATH', plugin_dir_path(__FILE__));
+define('ABPW_URL', plugin_dir_url(__FILE__));
 
 /**
  * Main Barion Pixel Plugin Class
  */
-class WC_Barion_Pixel {
+class ABPW_Plugin {
 
     /**
      * Plugin instance
      *
-     * @var WC_Barion_Pixel|null
+     * @var ABPW_Plugin|null
      */
     private static $instance = null;
 
@@ -62,7 +63,7 @@ class WC_Barion_Pixel {
     /**
      * Get plugin instance (singleton accessor)
      *
-     * @return WC_Barion_Pixel The plugin instance
+     * @return ABPW_Plugin The plugin instance
      */
     public static function get_instance() {
         if (null === self::$instance) {
@@ -76,7 +77,7 @@ class WC_Barion_Pixel {
      */
     private function __construct() {
         // Load options
-        $this->options = get_option('wc_barion_pixel_settings', array(
+        $this->options = get_option('abpw_settings', array(
             'pixel_id' => '',
             'enable_full_tracking' => true,
             'debug_mode' => false
@@ -144,37 +145,37 @@ class WC_Barion_Pixel {
      * @return void
      */
     public function register_settings() {
-        register_setting('wc_barion_pixel_group', 'wc_barion_pixel_settings', array($this, 'sanitize_settings'));
+        register_setting('abpw_settings_group', 'abpw_settings', array($this, 'sanitize_settings'));
 
         add_settings_section(
-            'wc_barion_pixel_main_section',
+            'abpw_main_section',
             __('Barion Pixel Configuration', 'advanced-pixel-for-barion'),
             array($this, 'render_section_description'),
             'advanced-pixel-for-barion'
         );
 
         add_settings_field(
-            'pixel_id',
+            'abpw_pixel_id',
             __('Pixel ID', 'advanced-pixel-for-barion'),
             array($this, 'render_pixel_id_field'),
             'advanced-pixel-for-barion',
-            'wc_barion_pixel_main_section'
+            'abpw_main_section'
         );
 
         add_settings_field(
-            'enable_full_tracking',
+            'abpw_enable_tracking',
             __('Enable Full Pixel Tracking', 'advanced-pixel-for-barion'),
             array($this, 'render_enable_tracking_field'),
             'advanced-pixel-for-barion',
-            'wc_barion_pixel_main_section'
+            'abpw_main_section'
         );
 
         add_settings_field(
-            'debug_mode',
+            'abpw_debug_mode',
             __('Debug Mode', 'advanced-pixel-for-barion'),
             array($this, 'render_debug_mode_field'),
             'advanced-pixel-for-barion',
-            'wc_barion_pixel_main_section'
+            'abpw_main_section'
         );
     }
 
@@ -208,7 +209,7 @@ class WC_Barion_Pixel {
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             <form method="post" action="options.php">
                 <?php
-                settings_fields('wc_barion_pixel_group');
+                settings_fields('abpw_settings_group');
                 do_settings_sections('advanced-pixel-for-barion');
                 submit_button();
                 ?>
@@ -240,7 +241,7 @@ class WC_Barion_Pixel {
         $value = isset($this->options['pixel_id']) ? $this->options['pixel_id'] : '';
         ?>
         <input type="text"
-               name="wc_barion_pixel_settings[pixel_id]"
+               name="abpw_settings[pixel_id]"
                value="<?php echo esc_attr($value); ?>"
                class="regular-text"
                placeholder="BP-0000000000-00"
@@ -259,7 +260,7 @@ class WC_Barion_Pixel {
         ?>
         <label>
             <input type="checkbox"
-                   name="wc_barion_pixel_settings[enable_full_tracking]"
+                   name="abpw_settings[enable_full_tracking]"
                    value="1"
                    <?php checked($value, true); ?>>
             <?php esc_html_e('Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)', 'advanced-pixel-for-barion'); ?>
@@ -278,7 +279,7 @@ class WC_Barion_Pixel {
         ?>
         <label>
             <input type="checkbox"
-                   name="wc_barion_pixel_settings[debug_mode]"
+                   name="abpw_settings[debug_mode]"
                    value="1"
                    <?php checked($value, true); ?>>
             <?php esc_html_e('Enable debug mode (logs events to browser console)', 'advanced-pixel-for-barion'); ?>
@@ -293,13 +294,13 @@ class WC_Barion_Pixel {
      */
     public function enqueue_base_script() {
         wp_enqueue_script(
-            'wc-barion-pixel-base',
-            WC_BARION_PIXEL_URL . 'assets/js/barion-pixel-base.js',
+            'abpw-base',
+            ABPW_URL . 'assets/js/barion-pixel-base.js',
             array(),
-            WC_BARION_PIXEL_VERSION,
+            ABPW_VERSION,
             false
         );
-        wp_localize_script('wc-barion-pixel-base', 'wcBarionPixelBase', array(
+        wp_localize_script('abpw-base', 'abpwBase', array(
             'pixelId' => $this->options['pixel_id'],
             'debug'   => $this->is_debug_mode(),
         ));
@@ -311,7 +312,7 @@ class WC_Barion_Pixel {
      * @return void
      */
     public function output_footer_action() {
-        do_action('wc_barion_pixel_footer_scripts');
+        do_action('abpw_footer_scripts');
     }
 
     /**
@@ -370,13 +371,13 @@ class WC_Barion_Pixel {
         }
 
         wp_enqueue_script(
-            'wc-barion-pixel-events',
-            WC_BARION_PIXEL_URL . 'assets/js/barion-pixel-events.js',
-            array('wc-barion-pixel-base'),
-            WC_BARION_PIXEL_VERSION,
+            'abpw-events',
+            ABPW_URL . 'assets/js/barion-pixel-events.js',
+            array('abpw-base'),
+            ABPW_VERSION,
             true
         );
-        wp_localize_script('wc-barion-pixel-events', 'wcBarionPixelEvents', array(
+        wp_localize_script('abpw-events', 'abpwEvents', array(
             'currency'      => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : 'HUF',
             'debug'         => $this->is_debug_mode(),
             'events'        => $this->events,
@@ -445,7 +446,7 @@ class WC_Barion_Pixel {
         }
 
         // Check if already tracked to prevent duplicate tracking
-        if ($order->get_meta('_wc_barion_tracked', true)) {
+        if ($order->get_meta('_abpw_tracked', true)) {
             return;
         }
 
@@ -484,7 +485,7 @@ class WC_Barion_Pixel {
         $this->queue_event('purchase', $event_data);
 
         // Mark as tracked
-        $order->update_meta_data('_wc_barion_tracked', true);
+        $order->update_meta_data('_abpw_tracked', true);
         $order->save();
     }
 
@@ -539,7 +540,7 @@ add_action('before_woocommerce_init', function() {
 });
 
 // Initialize plugin
-function wc_barion_pixel_init() {
-    WC_Barion_Pixel::get_instance();
+function abpw_init() {
+    ABPW_Plugin::get_instance();
 }
-add_action('plugins_loaded', 'wc_barion_pixel_init');
+add_action('plugins_loaded', 'abpw_init');

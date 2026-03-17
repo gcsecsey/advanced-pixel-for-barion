@@ -1,7 +1,7 @@
 /**
  * Barion Pixel Events - E-commerce event tracking and addToCart.
  *
- * Expects wcBarionPixelEvents to be set via wp_localize_script with:
+ * Expects abpwEvents to be set via wp_localize_script with:
  *   - currency      (string)
  *   - debug         (boolean)
  *   - events        (array)  - Each: { name: string, data: object }
@@ -9,7 +9,7 @@
  *   - email         (string|null) - billing email for setEncryptedEmail
  */
 (function () {
-	var config = window.wcBarionPixelEvents || {};
+	var config = window.abpwEvents || {};
 	var currency = config.currency || 'HUF';
 	var debug = !!config.debug;
 	var events = config.events || [];

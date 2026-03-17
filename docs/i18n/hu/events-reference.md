@@ -34,11 +34,11 @@ Automatikusan aktiválódik, amikor a `bp.js` betöltődik. Nincs szükség konf
 
 ### grantConsent
 
-Akkor aktiválódik, amikor a felhasználó elfogadja a marketing cookie-kat. Automatikusan kezeli a WP Consent API vagy a Cookie Law Info, illetve manuálisan a `window.wcBarionGrantConsent()` függvényen keresztül.
+Akkor aktiválódik, amikor a felhasználó elfogadja a marketing cookie-kat. Automatikusan kezeli a WP Consent API vagy a Cookie Law Info, illetve manuálisan a `window.abpwGrantConsent()` függvényen keresztül.
 
 ### rejectConsent
 
-Akkor aktiválódik, amikor a felhasználó elutasítja a marketing cookie-kat. Automatikusan kezeli a WP Consent API vagy a Cookie Law Info, illetve manuálisan a `window.wcBarionRejectConsent()` függvényen keresztül. Mind a `grantConsent`, mind a `rejectConsent` kötelező a Barion követelményei szerint.
+Akkor aktiválódik, amikor a felhasználó elutasítja a marketing cookie-kat. Automatikusan kezeli a WP Consent API vagy a Cookie Law Info, illetve manuálisan a `window.abpwRejectConsent()` függvényen keresztül. Mind a `grantConsent`, mind a `rejectConsent` kötelező a Barion követelményei szerint.
 
 Részletekért lásd a [Cookie-hozzájárulás integráció](cookie-consent.md) dokumentumot.
 
@@ -124,7 +124,7 @@ Részletekért lásd a [Cookie-hozzájárulás integráció](cookie-consent.md) 
 
 **Aktiválás:** Köszönő oldal (`woocommerce_thankyou` hook)
 
-**Duplikáció megelőzés:** A `_wc_barion_tracked` post meta-t használja az oldal újratöltéskor való ismételt aktiválás megakadályozására.
+**Duplikáció megelőzés:** A `_abpw_tracked` post meta-t használja az oldal újratöltéskor való ismételt aktiválás megakadályozására.
 
 **Küldött mezők:**
 

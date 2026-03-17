@@ -85,15 +85,15 @@ Egyéni hozzájárulás kezelőkhöz vagy olyan környezetekhez, ahol sem a WP C
 ```javascript
 // Amikor a felhasználó elfogadja a marketing cookie-kat
 function onMarketingConsentGranted() {
-    if (typeof window.wcBarionGrantConsent === 'function') {
-        window.wcBarionGrantConsent();
+    if (typeof window.abpwGrantConsent === 'function') {
+        window.abpwGrantConsent();
     }
 }
 
 // Amikor a felhasználó elutasítja a marketing cookie-kat
 function onMarketingConsentRejected() {
-    if (typeof window.wcBarionRejectConsent === 'function') {
-        window.wcBarionRejectConsent();
+    if (typeof window.abpwRejectConsent === 'function') {
+        window.abpwRejectConsent();
     }
 }
 ```
@@ -102,17 +102,17 @@ function onMarketingConsentRejected() {
 
 ```javascript
 // Hozzájárulás megadása
-document.dispatchEvent(new Event('wcBarionGrantConsent'));
+document.dispatchEvent(new Event('abpwGrantConsent'));
 
 // Hozzájárulás elutasítása
-document.dispatchEvent(new Event('wcBarionRejectConsent'));
+document.dispatchEvent(new Event('abpwRejectConsent'));
 ```
 
 ### 3. módszer: WordPress action hook
 
 ```php
 // Az egyéni hozzájárulás kezelő bővítményben vagy témában
-add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
+add_action('abpw_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
@@ -129,13 +129,13 @@ function my_barion_consent_handler() {
 ```javascript
 window.addEventListener('CookiebotOnAccept', function() {
     if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 });
 window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
+    window.abpwRejectConsent();
 });
 ```
 
@@ -143,9 +143,9 @@ window.addEventListener('CookiebotOnDecline', function() {
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 }
 ```

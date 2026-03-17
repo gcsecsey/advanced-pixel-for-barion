@@ -85,15 +85,15 @@ Für benutzerdefinierte Consent-Manager oder Umgebungen, in denen weder die WP C
 ```javascript
 // Wenn der Nutzer Marketing-Cookies akzeptiert
 function onMarketingConsentGranted() {
-    if (typeof window.wcBarionGrantConsent === 'function') {
-        window.wcBarionGrantConsent();
+    if (typeof window.abpwGrantConsent === 'function') {
+        window.abpwGrantConsent();
     }
 }
 
 // Wenn der Nutzer Marketing-Cookies ablehnt
 function onMarketingConsentRejected() {
-    if (typeof window.wcBarionRejectConsent === 'function') {
-        window.wcBarionRejectConsent();
+    if (typeof window.abpwRejectConsent === 'function') {
+        window.abpwRejectConsent();
     }
 }
 ```
@@ -102,17 +102,17 @@ function onMarketingConsentRejected() {
 
 ```javascript
 // Einwilligung erteilen
-document.dispatchEvent(new Event('wcBarionGrantConsent'));
+document.dispatchEvent(new Event('abpwGrantConsent'));
 
 // Einwilligung verweigern
-document.dispatchEvent(new Event('wcBarionRejectConsent'));
+document.dispatchEvent(new Event('abpwRejectConsent'));
 ```
 
 ### Methode 3: WordPress-Action-Hook
 
 ```php
 // In deinem Consent-Manager-Plugin oder Theme
-add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
+add_action('abpw_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
@@ -129,13 +129,13 @@ function my_barion_consent_handler() {
 ```javascript
 window.addEventListener('CookiebotOnAccept', function() {
     if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 });
 window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
+    window.abpwRejectConsent();
 });
 ```
 
@@ -143,9 +143,9 @@ window.addEventListener('CookiebotOnDecline', function() {
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 }
 ```

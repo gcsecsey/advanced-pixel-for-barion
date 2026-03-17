@@ -34,11 +34,11 @@ Wird automatisch ausgelöst, wenn `bp.js` geladen wird. Keine Konfiguration erfo
 
 ### grantConsent
 
-Wird ausgelöst, wenn der Nutzer Marketing-Cookies akzeptiert. Wird automatisch über die WP Consent API oder Cookie Law Info verarbeitet oder manuell über `window.wcBarionGrantConsent()`.
+Wird ausgelöst, wenn der Nutzer Marketing-Cookies akzeptiert. Wird automatisch über die WP Consent API oder Cookie Law Info verarbeitet oder manuell über `window.abpwGrantConsent()`.
 
 ### rejectConsent
 
-Wird ausgelöst, wenn der Nutzer Marketing-Cookies ablehnt. Wird automatisch über die WP Consent API oder Cookie Law Info verarbeitet oder manuell über `window.wcBarionRejectConsent()`. Sowohl `grantConsent` als auch `rejectConsent` sind gemäß den Barion-Anforderungen obligatorisch.
+Wird ausgelöst, wenn der Nutzer Marketing-Cookies ablehnt. Wird automatisch über die WP Consent API oder Cookie Law Info verarbeitet oder manuell über `window.abpwRejectConsent()`. Sowohl `grantConsent` als auch `rejectConsent` sind gemäß den Barion-Anforderungen obligatorisch.
 
 Weitere Einzelheiten unter [Cookie-Consent-Integration](cookie-consent.md).
 
@@ -124,7 +124,7 @@ Weitere Einzelheiten unter [Cookie-Consent-Integration](cookie-consent.md).
 
 **Auslöser:** Danke-Seite (Hook `woocommerce_thankyou`)
 
-**Duplikatverhinderung:** Verwendet `_wc_barion_tracked` Post-Meta, um das erneute Auslösen beim Neuladen der Seite zu verhindern.
+**Duplikatverhinderung:** Verwendet `_abpw_tracked` Post-Meta, um das erneute Auslösen beim Neuladen der Seite zu verhindern.
 
 **Gesendete Felder:**
 

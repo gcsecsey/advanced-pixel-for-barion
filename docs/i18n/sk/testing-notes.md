@@ -129,4 +129,4 @@ Ak vidíš `[Barion Pixel] bp.js already loaded by another plugin`, iný plugin 
 
 - **WP Consent API**: Uisti sa, že je nainštalovaný plugin WP Consent API a tvoj plugin na cookies ho podporuje
 - **Cookie Law Info**: Uisti sa, že je plugin aktívny a globálna premenná `CLI` je dostupná
-- **Manuálne**: Zavolaj `window.wcBarionGrantConsent()` z callbacku svojho správcu súhlasu
+- **Manuálne**: Zavolaj `window.abpwGrantConsent()` z callbacku svojho správcu súhlasu

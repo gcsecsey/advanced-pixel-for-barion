@@ -129,4 +129,4 @@ Wenn `[Barion Pixel] bp.js already loaded by another plugin` erscheint, hat ein 
 
 - **WP Consent API**: Stelle sicher, dass das WP Consent API-Plugin installiert ist und dein Cookie-Plugin es unterstützt
 - **Cookie Law Info**: Stelle sicher, dass das Plugin aktiv ist und das globale `CLI`-Objekt verfügbar ist
-- **Manuell**: Rufe `window.wcBarionGrantConsent()` aus dem Callback deines Consent-Managers auf
+- **Manuell**: Rufe `window.abpwGrantConsent()` aus dem Callback deines Consent-Managers auf

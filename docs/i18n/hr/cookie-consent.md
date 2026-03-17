@@ -85,15 +85,15 @@ Za prilagođene upravitelje pristanka ili okruženja gdje niti WP Consent API ni
 ```javascript
 // Kada korisnik prihvati marketinške kolačiće
 function onMarketingConsentGranted() {
-    if (typeof window.wcBarionGrantConsent === 'function') {
-        window.wcBarionGrantConsent();
+    if (typeof window.abpwGrantConsent === 'function') {
+        window.abpwGrantConsent();
     }
 }
 
 // Kada korisnik odbije marketinške kolačiće
 function onMarketingConsentRejected() {
-    if (typeof window.wcBarionRejectConsent === 'function') {
-        window.wcBarionRejectConsent();
+    if (typeof window.abpwRejectConsent === 'function') {
+        window.abpwRejectConsent();
     }
 }
 ```
@@ -102,17 +102,17 @@ function onMarketingConsentRejected() {
 
 ```javascript
 // Odobri pristanak
-document.dispatchEvent(new Event('wcBarionGrantConsent'));
+document.dispatchEvent(new Event('abpwGrantConsent'));
 
 // Odbij pristanak
-document.dispatchEvent(new Event('wcBarionRejectConsent'));
+document.dispatchEvent(new Event('abpwRejectConsent'));
 ```
 
 ### Metoda 3: WordPress action hook
 
 ```php
 // U svom dodatku za upravljanje pristankom ili temi
-add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
+add_action('abpw_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
@@ -129,13 +129,13 @@ function my_barion_consent_handler() {
 ```javascript
 window.addEventListener('CookiebotOnAccept', function() {
     if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 });
 window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
+    window.abpwRejectConsent();
 });
 ```
 
@@ -143,9 +143,9 @@ window.addEventListener('CookiebotOnDecline', function() {
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
-        window.wcBarionGrantConsent();
+        window.abpwGrantConsent();
     } else {
-        window.wcBarionRejectConsent();
+        window.abpwRejectConsent();
     }
 }
 ```

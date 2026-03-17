@@ -34,11 +34,11 @@ Sproži se samodejno, ko se naloži `bp.js`. Ni potrebna nobena konfiguracija ra
 
 ### grantConsent
 
-Sproži se, ko uporabnik sprejme tržne piškotke. Obravnavano samodejno prek WP Consent API ali Cookie Law Info ali ročno prek `window.wcBarionGrantConsent()`.
+Sproži se, ko uporabnik sprejme tržne piškotke. Obravnavano samodejno prek WP Consent API ali Cookie Law Info ali ročno prek `window.abpwGrantConsent()`.
 
 ### rejectConsent
 
-Sproži se, ko uporabnik zavrne tržne piškotke. Obravnavano samodejno prek WP Consent API ali Cookie Law Info ali ročno prek `window.wcBarionRejectConsent()`. Oba `grantConsent` in `rejectConsent` sta obvezna po zahtevah Barion.
+Sproži se, ko uporabnik zavrne tržne piškotke. Obravnavano samodejno prek WP Consent API ali Cookie Law Info ali ročno prek `window.abpwRejectConsent()`. Oba `grantConsent` in `rejectConsent` sta obvezna po zahtevah Barion.
 
 Glejte [Integracija soglasja s piškotki](cookie-consent.md) za podrobnosti.
 
@@ -124,7 +124,7 @@ Glejte [Integracija soglasja s piškotki](cookie-consent.md) za podrobnosti.
 
 **Sprožilec:** Stran zahvale (kavelj `woocommerce_thankyou`)
 
-**Preprečevanje podvajanja:** Uporablja post meta `_wc_barion_tracked` za preprečitev sprožitve ob ponovnem nalaganju strani.
+**Preprečevanje podvajanja:** Uporablja post meta `_abpw_tracked` za preprečitev sprožitve ob ponovnem nalaganju strani.
 
 **Poslana polja:**
 

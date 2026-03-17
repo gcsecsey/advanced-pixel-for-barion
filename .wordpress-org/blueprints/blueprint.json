@@ -43,7 +43,7 @@
 		},
 		{
 			"step": "runPHP",
-			"code": "<?php require '/wordpress/wp-load.php'; update_option( 'wc_barion_pixel_settings', array( 'pixel_id' => 'BP-DemoPixelId-00', 'enable_full_tracking' => true, 'debug_mode' => true ) ); ?>"
+			"code": "<?php require '/wordpress/wp-load.php'; update_option( 'abpw_settings', array( 'pixel_id' => 'BP-DemoPixelId-00', 'enable_full_tracking' => true, 'debug_mode' => true ) ); ?>"
 		},
 		{
 			"step": "writeFile",

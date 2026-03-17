@@ -34,11 +34,11 @@ Pokreće se automatski kada se učita `bp.js`. Nije potrebna konfiguracija osim 
 
 ### grantConsent
 
-Pokreće se kada korisnik prihvati marketinške kolačiće. Obrađuje se automatski putem WP Consent API-ja ili Cookie Law Info, ili ručno putem `window.wcBarionGrantConsent()`.
+Pokreće se kada korisnik prihvati marketinške kolačiće. Obrađuje se automatski putem WP Consent API-ja ili Cookie Law Info, ili ručno putem `window.abpwGrantConsent()`.
 
 ### rejectConsent
 
-Pokreće se kada korisnik odbije marketinške kolačiće. Obrađuje se automatski putem WP Consent API-ja ili Cookie Law Info, ili ručno putem `window.wcBarionRejectConsent()`. I `grantConsent` i `rejectConsent` su obvezni prema Barion zahtjevima.
+Pokreće se kada korisnik odbije marketinške kolačiće. Obrađuje se automatski putem WP Consent API-ja ili Cookie Law Info, ili ručno putem `window.abpwRejectConsent()`. I `grantConsent` i `rejectConsent` su obvezni prema Barion zahtjevima.
 
 Pogledaj [Integracija pristanka na kolačiće](cookie-consent.md) za detalje.
 
@@ -124,7 +124,7 @@ Pogledaj [Integracija pristanka na kolačiće](cookie-consent.md) za detalje.
 
 **Okidač:** Stranica zahvale (hook `woocommerce_thankyou`)
 
-**Prevencija dupliciranja:** Koristi `_wc_barion_tracked` post meta za sprječavanje ponovnog pokretanja pri osvježavanju stranice.
+**Prevencija dupliciranja:** Koristi `_abpw_tracked` post meta za sprječavanje ponovnog pokretanja pri osvježavanju stranice.
 
 **Poslana polja:**
 

@@ -34,11 +34,11 @@ Spustí se automaticky při načtení `bp.js`. Není potřeba žádná konfigura
 
 ### grantConsent
 
-Spustí se, když uživatel přijme marketingové cookies. Zpracováváno automaticky přes WP Consent API nebo Cookie Law Info, nebo ručně přes `window.wcBarionGrantConsent()`.
+Spustí se, když uživatel přijme marketingové cookies. Zpracováváno automaticky přes WP Consent API nebo Cookie Law Info, nebo ručně přes `window.abpwGrantConsent()`.
 
 ### rejectConsent
 
-Spustí se, když uživatel odmítne marketingové cookies. Zpracováváno automaticky přes WP Consent API nebo Cookie Law Info, nebo ručně přes `window.wcBarionRejectConsent()`. Obě události `grantConsent` i `rejectConsent` jsou povinné dle požadavků Barion.
+Spustí se, když uživatel odmítne marketingové cookies. Zpracováváno automaticky přes WP Consent API nebo Cookie Law Info, nebo ručně přes `window.abpwRejectConsent()`. Obě události `grantConsent` i `rejectConsent` jsou povinné dle požadavků Barion.
 
 Viz [Integrace souhlasu s cookies](cookie-consent.md) pro podrobnosti.
 
@@ -124,7 +124,7 @@ Viz [Integrace souhlasu s cookies](cookie-consent.md) pro podrobnosti.
 
 **Spouštěč:** Stránka s poděkováním (hook `woocommerce_thankyou`)
 
-**Ochrana proti duplicitám:** Používá post meta `_wc_barion_tracked` k zabránění opětovnému spuštění při obnovení stránky.
+**Ochrana proti duplicitám:** Používá post meta `_abpw_tracked` k zabránění opětovnému spuštění při obnovení stránky.
 
 **Odesílaná pole:**
 
