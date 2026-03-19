@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".wordpress-org/banner-1544x500.png" alt="Advanced Pixel for Barion" width="100%">
+</p>
+
 # Advanced Pixel for Barion
 
 Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
