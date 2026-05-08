@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,11 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Changelog ==
 
+= 1.0.1 =
+* Fix: events script (contentView, addToCart, initiateCheckout, purchase, setEncryptedEmail) was never printed because it was enqueued after `wp_print_footer_scripts` had already run.
+* New: `setEncryptedEmail` now also fires when the customer enters their email on the checkout page (and on checkout load for logged-in users), as required by the Barion Pixel API reference.
+* Fix: cookie consent auto-detection (WP Consent API and Cookie Law Info) now runs after `DOMContentLoaded`, so it can see globals defined by consent plugins that load later in the page.
+
 = 1.0.0 =
 * Initial release
 * Base Barion Pixel (pageView) implementation
@@ -126,6 +131,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+Critical fix: pixel events (including setEncryptedEmail) were never sent in 1.0.0 due to a script enqueueing timing bug. All users should upgrade.
 
 = 1.0.0 =
 Initial release.

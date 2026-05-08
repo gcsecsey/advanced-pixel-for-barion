@@ -5,7 +5,7 @@
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
  * Author: Gergely Csecsey
  * Author URI: https://github.com/gcsecsey
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 5.0
  * Tested up to: 6.9
  * Requires PHP: 7.2
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_BARION_PIXEL_VERSION', '1.0.0');
+define('WC_BARION_PIXEL_VERSION', '1.0.1');
 define('WC_BARION_PIXEL_PATH', plugin_dir_path(__FILE__));
 define('WC_BARION_PIXEL_URL', plugin_dir_url(__FILE__));
 
@@ -100,7 +100,8 @@ class WC_Barion_Pixel {
                 add_action('woocommerce_before_checkout_form', array($this, 'track_initiate_checkout'));
                 add_action('woocommerce_thankyou', array($this, 'track_purchase'), 10, 1);
                 add_action('woocommerce_thankyou', array($this, 'track_set_encrypted_email'), 10, 1);
-                add_action('wp_footer', array($this, 'enqueue_events_script'), 998);
+                // Priority must be < 20 so wp_print_footer_scripts (priority 20) prints the enqueued script.
+                add_action('wp_footer', array($this, 'enqueue_events_script'), 5);
             }
         }
     }
@@ -364,8 +365,23 @@ class WC_Barion_Pixel {
             }
         }
 
+        // Detect checkout (excluding the order-received endpoint) so JS can listen
+        // for email field changes and fire setEncryptedEmail at email entry time,
+        // as required by https://docs.barion.com/Barion-Pixel-API-referencia
+        $is_checkout = function_exists('is_checkout') && is_checkout()
+            && !(function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-received'));
+
+        // Pre-fill billing email for logged-in users so setEncryptedEmail fires immediately on checkout load
+        $logged_in_email = '';
+        if ($is_checkout && is_user_logged_in()) {
+            $user = wp_get_current_user();
+            if ($user && !empty($user->user_email)) {
+                $logged_in_email = strtolower($user->user_email);
+            }
+        }
+
         // Only enqueue if there's something to do
-        if (empty($this->events) && null === $single_product && null === $this->encrypted_email) {
+        if (empty($this->events) && null === $single_product && null === $this->encrypted_email && !$is_checkout) {
             return;
         }
 
@@ -377,11 +393,13 @@ class WC_Barion_Pixel {
             true
         );
         wp_localize_script('wc-barion-pixel-events', 'wcBarionPixelEvents', array(
-            'currency'      => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : 'HUF',
-            'debug'         => $this->is_debug_mode(),
-            'events'        => $this->events,
-            'singleProduct' => $single_product,
-            'email'         => $this->encrypted_email,
+            'currency'       => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : 'HUF',
+            'debug'          => $this->is_debug_mode(),
+            'events'         => $this->events,
+            'singleProduct'  => $single_product,
+            'email'          => $this->encrypted_email,
+            'isCheckout'     => $is_checkout,
+            'loggedInEmail'  => $logged_in_email,
         ));
     }
 
