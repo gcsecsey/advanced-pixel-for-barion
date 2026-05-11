@@ -22,7 +22,9 @@
 
 	function sendEncryptedEmail(value) {
 		if (typeof bp === 'undefined') return;
-		bp('identify', 'setEncryptedEmail', value);
+		// Method name per https://docs.barion.com/Barion_Pixel_API_reference
+		// ("bp('identity','setEncryptedEmail', '...')").
+		bp('identity', 'setEncryptedEmail', value);
 		if (debug) {
 			console.log('[Barion Pixel] setEncryptedEmail sent');
 		}
@@ -47,14 +49,22 @@
 	// Per Barion docs, setEncryptedEmail must fire whenever the user provides their email
 	// (during checkout), not only on the thank-you page.
 	if (isCheckout) {
-		// Strict format check: bp.js rejects partial inputs like "x@y" with error 12
-		// ("Format of e-mail address or hash is invalid in setEncryptedEmail.").
-		var EMAIL_RE = /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/;
+		// Per Barion docs, setEncryptedEmail accepts either a plain email
+		// (lowercase) or a pre-computed SHA-1 hash. Anything else triggers
+		// bp.js error 12 ("Format of e-mail address or hash is invalid in
+		// setEncryptedEmail."). We only ever send plain emails, but we still
+		// validate before forwarding so partial inputs are not transmitted.
+		// EMAIL_RE follows the HTML5 spec for valid email addresses
+		// (https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address),
+		// restricted to lowercase since the value has already been lowercased.
+		var EMAIL_RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
+		var SHA1_RE = /^[a-f0-9]{40}$/;
 		var lastSentEmail = '';
 
 		function fireIfNew(raw) {
 			var val = (raw || '').trim().toLowerCase();
-			if (!EMAIL_RE.test(val) || val === lastSentEmail) return;
+			if (!EMAIL_RE.test(val) && !SHA1_RE.test(val)) return;
+			if (val === lastSentEmail) return;
 			lastSentEmail = val;
 			sendEncryptedEmail(val);
 		}

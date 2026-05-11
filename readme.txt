@@ -115,7 +115,8 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 = 1.0.2 =
 * Fix: `setEncryptedEmail` was firing multiple times on a single checkout page load (the `change` + `blur` pair plus the `updated_checkout` rebind caused duplicates).
-* Fix: bp.js rejected partial values (e.g. `x@y`) with error 12 (`Format of e-mail address or hash is invalid in setEncryptedEmail`). The email is now validated with a stricter regex before being sent.
+* Fix: bp.js rejected partial values (e.g. `x@y`) with error 12 (`Format of e-mail address or hash is invalid in setEncryptedEmail`). The email is now validated against the HTML5 spec for valid email addresses before being sent; pre-computed SHA-1 hashes are also accepted, matching the Barion Pixel API reference.
+* Fix: aligned the bp.js call with the Barion documentation — `bp('identity', 'setEncryptedEmail', ...)` (previously `'identify'`).
 * setEncryptedEmail now fires once for logged-in users on checkout load, and once per distinct, valid email entered into the billing field (no more `blur` handler, idempotent rebinding via a data attribute).
 
 = 1.0.1 =
