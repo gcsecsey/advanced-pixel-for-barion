@@ -20,7 +20,28 @@
 	var isCheckout = !!config.isCheckout;
 	var loggedInEmail = config.loggedInEmail || '';
 
-	function sendEncryptedEmail(value) {
+	var SHA1_HEX_RE = /^[a-f0-9]{40}$/;
+
+	// bp.js validates plain emails with a very restrictive regex that rejects
+	// common valid addresses (no `+` in the local part, TLDs limited to 2–4
+	// letters). Pre-hashing the email with SHA-1 sidesteps that check — bp.js
+	// accepts any 40-char hex string as-is.
+	function sha1Hex(input) {
+		if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
+			return Promise.reject(new Error('Web Crypto API not available'));
+		}
+		var bytes = new TextEncoder().encode(input);
+		return window.crypto.subtle.digest('SHA-1', bytes).then(function (buffer) {
+			var arr = new Uint8Array(buffer);
+			var hex = '';
+			for (var i = 0; i < arr.length; i++) {
+				hex += ('00' + arr[i].toString(16)).slice(-2);
+			}
+			return hex;
+		});
+	}
+
+	function sendToBp(value) {
 		if (typeof bp === 'undefined') return;
 		// Method name per https://docs.barion.com/Barion_Pixel_API_reference
 		// ("bp('identity','setEncryptedEmail', '...')").
@@ -28,6 +49,20 @@
 		if (debug) {
 			console.log('[Barion Pixel] setEncryptedEmail sent');
 		}
+	}
+
+	function sendEncryptedEmail(value) {
+		if (typeof bp === 'undefined') return;
+		if (SHA1_HEX_RE.test(value)) {
+			sendToBp(value);
+			return;
+		}
+		sha1Hex(value).then(sendToBp).catch(function () {
+			// Web Crypto unavailable (e.g. non-HTTPS context). Fall back to the
+			// plain email — bp.js will still accept it as long as it matches
+			// the conservative format it requires.
+			sendToBp(value);
+		});
 	}
 
 	// Fire queued events (contentView, initiateCheckout, purchase)
@@ -49,21 +84,16 @@
 	// Per Barion docs, setEncryptedEmail must fire whenever the user provides their email
 	// (during checkout), not only on the thank-you page.
 	if (isCheckout) {
-		// Per Barion docs, setEncryptedEmail accepts either a plain email
-		// (lowercase) or a pre-computed SHA-1 hash. Anything else triggers
-		// bp.js error 12 ("Format of e-mail address or hash is invalid in
-		// setEncryptedEmail."). We only ever send plain emails, but we still
-		// validate before forwarding so partial inputs are not transmitted.
-		// EMAIL_RE follows the HTML5 spec for valid email addresses
-		// (https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address),
-		// restricted to lowercase since the value has already been lowercased.
+		// Validate before sending so partial typing doesn't reach bp.js. We
+		// accept any value bp.js would accept: a plain email (HTML5 spec
+		// regex, https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address),
+		// or a pre-computed SHA-1 hash.
 		var EMAIL_RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
-		var SHA1_RE = /^[a-f0-9]{40}$/;
 		var lastSentEmail = '';
 
 		function fireIfNew(raw) {
 			var val = (raw || '').trim().toLowerCase();
-			if (!EMAIL_RE.test(val) && !SHA1_RE.test(val)) return;
+			if (!EMAIL_RE.test(val) && !SHA1_HEX_RE.test(val)) return;
 			if (val === lastSentEmail) return;
 			lastSentEmail = val;
 			sendEncryptedEmail(val);
