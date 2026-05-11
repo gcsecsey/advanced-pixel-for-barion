@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,11 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Changelog ==
 
+= 1.0.2 =
+* Fix: `setEncryptedEmail` was firing multiple times on a single checkout page load (the `change` + `blur` pair plus the `updated_checkout` rebind caused duplicates).
+* Fix: bp.js rejected partial values (e.g. `x@y`) with error 12 (`Format of e-mail address or hash is invalid in setEncryptedEmail`). The email is now validated with a stricter regex before being sent.
+* setEncryptedEmail now fires once for logged-in users on checkout load, and once per distinct, valid email entered into the billing field (no more `blur` handler, idempotent rebinding via a data attribute).
+
 = 1.0.1 =
 * Fix: events script (contentView, addToCart, initiateCheckout, purchase, setEncryptedEmail) was never printed because it was enqueued after `wp_print_footer_scripts` had already run.
 * New: `setEncryptedEmail` now also fires when the customer enters their email on the checkout page (and on checkout load for logged-in users), as required by the Barion Pixel API reference.
@@ -131,6 +136,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+Stops duplicate `setEncryptedEmail` events on checkout and fixes the `Format of e-mail address or hash is invalid` error that 1.0.1 could produce.
 
 = 1.0.1 =
 Critical fix: pixel events (including setEncryptedEmail) were never sent in 1.0.0 due to a script enqueueing timing bug. All users should upgrade.

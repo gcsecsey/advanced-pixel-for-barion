@@ -47,44 +47,46 @@
 	// Per Barion docs, setEncryptedEmail must fire whenever the user provides their email
 	// (during checkout), not only on the thank-you page.
 	if (isCheckout) {
-		var lastSentEmail = (email || loggedInEmail || '').toLowerCase();
+		// Strict format check: bp.js rejects partial inputs like "x@y" with error 12
+		// ("Format of e-mail address or hash is invalid in setEncryptedEmail.").
+		var EMAIL_RE = /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/;
+		var lastSentEmail = '';
 
-		function bindEmailField() {
-			var field = document.querySelector('#billing_email');
-			if (!field) return false;
-
-			// Logged-in user: fire immediately with their email
-			if (loggedInEmail && loggedInEmail !== lastSentEmail) {
-				sendEncryptedEmail(loggedInEmail);
-				lastSentEmail = loggedInEmail;
-			}
-
-			// Also handle pre-filled field values (e.g. from session/cookies)
-			var initial = (field.value || '').trim().toLowerCase();
-			if (initial && initial.indexOf('@') > 0 && initial !== lastSentEmail) {
-				sendEncryptedEmail(initial);
-				lastSentEmail = initial;
-			}
-
-			var handler = function () {
-				var val = (field.value || '').trim().toLowerCase();
-				if (!val || val.indexOf('@') < 1 || val === lastSentEmail) return;
-				lastSentEmail = val;
-				sendEncryptedEmail(val);
-			};
-			field.addEventListener('change', handler);
-			field.addEventListener('blur', handler);
-			return true;
+		function fireIfNew(raw) {
+			var val = (raw || '').trim().toLowerCase();
+			if (!EMAIL_RE.test(val) || val === lastSentEmail) return;
+			lastSentEmail = val;
+			sendEncryptedEmail(val);
 		}
 
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', bindEmailField);
-		} else {
+		// Only bind once per email field instance to avoid stacking listeners
+		// on updated_checkout (which fires multiple times during normal use).
+		function bindEmailField() {
+			var field = document.querySelector('#billing_email');
+			if (!field || field.dataset.wcBarionBound === '1') return;
+			field.dataset.wcBarionBound = '1';
+			field.addEventListener('change', function () {
+				fireIfNew(field.value);
+			});
+		}
+
+		function init() {
+			// Logged-in user: fire once on load with their account email.
+			if (loggedInEmail) {
+				fireIfNew(loggedInEmail);
+			}
 			bindEmailField();
 		}
 
-		// WooCommerce re-renders the checkout form on AJAX updates (shipping, coupons, etc.),
-		// which replaces the email input and drops our listeners. Re-bind on updated_checkout.
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
+
+		// WooCommerce may replace the email field on updated_checkout. The
+		// data-attribute guard makes bindEmailField a no-op if the same field
+		// is still mounted, and idempotently binds a fresh one if it's new.
 		if (typeof jQuery !== 'undefined') {
 			jQuery(document.body).on('updated_checkout', bindEmailField);
 		}
