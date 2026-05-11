@@ -20,12 +20,49 @@
 	var isCheckout = !!config.isCheckout;
 	var loggedInEmail = config.loggedInEmail || '';
 
-	function sendEncryptedEmail(value) {
+	var SHA1_HEX_RE = /^[a-f0-9]{40}$/;
+
+	// bp.js validates plain emails with a very restrictive regex that rejects
+	// common valid addresses (no `+` in the local part, TLDs limited to 2–4
+	// letters). Pre-hashing the email with SHA-1 sidesteps that check — bp.js
+	// accepts any 40-char hex string as-is.
+	function sha1Hex(input) {
+		if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
+			return Promise.reject(new Error('Web Crypto API not available'));
+		}
+		var bytes = new TextEncoder().encode(input);
+		return window.crypto.subtle.digest('SHA-1', bytes).then(function (buffer) {
+			var arr = new Uint8Array(buffer);
+			var hex = '';
+			for (var i = 0; i < arr.length; i++) {
+				hex += ('00' + arr[i].toString(16)).slice(-2);
+			}
+			return hex;
+		});
+	}
+
+	function sendToBp(value) {
 		if (typeof bp === 'undefined') return;
-		bp('identify', 'setEncryptedEmail', value);
+		// Method name per https://docs.barion.com/Barion_Pixel_API_reference
+		// ("bp('identity','setEncryptedEmail', '...')").
+		bp('identity', 'setEncryptedEmail', value);
 		if (debug) {
 			console.log('[Barion Pixel] setEncryptedEmail sent');
 		}
+	}
+
+	function sendEncryptedEmail(value) {
+		if (typeof bp === 'undefined') return;
+		if (SHA1_HEX_RE.test(value)) {
+			sendToBp(value);
+			return;
+		}
+		sha1Hex(value).then(sendToBp).catch(function () {
+			// Web Crypto unavailable (e.g. non-HTTPS context). Fall back to the
+			// plain email — bp.js will still accept it as long as it matches
+			// the conservative format it requires.
+			sendToBp(value);
+		});
 	}
 
 	// Fire queued events (contentView, initiateCheckout, purchase)
@@ -47,44 +84,49 @@
 	// Per Barion docs, setEncryptedEmail must fire whenever the user provides their email
 	// (during checkout), not only on the thank-you page.
 	if (isCheckout) {
-		var lastSentEmail = (email || loggedInEmail || '').toLowerCase();
+		// Validate before sending so partial typing doesn't reach bp.js. We
+		// accept any value bp.js would accept: a plain email (HTML5 spec
+		// regex, https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address),
+		// or a pre-computed SHA-1 hash.
+		var EMAIL_RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
+		var lastSentEmail = '';
 
-		function bindEmailField() {
-			var field = document.querySelector('#billing_email');
-			if (!field) return false;
-
-			// Logged-in user: fire immediately with their email
-			if (loggedInEmail && loggedInEmail !== lastSentEmail) {
-				sendEncryptedEmail(loggedInEmail);
-				lastSentEmail = loggedInEmail;
-			}
-
-			// Also handle pre-filled field values (e.g. from session/cookies)
-			var initial = (field.value || '').trim().toLowerCase();
-			if (initial && initial.indexOf('@') > 0 && initial !== lastSentEmail) {
-				sendEncryptedEmail(initial);
-				lastSentEmail = initial;
-			}
-
-			var handler = function () {
-				var val = (field.value || '').trim().toLowerCase();
-				if (!val || val.indexOf('@') < 1 || val === lastSentEmail) return;
-				lastSentEmail = val;
-				sendEncryptedEmail(val);
-			};
-			field.addEventListener('change', handler);
-			field.addEventListener('blur', handler);
-			return true;
+		function fireIfNew(raw) {
+			var val = (raw || '').trim().toLowerCase();
+			if (!EMAIL_RE.test(val) && !SHA1_HEX_RE.test(val)) return;
+			if (val === lastSentEmail) return;
+			lastSentEmail = val;
+			sendEncryptedEmail(val);
 		}
 
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', bindEmailField);
-		} else {
+		// Only bind once per email field instance to avoid stacking listeners
+		// on updated_checkout (which fires multiple times during normal use).
+		function bindEmailField() {
+			var field = document.querySelector('#billing_email');
+			if (!field || field.dataset.wcBarionBound === '1') return;
+			field.dataset.wcBarionBound = '1';
+			field.addEventListener('change', function () {
+				fireIfNew(field.value);
+			});
+		}
+
+		function init() {
+			// Logged-in user: fire once on load with their account email.
+			if (loggedInEmail) {
+				fireIfNew(loggedInEmail);
+			}
 			bindEmailField();
 		}
 
-		// WooCommerce re-renders the checkout form on AJAX updates (shipping, coupons, etc.),
-		// which replaces the email input and drops our listeners. Re-bind on updated_checkout.
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
+
+		// WooCommerce may replace the email field on updated_checkout. The
+		// data-attribute guard makes bindEmailField a no-op if the same field
+		// is still mounted, and idempotently binds a fresh one if it's new.
 		if (typeof jQuery !== 'undefined') {
 			jQuery(document.body).on('updated_checkout', bindEmailField);
 		}
