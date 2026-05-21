@@ -21,10 +21,21 @@
 		},
 		{
 			"step": "installPlugin",
-			"pluginZipFile": {
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "wp-consent-api"
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
 				"resource": "url",
 				"url": "https://github.com/gcsecsey/advanced-pixel-for-barion/archive/refs/heads/main.zip"
 			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php if ( is_dir( '/wordpress/wp-content/plugins/advanced-pixel-for-barion-main' ) && ! is_dir( '/wordpress/wp-content/plugins/advanced-pixel-for-barion' ) ) { rename( '/wordpress/wp-content/plugins/advanced-pixel-for-barion-main', '/wordpress/wp-content/plugins/advanced-pixel-for-barion' ); require '/wordpress/wp-load.php'; $active = get_option( 'active_plugins', array() ); $active = array_map( function( $p ) { return str_replace( 'advanced-pixel-for-barion-main/', 'advanced-pixel-for-barion/', $p ); }, $active ); update_option( 'active_plugins', $active ); } ?>"
 		},
 		{
 			"step": "runPHP",
@@ -49,6 +60,11 @@
 			"step": "writeFile",
 			"path": "/wordpress/wp-content/mu-plugins/blueprint-demo-notice.php",
 			"data": "<?php add_action('wp_body_open', function() { if (is_admin()) return; echo '<div style=\"background:#1e1e2e;color:#cdd6f4;padding:12px 20px;text-align:center;font-family:system-ui,sans-serif;font-size:14px;\">Open your browser\\'s <strong>Developer Console</strong> (F12) to see <code style=\"background:#313244;padding:2px 6px;border-radius:3px;color:#89b4fa;\">[Barion Pixel]</code> debug logs as you browse the store.</div>'; });"
+		},
+		{
+			"step": "writeFile",
+			"path": "/wordpress/wp-content/mu-plugins/blueprint-demo-consent-banner.php",
+			"data": "<?php\nadd_filter('wp_get_consent_type', function() { return 'optin'; });\nadd_action('wp_footer', function() {\n  if (is_admin()) return;\n  ?>\n  <div id=\"demo-consent-banner\" style=\"position:fixed;bottom:0;left:0;right:0;background:#1e1e2e;color:#cdd6f4;padding:16px 20px;z-index:99999;font-family:system-ui,sans-serif;display:none;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;box-shadow:0 -4px 12px rgba(0,0,0,0.3);\">\n    <span>Demo cookie banner &mdash; this site uses the <strong>WP Consent API</strong>. Accept to enable Barion Pixel marketing tracking.</span>\n    <button id=\"demo-consent-accept\" style=\"background:#89b4fa;color:#1e1e2e;border:0;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:600;\">Accept marketing</button>\n    <button id=\"demo-consent-reject\" style=\"background:transparent;color:#cdd6f4;border:1px solid #cdd6f4;padding:8px 16px;border-radius:4px;cursor:pointer;\">Reject</button>\n  </div>\n  <script>\n  document.addEventListener('wp_consent_type_defined', function() {\n    var banner = document.getElementById('demo-consent-banner');\n    if (!banner) return;\n    if (document.cookie.indexOf('demo_consent_set=1') === -1) { banner.style.display = 'flex'; }\n    function setConsent(val) {\n      if (typeof wp_set_consent === 'function') {\n        wp_set_consent('marketing', val);\n        wp_set_consent('statistics', val);\n      }\n      document.cookie = 'demo_consent_set=1; path=/; max-age=86400';\n      banner.style.display = 'none';\n    }\n    document.getElementById('demo-consent-accept').addEventListener('click', function() { setConsent('allow'); });\n    document.getElementById('demo-consent-reject').addEventListener('click', function() { setConsent('deny'); });\n  });\n  </script>\n  <?php\n});\n"
 		},
 		{
 			"step": "importWxr",
