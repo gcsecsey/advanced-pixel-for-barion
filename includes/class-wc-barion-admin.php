@@ -284,6 +284,8 @@ class WC_Barion_Admin {
                 'needBoth'     => __('Record both accept and reject before saving.', 'advanced-pixel-for-barion'),
                 'noChange'     => __('No cookie changed. Make a choice in the banner on the other tab.', 'advanced-pixel-for-barion'),
                 'testing'      => __('Testing…', 'advanced-pixel-for-barion'),
+                'probeFailed'  => __('The check did not finish. Try again.', 'advanced-pixel-for-barion'),
+                'recorderSilent' => __('No signal from your shop. The recording link may have expired. Close this, then press Set up consent again.', 'advanced-pixel-for-barion'),
             ),
         ));
     }

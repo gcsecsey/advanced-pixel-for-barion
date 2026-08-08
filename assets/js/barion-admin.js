@@ -7,7 +7,8 @@
 	var dialog = document.getElementById('apb-wizard');
 	var toggle = document.getElementById('apb-toggle');
 
-	var state = { step: 1, side: 'grant', recorded: { grant: null, reject: null }, tab: null };
+	var state = { step: 1, side: 'grant', recorded: { grant: null, reject: null }, tab: null, lastPayload: null };
+	var recorderTimer = null;
 
 	if (toggle && panel) {
 		toggle.addEventListener('click', function () {
@@ -49,6 +50,11 @@
 		state.step = 1;
 		state.side = 'grant';
 		state.recorded = { grant: null, reject: null };
+		state.lastPayload = null;
+		if (recorderTimer) {
+			clearTimeout(recorderTimer);
+			recorderTimer = null;
+		}
 		showStep(1);
 		dialog.showModal();
 	}
@@ -95,6 +101,15 @@
 		}
 	}
 
+	function armRecorderTimeout() {
+		if (recorderTimer) {
+			clearTimeout(recorderTimer);
+		}
+		recorderTimer = setTimeout(function () {
+			document.getElementById('apb-recorder-log').textContent = cfg.strings.recorderSilent;
+		}, 20000);
+	}
+
 	function onNext() {
 		if (1 === state.step) {
 			var selected = dialog.querySelector('.apb-choice.is-selected');
@@ -110,6 +125,7 @@
 
 		if (2 === state.step) {
 			state.tab = window.open(cfg.recordUrl, 'apb-recorder');
+			armRecorderTimeout();
 			return;
 		}
 
@@ -124,6 +140,20 @@
 		var data = event.data;
 		if (!data || 'apb-recorder' !== data.source) {
 			return;
+		}
+
+		// The recorder re-sends the same baseline diff every 250ms, so an unchanged
+		// payload is a repeat, not a new signal. Without this guard the grant reading
+		// is immediately stored again as the reject reading.
+		var fingerprint = JSON.stringify({ cookies: data.cookies, events: data.events });
+		if (fingerprint === state.lastPayload) {
+			return;
+		}
+		state.lastPayload = fingerprint;
+
+		if (recorderTimer) {
+			clearTimeout(recorderTimer);
+			recorderTimer = null;
 		}
 
 		var log = document.getElementById('apb-recorder-log');
@@ -203,6 +233,36 @@
 		button.textContent = cfg.strings.testing;
 
 		var frame = document.createElement('iframe');
+		var settled = false;
+
+		function save(type, granted) {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			post({
+				action: 'apb_save_probe',
+				kind: 'consent',
+				consent_type: type,
+				has_consent: granted ? 'true' : 'false',
+			}, function () {
+				frame.remove();
+				window.location.reload();
+			});
+		}
+
+		// Never save a result we did not actually measure: an unfinished check
+		// would otherwise be stored as "no consent granted", which reads as healthy.
+		function abandon() {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			frame.remove();
+			button.disabled = false;
+			button.textContent = cfg.strings.probeFailed;
+		}
+
 		frame.style.display = 'none';
 		frame.src = cfg.recordUrl;
 		frame.addEventListener('load', function () {
@@ -215,16 +275,10 @@
 			} catch (e) {
 				type = '';
 			}
-			post({
-				action: 'apb_save_probe',
-				kind: 'consent',
-				consent_type: type,
-				has_consent: granted ? 'true' : 'false',
-			}, function () {
-				frame.remove();
-				window.location.reload();
-			});
+			save(type, granted);
 		});
+		frame.addEventListener('error', abandon);
+		setTimeout(abandon, 8000);
 		document.body.appendChild(frame);
 	}
 
