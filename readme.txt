@@ -24,6 +24,8 @@ Advanced Pixel for Barion adds Barion Pixel tracking to your WooCommerce store. 
 * **purchase** - Completed orders with full revenue tracking
 * **setEncryptedEmail** - Encrypted billing email for user identification
 
+Full Tracking is also one of the conditions of Barion's discounted "Advanced" gateway package. You have to request that package from Barion, and Barion reviews your pixel implementation before granting it — installing this plugin does not change your fees on its own. See the FAQ below.
+
 = Cookie Consent =
 
 The plugin integrates with the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), supporting all major cookie consent plugins:
@@ -97,11 +99,32 @@ All plugins that implement the WP Consent API standard: CookieYes, Complianz, Re
 
 = What is the difference between Base Pixel and Full Tracking? =
 
-**Base Pixel** loads bp.js and fires pageView on every page. This is used by Barion for fraud prevention and basic analytics. **Full Tracking** adds e-commerce events (product views, add to cart, checkout, purchase) that enable marketing analytics and may qualify your store for lower Barion commission rates.
+**Base Pixel** loads bp.js and fires pageView on every page. This is used by Barion for fraud prevention and basic analytics. **Full Tracking** adds e-commerce events (product views, add to cart, checkout, purchase) that enable marketing analytics. Full Tracking is also a condition of Barion's discounted Advanced package — see the question about fees below.
 
 = Can I use only the Base Pixel? =
 
 Yes. Just uncheck "Enable Full Pixel Tracking" in the settings. The base pixel will still load and fire pageView events.
+
+= How do I check that my events reach Barion? =
+
+Barion has no page that lists your events. The Barion admin gives you your Pixel ID (Barion Wallet > Merchant Management > Details), but it does not show incoming events.
+
+You check the events in your browser instead. Enable Debug Mode in Settings > Barion Pixel, then open the browser console (F12). Every event the plugin sends appears with a `[Barion Pixel]` prefix.
+
+Barion's own bp.js script also writes to the same console, and its message tells you your approval state:
+
+* `Testing message` — your pixel works, but Barion has not authorised it yet. Barion receives only the type of the event, not user data. Every new implementation starts here.
+* `Sending message` — Barion reviewed and approved your implementation. Barion now receives the full data.
+
+A person at Barion performs this approval. Contact Barion when your implementation is complete.
+
+= Will this plugin lower my Barion transaction fees? =
+
+Not on its own. Barion offers a discounted "Advanced" package for the Barion Smart Gateway, and a complete Full Pixel implementation with consent management is one of its conditions.
+
+Two things are important. First, you have to **request** the package from Barion — it is not applied automatically when you install a pixel. Second, Barion examines your implementation before granting it, and commercial conditions apply as well, for example your average cart size and your card mix.
+
+For the current conditions, see the [Barion Smart Gateway page](https://www.barion.com/en/business/barion-smart-gateway/).
 
 = How does the plugin handle page caching? =
 
@@ -109,7 +132,11 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Screenshots ==
 
-1. Settings page — enter your Barion Pixel ID and configure tracking options.
+1. Settings page — enter your Barion Pixel ID, then enable Full Pixel Tracking and Debug Mode.
+2. Product page — Debug Mode logs `contentView` when the page loads, and `addToCart` when the customer adds the product to the cart.
+3. Checkout page — `initiateCheckout` carries the cart contents and the revenue, and `setEncryptedEmail` sends the SHA-1 hashed billing email.
+4. Order received page — `purchase` reports the completed order with its contents and revenue.
+5. Events wait for consent. The plugin reads the WP Consent API, so any compatible cookie banner controls the tracking.
 
 == Changelog ==
 
