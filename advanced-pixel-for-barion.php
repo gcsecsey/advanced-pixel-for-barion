@@ -5,12 +5,13 @@
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
  * Author: Gergely Csecsey
  * Author URI: https://github.com/gcsecsey
- * Version: 1.0.4
+ * Version: 1.0.5
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * WC requires at least: 5.0
  * WC tested up to: 11.0
  * Text Domain: advanced-pixel-for-barion
+ * Domain Path: /languages
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -21,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_BARION_PIXEL_VERSION', '1.0.4');
+define('WC_BARION_PIXEL_VERSION', '1.0.5');
 define('WC_BARION_PIXEL_PATH', plugin_dir_path(__FILE__));
 define('WC_BARION_PIXEL_URL', plugin_dir_url(__FILE__));
 
@@ -346,7 +347,6 @@ class WC_Barion_Pixel {
 
     /**
      * Enqueue events script with all collected data (WordPress wp_footer hook callback)
-     * Called at priority 998 to run before output_footer_action at 999.
      *
      * @return void
      */
@@ -554,6 +554,19 @@ add_action('before_woocommerce_init', function() {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
     }
 });
+
+// Load the bundled translations. Without this, WordPress only searches
+// wp-content/languages/plugins, so the .mo files shipped in languages/ are
+// never found. Runs on init because load_plugin_textdomain() must not fire
+// before the locale is settled.
+function wc_barion_pixel_load_textdomain() {
+    load_plugin_textdomain(
+        'advanced-pixel-for-barion',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+}
+add_action('init', 'wc_barion_pixel_load_textdomain');
 
 // Initialize plugin
 function wc_barion_pixel_init() {
