@@ -90,6 +90,10 @@ Barion's own guides for setting up the pixel. The plugin's **Enable Full Pixel T
 - WooCommerce 5.0+ (for full event tracking)
 - Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) for universal cookie consent support
 
+## Contributing
+
+Bug reports, pull requests and translations are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
