@@ -50,6 +50,7 @@ class WC_Barion_Health {
             $checks[] = $duplicate;
         }
 
+        $checks[] = self::check_cookies_declared($facts);
         $checks[] = self::check_category();
         $checks[] = self::check_reachability($facts);
 
@@ -334,6 +335,23 @@ class WC_Barion_Health {
             'warn',
             __('Barion Payment Gateway holds a second Pixel ID', 'advanced-pixel-for-barion'),
             __('Both plugins work together and the base script loads only once. You may remove the ID from the gateway to keep one source of truth.', 'advanced-pixel-for-barion')
+        );
+    }
+
+    private static function check_cookies_declared($facts) {
+        if (!empty($facts['consent_api_active'])) {
+            return self::row(
+                'cookies_declared',
+                'ok',
+                __('Barion cookies are declared', 'advanced-pixel-for-barion'),
+                __('They appear in your cookie policy through the WP Consent API.', 'advanced-pixel-for-barion')
+            );
+        }
+        return self::row(
+            'cookies_declared',
+            'info',
+            __('Barion cookies are not declared', 'advanced-pixel-for-barion'),
+            __('Barion sets ba_sid, ba_vid and BarionMarketingConsent on your domain. Without the WP Consent API plugin they cannot be added to your cookie policy automatically, so add them by hand.', 'advanced-pixel-for-barion')
         );
     }
 

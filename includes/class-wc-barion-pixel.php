@@ -67,6 +67,7 @@ class WC_Barion_Pixel {
             // Enqueue scripts
             add_action('wp_enqueue_scripts', array($this, 'enqueue_base_script'), 1);
             add_action('wp_footer', array($this, 'output_footer_action'), 999);
+            add_action('wp_loaded', array($this, 'declare_cookies'));
             // WooCommerce event hooks (only if full tracking is enabled)
             if ($this->is_full_tracking_enabled()) {
                 add_action('woocommerce_after_single_product', array($this, 'track_content_view'));
@@ -124,6 +125,46 @@ class WC_Barion_Pixel {
             'debug'   => $this->is_debug_mode(),
             'trigger' => $this->get_consent_trigger(),
         ));
+    }
+
+    /**
+     * Declare the Barion cookies to the WP Consent API, so they appear in the
+     * site's cookie policy.
+     *
+     * bp.js sets these on the shop's own domain, with a murmurHash3 of that
+     * domain appended to each name at runtime. Only the prefixes are stable, so
+     * those are what we register.
+     *
+     * @return void
+     */
+    public function declare_cookies() {
+        if (!function_exists('wp_add_cookie_info')) {
+            return;
+        }
+
+        wp_add_cookie_info(
+            'ba_sid',
+            'Barion Pixel',
+            'functional',
+            __('30 minutes', 'advanced-pixel-for-barion'),
+            __('Groups a visitor\'s page views into one session. Barion uses it for fraud prevention. The full name has a hash of your domain appended.', 'advanced-pixel-for-barion')
+        );
+
+        wp_add_cookie_info(
+            'ba_vid',
+            'Barion Pixel',
+            'marketing',
+            __('1.5 years', 'advanced-pixel-for-barion'),
+            __('Identifies a returning visitor for Barion marketing analytics. The full name has a hash of your domain appended.', 'advanced-pixel-for-barion')
+        );
+
+        wp_add_cookie_info(
+            'BarionMarketingConsent',
+            'Barion Pixel',
+            'functional',
+            __('1.5 years', 'advanced-pixel-for-barion'),
+            __('Records whether the visitor accepted marketing tracking. Removed when they reject it. The full name has a hash of your domain appended.', 'advanced-pixel-for-barion')
+        );
     }
 
     /**

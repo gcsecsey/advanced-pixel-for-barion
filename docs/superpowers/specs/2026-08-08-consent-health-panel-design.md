@@ -111,7 +111,7 @@ The checks:
 | `full_tracking` | info | Full tracking on or off |
 | `gateway_duplicate_id` | warn | Barion Payment Gateway holds a second Pixel ID |
 | `category` | info | Read-only `marketing` row with the mapping explained |
-| `cookies_declared` | see Open item | Barion cookies missing from the cookie policy |
+| `cookies_declared` | info, when the WP Consent API is inactive | Whether Barion's cookies are declared to the cookie policy |
 | `reachability` | info until run | Result of the browser probe |
 
 **`consent_type_set` needs care.** `wp_get_consent_type()` reads a filter that most banner
@@ -233,15 +233,26 @@ Content updates:
 - Shipping adapters for named third-party managers such as Cookiebot or OneTrust. The recorder
   covers them without the maintenance cost of five third-party APIs.
 
-## Open item
+## Resolved: cookie declaration
 
-The mockup shows a **Declare cookies** action driven by `wp_add_cookie_info()`. That function
-declares cookies *the plugin itself sets*. Barion's `bp.js` sets Barion's own cookies from
-`pixel.barion.com`, which may put them outside the scope of that function. Verify this during
-implementation.
+The mockup shows a **Declare cookies** action driven by `wp_add_cookie_info()`. The open question
+was whether that function applies, since it declares cookies *the plugin itself sets*, and Barion's
+`bp.js` was assumed to set its cookies from `pixel.barion.com`. Reading the live script at
+`https://pixel.barion.com/bp.js` showed that assumption was wrong: `bp.js` sets its cookies with
+`"." + document.domain`, so they are first-party cookies on the shop's own domain, not on
+`pixel.barion.com`. `wp_add_cookie_info()` also explicitly supports declaring third-party services
+— it takes a `$domain` parameter and its own docblock uses "Google Maps" as the example.
 
-- If declaring them is correct, keep the action button as drawn.
-- If not, the row becomes an informational entry that names the Barion cookies and links to
-  Barion's cookie notice, so the owner can add them to their own policy by hand.
+Each cookie name is a stable prefix plus a murmurHash3 of the site domain, computed in the
+browser at runtime, so the plugin declares only the prefixes and explains the suffix in the
+description text.
 
-This affects one panel row and no other part of the design.
+| Prefix | Lifetime | Purpose |
+|---|---|---|
+| `ba_sid` | 30 minutes | Session grouping, used for fraud prevention |
+| `ba_vid` | 1.5 years | Returning-visitor ID for marketing analytics |
+| `BarionMarketingConsent` | 1.5 years (deleted on reject) | Records the visitor's marketing consent choice |
+
+`WC_Barion_Pixel::declare_cookies()` registers these three cookies with `wp_add_cookie_info()`
+when the WP Consent API is active. The `cookies_declared` health row reflects whether that
+declaration can take effect.

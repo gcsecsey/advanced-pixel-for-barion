@@ -142,6 +142,12 @@ for ($i = 1; $i < count($order); $i++) {
 }
 apb_assert($sorted, 'rows are sorted fail, warn, ok, info');
 
+echo "The cookie declaration row reflects whether the consent API is present\n";
+$checks = WC_Barion_Health::evaluate(apb_facts());
+apb_assert('ok' === apb_check($checks, 'cookies_declared')['status'], 'declared when the consent API is active');
+$checks = WC_Barion_Health::evaluate(apb_facts(array('consent_api_active' => false, 'consent_type' => '')));
+apb_assert('info' === apb_check($checks, 'cookies_declared')['status'], 'not declared without the consent API');
+
 echo "\n";
 if ($failures > 0) {
     echo "$failures check(s) failed\n";
