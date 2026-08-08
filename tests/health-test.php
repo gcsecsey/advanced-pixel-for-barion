@@ -97,7 +97,7 @@ $checks = WC_Barion_Health::evaluate(apb_facts(array(
     ),
 )));
 apb_assert('fail' === apb_check($checks, 'consent_both_signals')['status'], 'a half-taught trigger fails');
-apb_assert('learned' === apb_check($checks, 'consent_source')['target'], 'the source is the learned trigger');
+apb_assert('none' === apb_check($checks, 'consent_source')['target'], 'a half-taught trigger is not a usable source');
 
 echo "A complete learned trigger\n";
 $checks = WC_Barion_Health::evaluate(apb_facts(array(

@@ -82,7 +82,7 @@ class WC_Barion_Health {
      * @return string One of 'learned', 'wp-consent-api', 'cookie-law-info', 'none'.
      */
     private static function resolve_source($facts) {
-        if (!empty($facts['trigger'])) {
+        if (!empty($facts['trigger']['grant']) && !empty($facts['trigger']['reject'])) {
             return 'learned';
         }
         if (!empty($facts['consent_api_active']) && '' !== $facts['consent_type']) {
