@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Changelog ==
 
+= 1.0.5 =
+* Fix: the bundled Hungarian, Czech, Slovak, German, Croatian, Romanian, Slovenian and Serbian translations never loaded, so the settings screen stayed in English. WordPress only searches `wp-content/languages/plugins` unless a plugin registers its own directory, and the plugin never did. It now registers `languages/` on `init`.
+
 = 1.0.4 =
 * Compatibility: tested against WordPress 7.0 and WooCommerce 11.0.
 * `Requires PHP` raised from 7.2 to 7.4. WordPress 7.0 dropped support for PHP 7.2 and 7.3, so 7.2 was no longer a version the plugin could run on.
@@ -143,6 +146,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+Fixes the bundled translations, which never loaded. If you run WordPress in Hungarian, Czech, Slovak, German, Croatian, Romanian, Slovenian or Serbian, the plugin's settings screen is now translated.
 
 = 1.0.3 =
 Stops duplicate `setEncryptedEmail` events on checkout, and fixes the `Format of e-mail address or hash is invalid` error that 1.0.1 could produce — including for emails that contain `+` or use an extended TLD, which bp.js's internal regex rejected. The plugin now pre-hashes the email with SHA-1 before sending.
