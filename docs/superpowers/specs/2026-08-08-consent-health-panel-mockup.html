@@ -1,0 +1,215 @@
+<style>
+.wp { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #1d2327; font-size: 13px; line-height: 1.5; }
+.wp * { box-sizing: border-box; }
+.wp-screen { background: #f0f0f1; padding: 20px; border-radius: 6px; border: 1px solid #dcdcde; }
+.wp h1.wp-title { font-size: 23px; font-weight: 400; margin: 0 0 16px; color: #1d2327; }
+.wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); margin-bottom: 16px; }
+.wp-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #dcdcde; }
+.wp-card-head.ok   { border-left: 4px solid #00a32a; }
+.wp-card-head.warn { border-left: 4px solid #dba617; }
+.wp-card-head.bad  { border-left: 4px solid #d63638; }
+.wp-status { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.dot.ok { background: #00a32a; } .dot.warn { background: #dba617; } .dot.bad { background: #d63638; } .dot.off { background: #a7aaad; }
+.wp-rows { margin: 0; }
+.wp-row { display: flex; align-items: flex-start; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #f0f0f1; }
+.wp-row:last-child { border-bottom: 0; }
+.wp-row .ico { flex: 0 0 auto; width: 18px; text-align: center; font-weight: 700; line-height: 20px; }
+.ico.ok { color: #00a32a; } .ico.warn { color: #dba617; } .ico.bad { color: #d63638; } .ico.off { color: #a7aaad; }
+.wp-row .body { flex: 1 1 auto; min-width: 0; }
+.wp-row .body b { font-weight: 600; }
+.wp-row .desc { color: #50575e; margin-top: 3px; }
+.wp-row .act { flex: 0 0 auto; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; background: #f6f7f7; border: 1px solid #dcdcde; border-radius: 3px; padding: 1px 5px; }
+.btn { display: inline-block; border-radius: 3px; padding: 4px 11px; font-size: 13px; line-height: 2; border: 1px solid #2271b1; background: #f6f7f7; color: #2271b1; cursor: pointer; white-space: nowrap; }
+.btn.primary { background: #2271b1; border-color: #2271b1; color: #fff; }
+.btn.small { padding: 1px 9px; line-height: 1.9; font-size: 12px; }
+.btn.link { border: 0; background: none; color: #2271b1; text-decoration: underline; padding: 4px 0; }
+.pill { display: inline-block; font-size: 11px; border-radius: 9px; padding: 1px 9px; background: #f0f0f1; border: 1px solid #dcdcde; color: #50575e; }
+.callout { background: #fcf9e8; border-left: 4px solid #dba617; padding: 10px 14px; margin: 0 16px 14px; }
+.callout.err { background: #fcf0f1; border-left-color: #d63638; }
+.wp-field { display: flex; gap: 18px; padding: 12px 16px; border-bottom: 1px solid #f0f0f1; }
+.wp-field .lab { width: 190px; font-weight: 600; flex: 0 0 auto; }
+input.wp-in { border: 1px solid #8c8f94; border-radius: 4px; padding: 4px 8px; font-size: 13px; min-width: 230px; }
+.dim { color: #787c82; }
+/* modal */
+.modal-wrap { background: rgba(0,0,0,.45); padding: 26px; border-radius: 6px; }
+.modal { background: #fff; border-radius: 4px; max-width: 560px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,.3); }
+.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #dcdcde; }
+.modal-head h3 { margin: 0; font-size: 15px; }
+.modal-body { padding: 18px; }
+.modal-foot { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-top: 1px solid #dcdcde; background: #f6f7f7; }
+.steps { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #787c82; }
+.steps .s { padding: 2px 9px; border-radius: 10px; background: #f0f0f1; }
+.steps .s.on { background: #2271b1; color: #fff; }
+.radio { display: flex; gap: 9px; align-items: flex-start; border: 1px solid #dcdcde; border-radius: 4px; padding: 11px 13px; margin-bottom: 8px; }
+.radio.sel { border-color: #2271b1; background: #f0f6fc; box-shadow: 0 0 0 1px #2271b1; }
+.rec { background: #f6f7f7; border: 1px dashed #c3c4c7; border-radius: 4px; padding: 13px; }
+.log { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: #2c3338; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; align-items: start; }
+@media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } }
+.cap { font-size: 12px; color: #646970; margin: 0 0 7px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+</style>
+
+<h2>Advanced Pixel for Barion — admin mockups</h2>
+<p class="subtitle">Health panel at the top of Settings &rsaquo; Barion Pixel, then the consent wizard modal. Scroll for the wizard.</p>
+
+<div class="wp">
+
+  <p class="cap">1 &nbsp;·&nbsp; Health panel — the bad state (this is the state that matters)</p>
+  <div class="wp-screen">
+    <h1 class="wp-title">Barion Pixel Settings</h1>
+
+    <div class="wp-card">
+      <div class="wp-card-head bad">
+        <div class="wp-status"><span class="dot bad"></span> Action needed — consent is granted to every visitor</div>
+        <div><span class="pill">3 of 8 checks failed</span> &nbsp; <span class="btn small">Re-check</span></div>
+      </div>
+
+      <div class="callout err">
+        <b>Every visitor is counted as consenting.</b> WP&nbsp;Consent&nbsp;API is active, but no cookie banner
+        plugin sets a consent type. When that happens <span class="mono">wp_has_consent()</span> returns true for
+        everyone, so the pixel sends <span class="mono">grantConsent</span> without any consent. This breaks GDPR
+        and the Barion terms.
+      </div>
+
+      <div class="wp-rows">
+        <div class="wp-row">
+          <span class="ico ok">&#10003;</span>
+          <span class="body"><b>Pixel ID</b> <span class="mono">BP-1234567890-01</span></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico bad">&#10007;</span>
+          <span class="body">
+            <b>No cookie banner plugin sets a consent type</b>
+            <div class="desc">Install a banner plugin that supports WP&nbsp;Consent&nbsp;API, or teach the plugin your banner&rsquo;s signal.</div>
+          </span>
+          <span class="act"><span class="btn primary small">Set up consent</span></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico bad">&#10007;</span>
+          <span class="body">
+            <b>Barion cookies are not declared</b>
+            <div class="desc">The cookies do not appear in your cookie policy. One click adds them through <span class="mono">wp_add_cookie_info()</span>.</div>
+          </span>
+          <span class="act"><span class="btn small">Declare cookies</span></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico warn">!</span>
+          <span class="body">
+            <b>Barion Payment Gateway holds a second Pixel ID</b>
+            <div class="desc">Both plugins work together. You may remove the ID there to keep one source of truth.</div>
+          </span>
+          <span class="act"><span class="btn link small">Open gateway settings</span></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico ok">&#10003;</span>
+          <span class="body"><b>WP Consent API plugin active</b></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico ok">&#10003;</span>
+          <span class="body"><b>WooCommerce active</b> <span class="dim">&mdash; 9.6</span></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico ok">&#10003;</span>
+          <span class="body"><b>Full tracking enabled</b> <span class="dim">&mdash; contentView, addToCart, initiateCheckout, purchase</span></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico off">&#8226;</span>
+          <span class="body">
+            <b>Consent category</b> <span class="mono">marketing</span>
+            <div class="desc">Fixed. Barion requires consent for marketing purposes, so this is the only correct category. Your banner&rsquo;s advertising checkbox maps to it.</div>
+          </span>
+          <span class="act"><span class="btn link small">Why?</span></span>
+        </div>
+        <div class="wp-row">
+          <span class="ico off">&#8226;</span>
+          <span class="body">
+            <b>Barion pixel script reachable</b>
+            <div class="desc">Loads <span class="mono">bp.js</span> from this browser. Nothing is sent to your server.</div>
+          </span>
+          <span class="act"><span class="btn small">Test</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="wp-card">
+      <div class="wp-field"><span class="lab">Pixel ID</span><span><input class="wp-in" value="BP-1234567890-01"> <div class="desc" style="margin-top:5px">Format <span class="mono">BP-0000000000-00</span></div></span></div>
+      <div class="wp-field"><span class="lab">Enable Full Pixel Tracking</span><span><input type="checkbox" checked> Track e-commerce events</span></div>
+      <div class="wp-field" style="border-bottom:0"><span class="lab">Debug Mode</span><span><input type="checkbox"> Log events to the browser console</span></div>
+    </div>
+    <span class="btn primary">Save Changes</span>
+  </div>
+
+  <p class="cap" style="margin-top:26px">2 &nbsp;·&nbsp; Health panel — the healthy state, collapsed</p>
+  <div class="wp-screen">
+    <div class="wp-card" style="margin-bottom:0">
+      <div class="wp-card-head ok">
+        <div class="wp-status"><span class="dot ok"></span> Barion Pixel is healthy — consent handled by Complianz</div>
+        <div><span class="btn link small">Show 9 checks</span> &nbsp; <span class="btn small">Re-check</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="cap" style="margin-top:26px">3 &nbsp;·&nbsp; Consent wizard — the three steps</p>
+  <div class="grid3">
+
+    <div class="modal-wrap">
+      <div class="modal">
+        <div class="modal-head"><h3>Set up consent</h3><span class="dim">&times;</span></div>
+        <div class="modal-body">
+          <p style="margin-top:0">Barion may only receive marketing data after the visitor agrees. The plugin needs a reliable signal for <b>accept</b> and for <b>reject</b>.</p>
+          <p class="cap" style="margin-top:16px">What we found on your site</p>
+          <div class="radio sel">
+            <input type="radio" checked>
+            <span><b>Teach the plugin my banner</b><div class="desc">You open your shop, click Accept, then Reject. The plugin records what changes. Works with any banner.</div></span>
+          </div>
+          <div class="radio">
+            <input type="radio">
+            <span><b>Use WP Consent API</b> <span class="pill">not usable</span><div class="desc">Active, but no banner plugin sets a consent type.</div></span>
+          </div>
+          <div class="radio">
+            <input type="radio">
+            <span><b>Do nothing</b><div class="desc">Consent is never granted. Full tracking collects no marketing data.</div></span>
+          </div>
+        </div>
+        <div class="modal-foot"><span class="steps"><span class="s on">1</span><span class="s">2</span><span class="s">3</span></span><span><span class="btn small">Cancel</span> <span class="btn primary small">Next</span></span></div>
+      </div>
+    </div>
+
+    <div class="modal-wrap">
+      <div class="modal">
+        <div class="modal-head"><h3>Record the accept signal</h3><span class="dim">&times;</span></div>
+        <div class="modal-body">
+          <p style="margin-top:0">Your shop opens in a new tab in recording mode. On that tab, <b>accept</b> cookies in your banner. Then come back here.</p>
+          <div class="rec">
+            <div class="log">&#9679; Recording&hellip; waiting for the banner</div>
+            <div class="log dim" style="margin-top:9px">cookie &nbsp;<span class="mono">cookieyes-consent</span> &rarr; <span class="mono">&hellip;advertisement:yes</span></div>
+            <div class="log dim">event &nbsp;&nbsp;<span class="mono">cookieyes_consent_update</span></div>
+          </div>
+          <p class="desc" style="margin-top:12px">The recorder watches cookie changes and dispatched events only. It runs for you alone and never for your visitors.</p>
+        </div>
+        <div class="modal-foot"><span class="steps"><span class="s">1</span><span class="s on">2</span><span class="s">3</span></span><span><span class="btn small">Back</span> <span class="btn primary small">Open my shop</span></span></div>
+      </div>
+    </div>
+
+    <div class="modal-wrap">
+      <div class="modal">
+        <div class="modal-head"><h3>Confirm the trigger</h3><span class="dim">&times;</span></div>
+        <div class="modal-body">
+          <p style="margin-top:0">Grant consent to Barion when this is true:</p>
+          <div class="rec" style="border-style:solid">
+            <div><b>Cookie</b> <span class="mono">cookieyes-consent</span></div>
+            <div style="margin-top:7px"><b>contains</b> <span class="mono">advertisement:yes</span></div>
+            <div style="margin-top:7px"><b>re-check on event</b> <span class="mono">cookieyes_consent_update</span></div>
+            <div style="margin-top:10px"><span class="btn link small">Edit by hand</span></div>
+          </div>
+          <div class="wp-row" style="padding:12px 0 0"><span class="ico ok">&#10003;</span><span class="body"><b>Accept recorded</b></span></div>
+          <div class="wp-row" style="padding:6px 0 0;border:0"><span class="ico warn">!</span><span class="body"><b>Reject not recorded yet</b><div class="desc">Barion requires <span class="mono">rejectConsent</span> too. Record it before you save.</div></span></div>
+        </div>
+        <div class="modal-foot"><span class="steps"><span class="s">1</span><span class="s">2</span><span class="s on">3</span></span><span><span class="btn small">Record reject</span> <span class="btn primary small" style="opacity:.5">Save</span></span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
