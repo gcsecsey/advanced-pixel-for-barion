@@ -12,6 +12,8 @@ Skripta osnovnog piksela se uvek učitava radi sprečavanja prevara, ali marketi
 
 **Važno:** Tvoj baner sa kolačićima mora nuditi i opciju prihvatanja i opciju odbijanja. "Zid kolačića" (samo prihvatanje) nije u skladu sa GDPR od 2020. godine i Barion će ga odbiti.
 
+Barionova sopstvena pravila o tome: [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements) (na engleskom).
+
 Dodatak podržava tri nivoa integracije saglasnosti, koji se proveravaju sledećim redom:
 
 1. **WP Consent API** (preporučeno) — univerzalno, radi sa svim glavnim dodacima za kolačiće

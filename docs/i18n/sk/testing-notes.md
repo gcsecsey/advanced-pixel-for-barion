@@ -6,22 +6,22 @@
 
 ## Zvláštnosti validácie bp.js za behu
 
-Skript `bp.js` od Barion vykonáva validáciu údajov udalostí na strane klienta. V niektorých prípadoch sa pravidlá validácie líšia od referenčnej dokumentácie Barion API. Tieto zvláštnosti boli objavené počas testovania na staging prostredí.
+Skript `bp.js` od Barion vykonáva validáciu údajov udalostí na strane klienta. V niektorých prípadoch sa pravidlá validácie líšia od [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference). Tieto zvláštnosti boli objavené počas testovania na staging prostredí.
 
 ### totalItemPrice: odmietnuté pre contentView, povinné pre položky contents
 
-- **contentView** (plochá udalosť): bp.js **odmietne** `totalItemPrice` s chybou `Invalid key totalItemPrice in contentView event`, aj keď referencia API ho uvádza ako povinné pole.
-- **initiateCheckout** a **purchase** položky `contents`: bp.js **vyžaduje** `totalItemPrice` s chybou `Mandatory key totalItemPrice is missing from contents event`, ak je vynechané.
+- **contentView** (plochá udalosť): bp.js **odmietne** `totalItemPrice` s chybou `Invalid key totalItemPrice in contentView event`. Referencia API sa s tým zhoduje — `totalItemPrice` nie je vlastnosťou udalosti contentView.
+- **initiateCheckout** a **purchase** položky `contents`: bp.js **vyžaduje** `totalItemPrice` s chybou `Mandatory key totalItemPrice is missing from contents event`, ak je vynechané. Referencia API ho pre položky contents tiež uvádza ako povinné.
 
 **Pravidlo palca:** `totalItemPrice` je neplatné pre ploché udalosti, ale povinné vo vnútri položiek poľa `contents`.
 
 ### unit je povinné v položkách contents
 
-bp.js vyžaduje `unit` v položkách poľa `contents` pre `initiateCheckout` a `purchase`. Ak je vynechané, produkuje: `Mandatory key unit is missing from contents event`.
+bp.js vyžaduje `unit` v položkách poľa `contents` pre `initiateCheckout` a `purchase`, rovnako ako referencia API. Ak je vynechané, produkuje: `Mandatory key unit is missing from contents event`.
 
-### step je povinné pre udalosti pokladne
+### step
 
-Pole `step` je povinné pre `addToCart`, `initiateCheckout` a `purchase`. Dokumentácia Barion odporúča používať `1` pre pokladne s jedným krokom.
+Plugin odosiela `step: 1` pre `addToCart`, `initiateCheckout` a `purchase`. Referencia API uvádza `step` ako povinné pre `initiateCheckout` a `purchase` a ako voliteľné pre `addToCart`. Barion dokumentuje `1` ako začiatočný krok pokladne; pre `purchase` referencia žiada najvyššie číslo kroku, ktoré používaš — pri pokladni s jedným krokom tiež `1`.
 
 ---
 
@@ -91,6 +91,7 @@ bp.js zaznamenáva vlastné chyby validácie s numerickým prefixom. Bežné chy
 4. Skontroluj, či pole `contents` obsahuje správne položky s `unit`, `unitPrice`, `totalItemPrice`
 5. Skontroluj, či `revenue` je medzisúčet + daň (bez dopravy)
 6. Skontroluj, či je prítomné `step: 1`
+7. Zadaj do formulára pokladne fakturačný e-mail a over, že sa `[Barion Pixel] setEncryptedEmail sent` objaví raz pre každú odlišnú platnú adresu — nie pri každom stlačení klávesu
 
 ### Dokončenie objednávky (purchase + setEncryptedEmail)
 

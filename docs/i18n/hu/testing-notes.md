@@ -6,22 +6,22 @@
 
 ## bp.js futásidejű validációs sajátosságok
 
-A Barion `bp.js` szkriptje kliensoldalú validációt végez az eseményadatokon. Bizonyos esetekben a validációs szabályok eltérnek a Barion API referencia dokumentációjától. Ezeket a sajátosságokat staging tesztelés során fedezték fel.
+A Barion `bp.js` szkriptje kliensoldalú validációt végez az eseményadatokon. Bizonyos esetekben a validációs szabályok eltérnek a [Barion Pixel API referenciától](https://docs.barion.com/Barion-Pixel-API-referencia). Ezeket a sajátosságokat staging tesztelés során fedezték fel.
 
 ### totalItemPrice: contentView esetén elutasítva, contents elemekben szükséges
 
-- **contentView** (sima esemény): A bp.js **elutasítja** a `totalItemPrice` mezőt a következő hibával: `Invalid key totalItemPrice in contentView event`, még akkor is, ha az API referencia kötelező mezőként listázza.
-- **initiateCheckout** és **purchase** `contents` elemek: A bp.js **megköveteli** a `totalItemPrice` mezőt, és ha hiányzik, a következő hibát adja: `Mandatory key totalItemPrice is missing from contents event`.
+- **contentView** (sima esemény): A bp.js **elutasítja** a `totalItemPrice` mezőt a következő hibával: `Invalid key totalItemPrice in contentView event`. Az API referencia ezzel egyezik — a `totalItemPrice` nem contentView tulajdonság.
+- **initiateCheckout** és **purchase** `contents` elemek: A bp.js **megköveteli** a `totalItemPrice` mezőt, és ha hiányzik, a következő hibát adja: `Mandatory key totalItemPrice is missing from contents event`. Az API referencia is kötelezőként listázza a contents elemeknél.
 
 **Ökölszabály:** A `totalItemPrice` érvénytelen a sima eseményeknél, de kötelező a `contents` tömb elemein belül.
 
 ### unit kötelező a contents elemekben
 
-A bp.js megköveteli a `unit` mezőt a `contents` tömb elemekben az `initiateCheckout` és `purchase` eseményeknél. Ha hiányzik, a következő hibát produkálja: `Mandatory key unit is missing from contents event`.
+A bp.js megköveteli a `unit` mezőt a `contents` tömb elemekben az `initiateCheckout` és `purchase` eseményeknél, ahogy az API referencia is. Ha hiányzik, a következő hibát produkálja: `Mandatory key unit is missing from contents event`.
 
-### step kötelező a checkout eseményeknél
+### step
 
-A `step` mező kötelező az `addToCart`, `initiateCheckout` és `purchase` eseményeknél. A Barion dokumentáció az egyoldalas pénztárnál az `1` értéket javasolja.
+A bővítmény `step: 1` értéket küld az `addToCart`, `initiateCheckout` és `purchase` eseményeknél. Az API referencia a `step` mezőt az `initiateCheckout` és `purchase` eseményeknél kötelezőként, az `addToCart` eseménynél opcionálisként listázza. A Barion az `1` értéket a pénztár kezdő lépéseként dokumentálja; a `purchase` eseménynél a referencia a használt legnagyobb lépésszámot kéri — ez egyoldalas pénztárnál szintén `1`.
 
 ---
 
@@ -91,6 +91,7 @@ A bp.js numerikus előtaggal naplózza saját validációs hibáit. Leggyakoribb
 4. Ellenőrizd, hogy a `contents` tömb helyes elemeket tartalmaz `unit`, `unitPrice`, `totalItemPrice` mezőkkel
 5. Ellenőrizd, hogy a `revenue` értéke részösszeg + adó (szállítás nélkül)
 6. Ellenőrizd a `step: 1` jelenlétét
+7. Írj be egy számlázási e-mail-címet a pénztár űrlapjába, és ellenőrizd, hogy a `[Barion Pixel] setEncryptedEmail sent` üzenet érvényes címenként egyszer jelenik meg — nem minden leütésnél
 
 ### Rendelés teljesítése (purchase + setEncryptedEmail)
 

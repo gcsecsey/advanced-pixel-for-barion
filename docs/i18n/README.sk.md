@@ -63,6 +63,17 @@ Podrobná dokumentácia je dostupná v priečinku [`sk/`](sk/):
 
 Dokumentácia je tiež dostupná v [Magyar](../hu/), [Čeština](../cs/), [Deutsch](../de/), [Hrvatski](../hr/), [Română](../ro/), [Slovenščina](../sl/) a [Srpski](../sr/).
 
+### Dokumentácia Barionu
+
+Vlastné príručky Barionu k nastaveniu pixela (v angličtine). Voľba **Enable Full Pixel Tracking** v tomto plugine zodpovedá plnému (Full) Barion Pixelu:
+
+- [Getting started with the Barion Pixel](https://docs.barion.com/Getting_started_with_the_Barion_Pixel)
+- [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+- [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
+- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+
 ## Kompatibilita
 
 - **WooCommerce**: Vyžaduje sa pre úplné sledovanie udalostí (základný pixel funguje aj bez neho)
@@ -82,6 +93,19 @@ Dokumentácia je tiež dostupná v [Magyar](../hu/), [Čeština](../cs/), [Deuts
 GPL-2.0-or-later — podrobnosti nájdeš v [LICENSE](../../LICENSE).
 
 ## Zoznam zmien
+
+### 1.0.3
+- Opravené: `setEncryptedEmail` sa pri jednom načítaní stránky pokladne odoslal viackrát
+- Opravené: bp.js odmietal e-maily so znakom `+` v lokálnej časti alebo s TLD dlhšou než štyri písmená (`.museum`, `.online`) chybou `Format of e-mail address or hash is invalid`. Plugin teraz e-mail zahashuje algoritmom SHA-1 priamo v prehliadači, než ho odovzdá bp.js — Barion Pixel API predpočítaný hash namiesto obyčajnej adresy prijíma
+- Opravené: čiastočne zadaná hodnota (napríklad `x@y`) sa už do bp.js neposiela
+- Opravené: volanie zodpovedá dokumentácii Barionu — `bp('identity', 'setEncryptedEmail', ...)` (predtým `'identify'`)
+
+Verziu 1.0.2 pred vydaním nahradila verzia 1.0.3; jej opravy sú uvedené vyššie.
+
+### 1.0.1
+- Opravené: neodosielali sa žiadne udalosti pixela — skript udalostí bol zaradený až po tom, čo `wp_print_footer_scripts` už prebehol
+- Opravené: automatická detekcia súhlasu s cookies teraz beží až po `DOMContentLoaded`, takže vidí aj globálne premenné pluginov pre súhlas, ktoré sa načítavajú neskôr
+- Nové: `setEncryptedEmail` sa teraz odosiela aj na stránke pokladne — pri prihlásených používateľoch pri načítaní a pri zadaní platného fakturačného e-mailu
 
 ### 1.0.0
 - Prvé vydanie

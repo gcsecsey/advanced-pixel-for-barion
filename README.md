@@ -65,6 +65,17 @@ Detailed documentation is available in the [`docs/`](docs/) folder:
 
 Documentation is also available in [Magyar](docs/i18n/hu/), [Čeština](docs/i18n/cs/), [Slovenčina](docs/i18n/sk/), [Deutsch](docs/i18n/de/), [Hrvatski](docs/i18n/hr/), [Română](docs/i18n/ro/), [Slovenščina](docs/i18n/sl/), and [Srpski](docs/i18n/sr/).
 
+### Barion documentation
+
+Barion's own guides for setting up the pixel. The plugin's **Enable Full Pixel Tracking** option corresponds to Barion's Full (advanced) Barion Pixel:
+
+- [Getting started with the Barion Pixel](https://docs.barion.com/Getting_started_with_the_Barion_Pixel)
+- [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+- [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
+- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+
 ## Compatibility
 
 - **WooCommerce**: Required for full event tracking (base pixel works without it)
@@ -84,6 +95,19 @@ Documentation is also available in [Magyar](docs/i18n/hu/), [Čeština](docs/i18
 GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
 
 ## Changelog
+
+### 1.0.3
+- Fixed: `setEncryptedEmail` fired several times on a single checkout page load
+- Fixed: bp.js rejected emails with `+` in the local part, or with a TLD longer than four letters (`.museum`, `.online`), with `Format of e-mail address or hash is invalid`. The plugin now SHA-1 hashes the email in the browser before passing it to bp.js — the Barion Pixel API accepts a pre-computed hash in place of a plain address
+- Fixed: partial input (for example `x@y`) is no longer forwarded to bp.js
+- Fixed: call `bp('identity', 'setEncryptedEmail', ...)` as the Barion documentation specifies (was `'identify'`)
+
+Version 1.0.2 was superseded by 1.0.3 before release; its fixes are listed above.
+
+### 1.0.1
+- Fixed: no pixel events were sent at all — the events script was enqueued after `wp_print_footer_scripts` had already run
+- Fixed: cookie consent auto-detection now runs after `DOMContentLoaded`, so it can see globals set by consent plugins that load late
+- Added: `setEncryptedEmail` also fires on the checkout page — on load for logged-in users, and when a customer enters a valid billing email
 
 ### 1.0.0
 - Initial release

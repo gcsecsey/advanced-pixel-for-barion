@@ -8,6 +8,8 @@ The base pixel script always loads for fraud prevention, but no marketing data i
 
 **Important:** Your cookie banner must offer both an accept and a reject option. A "cookie wall" (accept-only) is not GDPR compliant since 2020 and will be rejected by Barion.
 
+Barion's own rules for this are in [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements).
+
 The plugin supports three tiers of consent integration, checked in order:
 
 1. **WP Consent API** (recommended) — universal, works with all major cookie plugins

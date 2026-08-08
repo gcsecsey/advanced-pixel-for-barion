@@ -12,6 +12,8 @@ Skript osnovnega piksla se vedno naloži za preprečevanje goljufij, toda nobeni
 
 **Pomembno:** Vaš pasici za piškotke mora ponuditi tako možnost sprejemanja kot zavrnitve. "Zid piškotkov" (samo sprejemanje) ni v skladu z GDPR od leta 2020 in ga bo Barion zavrnil.
 
+Barionova lastna pravila o tem: [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements) (v angleščini).
+
 Vtičnik podpira tri ravni integracije soglasja, preverjene v naslednjem vrstnem redu:
 
 1. **WP Consent API** (priporočeno) — univerzalno, deluje z vsemi večjimi vtičniki za piškotke

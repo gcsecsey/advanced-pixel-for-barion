@@ -12,6 +12,8 @@ Scriptul pixelului de bază se încarcă întotdeauna pentru prevenirea fraudei,
 
 **Important:** Bannerul tău de cookie-uri trebuie să ofere atât o opțiune de acceptare, cât și una de refuz. Un „zid de cookie-uri" (numai acceptare) nu este conform cu GDPR din 2020 și va fi respins de Barion.
 
+Regulile proprii ale Barion în această privință: [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements) (în limba engleză).
+
 Plugin-ul suportă trei niveluri de integrare a consimțământului, verificate în ordine:
 
 1. **WP Consent API** (recomandat) — universal, funcționează cu toate plugin-urile majore de cookie

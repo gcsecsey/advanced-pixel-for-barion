@@ -63,6 +63,17 @@ Detaillierte Dokumentation ist im Ordner [`de/`](de/) verfügbar:
 
 Die Dokumentation ist auch verfügbar auf [Magyar](hu/), [Čeština](cs/), [Slovenčina](sk/), [Deutsch](de/), [Hrvatski](hr/), [Română](ro/), [Slovenščina](sl/) und [Srpski](sr/).
 
+### Barion-Dokumentation
+
+Barions eigene Anleitungen zur Einrichtung des Pixels (auf Englisch). Die Option **Enable Full Pixel Tracking** in diesem Plugin entspricht dem vollständigen (Full) Barion Pixel:
+
+- [Getting started with the Barion Pixel](https://docs.barion.com/Getting_started_with_the_Barion_Pixel)
+- [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+- [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
+- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+
 ## Kompatibilität
 
 - **WooCommerce**: Erforderlich für vollständiges Event-Tracking (Basis-Pixel funktioniert auch ohne)
@@ -82,6 +93,19 @@ Die Dokumentation ist auch verfügbar auf [Magyar](hu/), [Čeština](cs/), [Slov
 GPL-2.0-or-later — siehe [LICENSE](../../LICENSE) für Details.
 
 ## Änderungsprotokoll
+
+### 1.0.3
+- Behoben: `setEncryptedEmail` wurde bei einem einzigen Aufruf der Kassenseite mehrfach gesendet
+- Behoben: bp.js lehnte E-Mail-Adressen mit `+` im lokalen Teil oder mit einer TLD von mehr als vier Buchstaben (`.museum`, `.online`) mit `Format of e-mail address or hash is invalid` ab. Das Plugin bildet die Adresse jetzt im Browser als SHA-1-Hash, bevor sie an bp.js übergeben wird — die Barion-Pixel-API akzeptiert einen vorberechneten Hash anstelle der Klartextadresse
+- Behoben: unvollständige Eingaben (zum Beispiel `x@y`) werden nicht mehr an bp.js weitergegeben
+- Behoben: Aufruf gemäß Barion-Dokumentation als `bp('identity', 'setEncryptedEmail', ...)` (zuvor `'identify'`)
+
+Version 1.0.2 wurde vor der Veröffentlichung durch 1.0.3 ersetzt; ihre Korrekturen sind oben aufgeführt.
+
+### 1.0.1
+- Behoben: es wurden überhaupt keine Pixel-Events gesendet — das Event-Skript wurde eingereiht, nachdem `wp_print_footer_scripts` bereits ausgeführt war
+- Behoben: die automatische Consent-Erkennung läuft jetzt nach `DOMContentLoaded` und sieht damit auch Globals von spät ladenden Consent-Plugins
+- Neu: `setEncryptedEmail` wird auch auf der Kassenseite gesendet — bei angemeldeten Benutzern beim Laden und sobald eine gültige Rechnungs-E-Mail eingegeben wird
 
 ### 1.0.0
 - Erstveröffentlichung

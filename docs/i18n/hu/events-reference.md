@@ -11,6 +11,8 @@ A bővítmény két működési módot támogat:
 - **Alap Pixel** (mindig aktív, ha a Pixel azonosító be van állítva): Betölti a `bp.js` fájlt és minden oldalon automatikusan aktiválja a `pageView` eseményt. Csalás megelőzésre szolgál.
 - **Teljes követés** (opcionális, az adminisztrációs felületen kapcsolható): E-kereskedelmi eseménykövetést ad a marketing analitikához és az alacsonyabb Barion jutalékkulcshoz.
 
+A Barion saját referenciája ezekhez az eseményekhez: [Barion Pixel API referencia](https://docs.barion.com/Barion-Pixel-API-referencia) és [A Teljes (Full) Barion Pixel implementációja](https://docs.barion.com/A-Teljes-%28Full%29-Barion-Pixel-implementacioja).
+
 ### Esemény összefoglaló
 
 | Esemény | Mód | bp() hívás | Aktiválás |
@@ -22,7 +24,7 @@ A bővítmény két működési módot támogat:
 | addToCart | Teljes | `bp('track', 'addToCart', data)` | Kosárba helyezési művelet |
 | initiateCheckout | Teljes | `bp('track', 'initiateCheckout', data)` | Pénztár oldal betöltése |
 | purchase | Teljes | `bp('track', 'purchase', data)` | Köszönő oldal |
-| setEncryptedEmail | Teljes | `bp('identify', 'setEncryptedEmail', email)` | Köszönő oldal |
+| setEncryptedEmail | Teljes | `bp('identity', 'setEncryptedEmail', hash)` | Köszönő oldal és e-mail megadása a pénztárban |
 
 ---
 
@@ -62,7 +64,7 @@ Részletekért lásd a [Cookie-hozzájárulás integráció](cookie-consent.md) 
 | unit | string | `'pcs'` |
 | unitPrice | float | Termék ára |
 
-> **Megjegyzés:** A Barion API referencia a `totalItemPrice` mezőt kötelezőként listázza ennél az eseménynél, de a bp.js futásidőben elutasítja: "Invalid key totalItemPrice in contentView event." Ez a mező szándékosan ki van hagyva.
+> **Megjegyzés:** A `totalItemPrice` nem contentView tulajdonság. A bp.js futásidőben elutasítja: "Invalid key totalItemPrice in contentView event", és az API referencia sem listázza ennél az eseménynél. Helyette a `contents` tömb elemein belül kötelező.
 
 ---
 
@@ -154,13 +156,15 @@ Részletekért lásd a [Cookie-hozzájárulás integráció](cookie-consent.md) 
 
 ### setEncryptedEmail
 
-**Aktiválás:** Köszönő oldal (`woocommerce_thankyou` hook)
+**Aktiválás:** Köszönő oldal (`woocommerce_thankyou` hook), valamint a pénztároldal — bejelentkezett felhasználóknál egyszer betöltéskor, majd valahányszor a vásárló másik érvényes számlázási e-mail-címet ad meg.
 
-**bp() hívás:** `bp('identify', 'setEncryptedEmail', email)`
+**bp() hívás:** `bp('identity', 'setEncryptedEmail', hash)`
 
-A számlázási e-mail-t kisbetűssé alakítja küldés előtt. A Barion `bp.js` automatikusan kezeli az SHA1 hash-elést — a bővítmény a plain e-mail-t küldi, nem a hash-t.
+Az e-mail-cím kisbetűssé alakítva, SHA-1 kivonatként jut el a `bp.js`-hez; a kivonat a böngészőben készül (Web Crypto API). A Barion API a sima cím helyett elfogadja az előre kiszámított SHA-1 kivonatot, az előzetes kivonatolás pedig megkerüli a `bp.js` saját e-mail-mintáját, amely elutasítja a helyi részben lévő `+` jelet és a négy betűnél hosszabb TLD-ket. A már 40 karakteres hexadecimális kivonatot a bővítmény változatlanul továbbadja; ha a Web Crypto API nem érhető el (nem HTTPS környezet), a sima e-mail-cím megy el.
 
-Csak akkor aktiválódik, ha a rendeléshez tartozik számlázási e-mail cím.
+Azokat az értékeket, amelyek sem érvényes e-mail-címnek ([HTML5 szabvány](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)), sem SHA-1 kivonatnak nem felelnek meg, a bővítmény soha nem küldi el, így a pénztárban a részleges gépelés nem jut el a `bp.js`-hez.
+
+A köszönő oldalon csak akkor aktiválódik, ha a rendeléshez tartozik számlázási e-mail-cím.
 
 ---
 
@@ -169,6 +173,6 @@ Csak akkor aktiválódik, ha a rendeléshez tartozik számlázási e-mail cím.
 | Esemény | Ok |
 |---------|----|
 | `customEvent` | Nem szükséges a standard e-kereskedelmi követéshez |
-| `initiatePayment` | A Barion dokumentáció szerint valósítsd meg a `purchase` VAGY az `initiatePayment` eseményt — mi a `purchase`-t használjuk |
-| `setPhoneNumber` | Opcionális; a telefonszám nem érhető el megbízhatóan minden WooCommerce folyamatban |
+| `initiatePurchase` | A Barion kötelező eseménylistája szerint az `initiatePurchase` VAGY a `purchase` eseményt kell megvalósítani — mi a `purchase`-t használjuk |
+| `setEncryptedPhone` | Opcionális; a telefonszám nem érhető el megbízhatóan minden WooCommerce folyamatban |
 | `search` | Opcionális; nem része a kötelező eseménykészletnek |

@@ -11,6 +11,8 @@ Vtičnik podpira dva načina delovanja:
 - **Osnovni piksel** (vedno aktiven, ko je konfiguriran ID piksla): Naloži `bp.js` in samodejno sproži `pageView` na vsaki strani. Uporablja se za preprečevanje goljufij.
 - **Popolno sledenje** (izbirno, preklop v skrbniškem vmesniku): Dodaja sledenje dogodkov e-trgovine za tržno analitiko in nižje provizije Barion.
 
+Barionova lastna referenca za te dogodke: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) in [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (v angleščini).
+
 ### Povzetek dogodkov
 
 | Dogodek | Način | Klic bp() | Sprožilec |
@@ -22,7 +24,7 @@ Vtičnik podpira dva načina delovanja:
 | addToCart | Polni | `bp('track', 'addToCart', data)` | Akcija dodajanja v košarico |
 | initiateCheckout | Polni | `bp('track', 'initiateCheckout', data)` | Nalaganje strani blagajne |
 | purchase | Polni | `bp('track', 'purchase', data)` | Stran zahvale |
-| setEncryptedEmail | Polni | `bp('identify', 'setEncryptedEmail', email)` | Stran zahvale |
+| setEncryptedEmail | Polni | `bp('identity', 'setEncryptedEmail', hash)` | Stran zahvale in vnos e-pošte na blagajni |
 
 ---
 
@@ -62,7 +64,7 @@ Glejte [Integracija soglasja s piškotki](cookie-consent.md) za podrobnosti.
 | unit | string | `'pcs'` |
 | unitPrice | float | Cena izdelka |
 
-> **Opomba:** Referenca Barion API navaja `totalItemPrice` kot obvezno za ta dogodek, toda bp.js ga zavrne ob izvajanju z napako "Invalid key totalItemPrice in contentView event." To polje je namerno izpuščeno.
+> **Opomba:** `totalItemPrice` ni lastnost dogodka contentView. bp.js ga ob izvajanju zavrne z napako "Invalid key totalItemPrice in contentView event", prav tako ga referenca API za ta dogodek ne navaja. Namesto tega je obvezen znotraj postavk niza `contents`.
 
 ---
 
@@ -154,13 +156,15 @@ Glejte [Integracija soglasja s piškotki](cookie-consent.md) za podrobnosti.
 
 ### setEncryptedEmail
 
-**Sprožilec:** Stran zahvale (kavelj `woocommerce_thankyou`)
+**Sprožilec:** Stran zahvale (kavelj `woocommerce_thankyou`) in stran blagajne — pri prijavljenih uporabnikih enkrat ob nalaganju, nato vsakič, ko kupec vnese drug veljaven e-poštni naslov za račun.
 
-**Klic bp():** `bp('identify', 'setEncryptedEmail', email)`
+**Klic bp():** `bp('identity', 'setEncryptedEmail', hash)`
 
-E-poštni naslov za zaračunavanje je pred pošiljanjem pretvorjen v male črke. Barionov `bp.js` samodejno obravnava zgoščevanje SHA1 — vtičnik pošlje navaden e-poštni naslov, ne zgoščene vrednosti.
+Naslov se pretvori v male črke in se v brskalniku zgosti z algoritmom SHA-1 (Web Crypto API), preden doseže `bp.js`. Barion API namesto navadnega naslova sprejme vnaprej izračunano zgoščeno vrednost SHA-1, predhodno zgoščevanje pa se izogne lastnemu regularnemu izrazu za e-pošto v `bp.js`, ki zavrača `+` v lokalnem delu in TLD, daljše od štirih črk. Vrednost, ki je že 40-znakovna šestnajstiška zgoščena vrednost, se posreduje nespremenjena; če Web Crypto API ni na voljo (okolje brez HTTPS), se pošlje navaden naslov.
 
-Sproži se samo, ko ima naročilo e-poštni naslov za zaračunavanje.
+Vrednosti, ki niso niti veljaven e-poštni naslov (po [specifikaciji HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) niti zgoščena vrednost SHA-1, se nikoli ne pošljejo, zato delno tipkanje na blagajni ne doseže `bp.js`.
+
+Na strani zahvale se sproži samo, ko ima naročilo e-poštni naslov za zaračunavanje.
 
 ---
 
@@ -169,6 +173,6 @@ Sproži se samo, ko ima naročilo e-poštni naslov za zaračunavanje.
 | Dogodek | Razlog |
 |---------|--------|
 | `customEvent` | Ni potreben za standardno sledenje e-trgovine |
-| `initiatePayment` | Dokumentacija Barion pravi, da implementirajte `purchase` ALI `initiatePayment` — mi uporabljamo `purchase` |
-| `setPhoneNumber` | Izbirno; telefonska številka ni zanesljivo na voljo v vseh tokih WooCommerce |
+| `initiatePurchase` | Barionov seznam obveznih dogodkov pravi, da implementirajte `initiatePurchase` ALI `purchase` — mi uporabljamo `purchase` |
+| `setEncryptedPhone` | Izbirno; telefonska številka ni zanesljivo na voljo v vseh tokih WooCommerce |
 | `search` | Izbirno; ni del obveznega nabora dogodkov |

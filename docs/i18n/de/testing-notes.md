@@ -6,22 +6,22 @@
 
 ## bp.js Laufzeit-Validierungseigenheiten
 
-Barions `bp.js`-Skript führt eine clientseitige Validierung der Event-Daten durch. In einigen Fällen weichen die Validierungsregeln von der Barion-API-Referenzdokumentation ab. Diese Eigenheiten wurden beim Staging-Test entdeckt.
+Barions `bp.js`-Skript führt eine clientseitige Validierung der Event-Daten durch. In einigen Fällen weichen die Validierungsregeln von der [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) ab. Diese Eigenheiten wurden beim Staging-Test entdeckt.
 
 ### totalItemPrice: abgelehnt für contentView, erforderlich für contents-Artikel
 
-- **contentView** (flaches Event): bp.js **lehnt** `totalItemPrice` mit dem Fehler `Invalid key totalItemPrice in contentView event` ab, obwohl die API-Referenz es als erforderliches Feld auflistet.
-- **initiateCheckout** und **purchase** `contents`-Artikel: bp.js **erfordert** `totalItemPrice` mit dem Fehler `Mandatory key totalItemPrice is missing from contents event`, wenn es weggelassen wird.
+- **contentView** (flaches Event): bp.js **lehnt** `totalItemPrice` mit dem Fehler `Invalid key totalItemPrice in contentView event` ab. Die API-Referenz stimmt damit überein — `totalItemPrice` ist keine contentView-Eigenschaft.
+- **initiateCheckout** und **purchase** `contents`-Artikel: bp.js **erfordert** `totalItemPrice` mit dem Fehler `Mandatory key totalItemPrice is missing from contents event`, wenn es weggelassen wird. Die API-Referenz führt es für contents-Artikel ebenfalls als erforderlich auf.
 
 **Faustregel:** `totalItemPrice` ist für flache Events ungültig, aber innerhalb von `contents`-Array-Artikeln erforderlich.
 
 ### unit ist in contents-Artikeln erforderlich
 
-bp.js erfordert `unit` in den `contents`-Array-Artikeln für `initiateCheckout` und `purchase`. Das Weglassen führt zu: `Mandatory key unit is missing from contents event`.
+bp.js erfordert `unit` in den `contents`-Array-Artikeln für `initiateCheckout` und `purchase`, ebenso wie die API-Referenz. Das Weglassen führt zu: `Mandatory key unit is missing from contents event`.
 
-### step ist für Checkout-Events erforderlich
+### step
 
-Das Feld `step` ist für `addToCart`, `initiateCheckout` und `purchase` obligatorisch. Die Barion-Dokumentation empfiehlt die Verwendung von `1` für einstufige Checkouts.
+Das Plugin sendet `step: 1` für `addToCart`, `initiateCheckout` und `purchase`. Die API-Referenz führt `step` als erforderlich für `initiateCheckout` und `purchase` und als optional für `addToCart` auf. Barion dokumentiert `1` als Schritt der Checkout-Initiierung; für `purchase` verlangt die Referenz die höchste verwendete Schrittnummer — bei einem einstufigen Checkout ebenfalls `1`.
 
 ---
 
@@ -91,6 +91,7 @@ bp.js protokolliert seine eigenen Validierungsfehler mit einem numerischen Präf
 4. Prüfe, ob das `contents`-Array korrekte Artikel mit `unit`, `unitPrice`, `totalItemPrice` enthält
 5. Prüfe, ob `revenue` Zwischensumme + Steuer ist (ohne Versand)
 6. Prüfe, ob `step: 1` vorhanden ist
+7. Gib eine Rechnungs-E-Mail-Adresse im Kassenformular ein und prüfe, ob `[Barion Pixel] setEncryptedEmail sent` einmal pro unterschiedlicher gültiger Adresse erscheint — nicht bei jedem Tastendruck
 
 ### Bestellabschluss (purchase + setEncryptedEmail)
 
