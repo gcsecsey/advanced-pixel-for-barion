@@ -44,8 +44,6 @@ add_filter('wp_consent_api_registered_' . plugin_basename(__FILE__), '__return_t
 // Initialize plugin
 function wc_barion_pixel_init() {
     WC_Barion_Pixel::get_instance();
-    if (is_admin()) {
-        WC_Barion_Admin::get_instance();
-    }
+    WC_Barion_Admin::get_instance();
 }
 add_action('plugins_loaded', 'wc_barion_pixel_init');

@@ -50,6 +50,7 @@ class WC_Barion_Admin {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        add_action('wp_enqueue_scripts', array($this, 'maybe_enqueue_recorder'), 1);
     }
 
     /**
@@ -251,6 +252,35 @@ class WC_Barion_Admin {
             WC_BARION_PIXEL_URL . 'assets/css/barion-admin.css',
             array(),
             WC_BARION_PIXEL_VERSION
+        );
+    }
+
+    /**
+     * Load the consent recorder on the front end, for an administrator who came
+     * from the setup wizard. It never loads for a visitor.
+     *
+     * @return void
+     */
+    public function maybe_enqueue_recorder() {
+        if (!isset($_GET['apb_record_consent'])) {
+            return;
+        }
+
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        $nonce = sanitize_text_field(wp_unslash($_GET['apb_record_consent']));
+        if (!wp_verify_nonce($nonce, 'apb_record_consent')) {
+            return;
+        }
+
+        wp_enqueue_script(
+            'wc-barion-consent-recorder',
+            WC_BARION_PIXEL_URL . 'assets/js/barion-consent-recorder.js',
+            array(),
+            WC_BARION_PIXEL_VERSION,
+            false
         );
     }
 
