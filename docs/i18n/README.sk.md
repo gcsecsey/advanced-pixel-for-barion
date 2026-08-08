@@ -73,7 +73,7 @@ Dokumentácia je tiež dostupná v [Magyar](../hu/), [Čeština](../cs/), [Deuts
 ## Požiadavky
 
 - WordPress 5.0 alebo vyšší
-- PHP 7.2 alebo vyšší
+- PHP 7.4 alebo vyšší
 - WooCommerce 5.0+ (pre úplné sledovanie udalostí)
 - Voliteľné: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) pre univerzálnu podporu súhlasu s cookies
 

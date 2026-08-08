@@ -11,7 +11,7 @@
 | Verzió | Állapot |
 |--------|---------|
 | WooCommerce 5.0+ | Támogatott |
-| WooCommerce 9.6 | Tesztelve |
+| WooCommerce 11.0 | Tesztelve |
 
 ---
 
@@ -71,11 +71,11 @@ A bővítmény támogatja az összes cookie hozzájárulás bővítményt, amely
 | Verzió | Állapot |
 |--------|---------|
 | WordPress 5.0+ | Szükséges |
-| WordPress 6.7 | Tesztelve |
+| WordPress 7.0 | Tesztelve |
 
 ## PHP verzió
 
 | Verzió | Állapot |
 |--------|---------|
-| PHP 7.2+ | Szükséges |
+| PHP 7.4+ | Szükséges |
 | PHP 8.x | Kompatibilis |

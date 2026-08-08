@@ -11,7 +11,7 @@
 | Različica | Status |
 |-----------|--------|
 | WooCommerce 5.0+ | Podprto |
-| WooCommerce 9.6 | Preizkušeno |
+| WooCommerce 11.0 | Preizkušeno |
 
 ---
 
@@ -71,11 +71,11 @@ Vtičnik podpira vse vtičnike za soglasje s piškotki, ki implementirajo [WP Co
 | Različica | Status |
 |-----------|--------|
 | WordPress 5.0+ | Potrebno |
-| WordPress 6.7 | Preizkušeno |
+| WordPress 7.0 | Preizkušeno |
 
 ## Različica PHP
 
 | Različica | Status |
 |-----------|--------|
-| PHP 7.2+ | Potrebno |
+| PHP 7.4+ | Potrebno |
 | PHP 8.x | Združljivo |
