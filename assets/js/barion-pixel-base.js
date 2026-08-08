@@ -70,7 +70,70 @@
 		return match ? decodeURIComponent(match[1]) : '';
 	}
 
+	// Tier 0: a trigger recorded by the admin wizard. An explicit setting by the
+	// shop owner beats every auto-detected consent manager.
+	function wcBarionApplyLearnedTrigger() {
+		var api = window.wcBarionConsentTrigger;
+		var config = config_trigger();
+
+		if (!api || !config) {
+			return false;
+		}
+
+		var last = null;
+
+		function check() {
+			var state = api.evaluate(document.cookie, config);
+			if (state === last || 'none' === state) {
+				return;
+			}
+			last = state;
+			if ('grant' === state) {
+				window.wcBarionGrantConsent();
+			} else {
+				window.wcBarionRejectConsent();
+			}
+			if (debug) {
+				console.log('[Barion Pixel] Consent ' + state + 'ed via the recorded cookie trigger');
+			}
+		}
+
+		check();
+
+		var names = api.eventNames(config);
+		for (var i = 0; i < names.length; i++) {
+			document.addEventListener(names[i], check);
+			window.addEventListener(names[i], check);
+		}
+
+		// Some banners set their cookie without dispatching any event, so poll
+		// briefly as well. The timer stops after 30 seconds; no page keeps it forever.
+		var polls = 0;
+		var timer = setInterval(function () {
+			polls++;
+			check();
+			if (polls >= 60) {
+				clearInterval(timer);
+			}
+		}, 500);
+
+		return true;
+	}
+
+	function config_trigger() {
+		var t = config.trigger;
+		if (!t || !t.grant || !t.reject) {
+			return null;
+		}
+		return t;
+	}
+
 	function wcBarionDetectConsent() {
+		// --- Tier 0: a trigger recorded by the admin wizard ---
+		if (wcBarionApplyLearnedTrigger()) {
+			return;
+		}
+
 		// --- Tier 1: WP Consent API integration ---
 		if (typeof wp_has_consent === 'function') {
 			if (wp_has_consent('marketing')) {

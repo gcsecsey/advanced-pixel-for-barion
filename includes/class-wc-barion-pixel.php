@@ -104,16 +104,90 @@ class WC_Barion_Pixel {
      */
     public function enqueue_base_script() {
         wp_enqueue_script(
-            'wc-barion-pixel-base',
-            WC_BARION_PIXEL_URL . 'assets/js/barion-pixel-base.js',
+            'wc-barion-consent-trigger',
+            WC_BARION_PIXEL_URL . 'assets/js/barion-consent-trigger.js',
             array(),
             WC_BARION_PIXEL_VERSION,
             false
         );
+
+        wp_enqueue_script(
+            'wc-barion-pixel-base',
+            WC_BARION_PIXEL_URL . 'assets/js/barion-pixel-base.js',
+            array('wc-barion-consent-trigger'),
+            WC_BARION_PIXEL_VERSION,
+            false
+        );
+
         wp_localize_script('wc-barion-pixel-base', 'wcBarionPixelBase', array(
             'pixelId' => $this->options['pixel_id'],
             'debug'   => $this->is_debug_mode(),
+            'trigger' => $this->get_consent_trigger(),
         ));
+    }
+
+    /**
+     * Clean a stored consent trigger. Mirrors sanitize() in barion-consent-trigger.js.
+     *
+     * @param mixed $trigger The raw trigger from the option or a request.
+     * @return array|null The cleaned trigger, or null when it breaks a rule.
+     */
+    public static function sanitize_trigger($trigger) {
+        if (!is_array($trigger) || empty($trigger['cookie'])) {
+            return null;
+        }
+
+        $cookie = (string) $trigger['cookie'];
+        if (!preg_match('/^[A-Za-z0-9_\-.]{1,128}$/', $cookie)) {
+            return null;
+        }
+
+        $contains = isset($trigger['contains']) ? sanitize_text_field((string) $trigger['contains']) : '';
+        if (strlen($contains) > 256) {
+            $contains = substr($contains, 0, 256);
+        }
+
+        $events = array();
+        if (isset($trigger['events']) && is_array($trigger['events'])) {
+            foreach ($trigger['events'] as $event) {
+                if (count($events) >= 5) {
+                    break;
+                }
+                if (is_string($event) && preg_match('/^[A-Za-z0-9_\-:.]{1,128}$/', $event)) {
+                    $events[] = $event;
+                }
+            }
+        }
+
+        return array(
+            'cookie'   => $cookie,
+            'contains' => $contains,
+            'events'   => $events,
+        );
+    }
+
+    /**
+     * Get the stored consent trigger pair, or null when it is absent or incomplete.
+     *
+     * Barion requires both grantConsent and rejectConsent, so a half-taught
+     * trigger is treated as no trigger at all.
+     *
+     * @return array|null Array with 'grant' and 'reject' keys, or null.
+     */
+    private function get_consent_trigger() {
+        if (empty($this->options['consent_trigger'])) {
+            return null;
+        }
+
+        $stored = $this->options['consent_trigger'];
+        $grant  = isset($stored['grant']) ? self::sanitize_trigger($stored['grant']) : null;
+        $reject = isset($stored['reject']) ? self::sanitize_trigger($stored['reject']) : null;
+
+        if (null === $grant || null === $reject) {
+            return null;
+        }
+
+        return array('grant' => $grant, 'reject' => $reject);
     }
 
     /**
