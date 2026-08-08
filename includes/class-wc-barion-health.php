@@ -33,8 +33,9 @@ class WC_Barion_Health {
         $source = self::resolve_source($facts);
         $checks[] = self::check_consent_source($facts, $source);
 
-        if (!empty($facts['consent_api_active'])) {
-            $checks[] = self::check_consent_type($facts);
+        $consent_type = self::check_consent_type($facts, $source);
+        if (null !== $consent_type) {
+            $checks[] = $consent_type;
         }
 
         $both = self::check_both_signals($facts);
@@ -79,7 +80,7 @@ class WC_Barion_Health {
     /**
      * Read WordPress state into a facts array for evaluate().
      *
-     * This is the only method in this class that touches WordPress.
+     * This is the only method in this class that touches WordPress or another class.
      *
      * @param array $options The wc_barion_pixel_settings option.
      * @return array Facts array.
@@ -87,6 +88,13 @@ class WC_Barion_Health {
     public static function gather_facts($options) {
         $gateway = get_option('woocommerce_barion_settings', array());
         $probe   = get_option('wc_barion_pixel_probe', array());
+        $stored  = isset($options['consent_trigger']) ? $options['consent_trigger'] : array();
+
+        // The front end drops a trigger that fails sanitization, so the panel must
+        // judge the sanitized pair, not the raw option, or it calls a dead trigger live.
+        $grant   = isset($stored['grant']) ? WC_Barion_Pixel::sanitize_trigger($stored['grant']) : null;
+        $reject  = isset($stored['reject']) ? WC_Barion_Pixel::sanitize_trigger($stored['reject']) : null;
+        $trigger = (null !== $grant && null !== $reject) ? array('grant' => $grant, 'reject' => $reject) : null;
 
         return array(
             'pixel_id'           => isset($options['pixel_id']) ? $options['pixel_id'] : '',
@@ -95,7 +103,7 @@ class WC_Barion_Health {
             'consent_api_active' => function_exists('wp_has_consent'),
             'consent_type'       => function_exists('wp_get_consent_type') ? (string) wp_get_consent_type() : '',
             'cli_active'         => defined('CLI_PLUGIN_PATH') || defined('CLI_PLUGIN_FILENAME') || class_exists('Cookie_Law_Info'),
-            'trigger'            => isset($options['consent_trigger']) ? $options['consent_trigger'] : null,
+            'trigger'            => $trigger,
             'gateway_pixel_id'   => isset($gateway['barion_pixel_id']) ? $gateway['barion_pixel_id'] : '',
             'browser_probe'      => isset($probe['consent']) ? $probe['consent'] : null,
             'reachability'       => isset($probe['reachability']) ? $probe['reachability'] : null,
@@ -112,7 +120,10 @@ class WC_Barion_Health {
         if (!empty($facts['trigger']['grant']) && !empty($facts['trigger']['reject'])) {
             return 'learned';
         }
-        if (!empty($facts['consent_api_active']) && '' !== $facts['consent_type']) {
+        // No consent-type condition here: wcBarionDetectConsent() enters this tier on
+        // the presence of wp_has_consent() alone, and the panel must name the tier
+        // that really runs, not the one that would be safe.
+        if (!empty($facts['consent_api_active'])) {
             return 'wp-consent-api';
         }
         if (!empty($facts['cli_active'])) {
@@ -179,11 +190,17 @@ class WC_Barion_Health {
             'cookie-law-info' => __('Consent comes from Cookie Law Info', 'advanced-pixel-for-barion'),
         );
 
+        // PHP sees the Cookie Law Info plugin through its constants, but the browser
+        // tier needs the CLI global as well, so the server view alone proves nothing.
+        $desc = ('cookie-law-info' === $source)
+            ? __('The Cookie Law Info plugin was detected on the server. Turn on Debug Mode and read the browser console on your shop to confirm that this tier really runs.', 'advanced-pixel-for-barion')
+            : __('Barion receives grantConsent and rejectConsent from this source.', 'advanced-pixel-for-barion');
+
         return self::row(
             'consent_source',
             'info',
             $labels[$source],
-            __('Barion receives grantConsent and rejectConsent from this source.', 'advanced-pixel-for-barion'),
+            $desc,
             array(
                 'type'   => 'modal',
                 'label'  => __('Change', 'advanced-pixel-for-barion'),
@@ -193,7 +210,19 @@ class WC_Barion_Health {
         );
     }
 
-    private static function check_consent_type($facts) {
+    /**
+     * The "everyone consents" risk only exists while the WP Consent API tier is the
+     * live one, so the row is absent under any other source.
+     *
+     * @param array  $facts  Facts array.
+     * @param string $source The resolved consent source.
+     * @return array|null A check row, or null when the tier does not run.
+     */
+    private static function check_consent_type($facts, $source) {
+        if ('wp-consent-api' !== $source) {
+            return null;
+        }
+
         if ('' !== $facts['consent_type']) {
             return self::row(
                 'consent_type_set',
@@ -339,7 +368,9 @@ class WC_Barion_Health {
     }
 
     private static function check_cookies_declared($facts) {
-        if (!empty($facts['consent_api_active'])) {
+        // declare_cookies() is hooked only when a Pixel ID is set, so without one
+        // nothing reaches the consent API however active it is.
+        if (!empty($facts['consent_api_active']) && '' !== trim($facts['pixel_id'])) {
             return self::row(
                 'cookies_declared',
                 'ok',

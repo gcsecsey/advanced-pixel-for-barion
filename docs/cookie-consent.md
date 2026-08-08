@@ -85,7 +85,7 @@ The plugin checks for the `wp_has_consent()` JavaScript function at runtime. If 
 
 1. On page load, checks if `marketing` consent is granted or rejected
 2. Calls `bp('consent', 'grantConsent')` if marketing consent is granted
-3. Calls `bp('consent', 'rejectConsent')` if marketing consent is not granted
+3. Stays silent if marketing consent is not granted — no `rejectConsent` is sent on page load; it is sent only after the visitor answers the banner (see step 4)
 4. Listens for the `wp_listen_for_consent_change` event for real-time consent updates — grants or rejects accordingly
 
 ### Supported cookie plugins

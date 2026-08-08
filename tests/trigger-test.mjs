@@ -125,3 +125,22 @@ test('falls back to the raw value when the cookie value cannot be decoded', () =
 test('a value that cannot be decoded does not produce a false grant', () => {
 	assert.equal(trigger.evaluate('cky-consent=100%', { grant: GRANT, reject: REJECT }), 'none');
 });
+
+test('a dot in a cookie name is a literal, not a wildcard', () => {
+	// A dot is the only regular expression metacharacter the cookie name pattern
+	// allows, so this fails if escapeRegExp() goes away.
+	const dotted = { cookie: 'ba_vid.abc', contains: '', events: [] };
+	assert.equal(trigger.matches('ba_vidXabc=1', dotted), false);
+	assert.equal(trigger.matches('ba_vid.abc=1', dotted), true);
+});
+
+test('sanitize rejects anything that is not a trigger object', () => {
+	assert.equal(trigger.sanitize(null), null);
+	assert.equal(trigger.sanitize(undefined), null);
+	assert.equal(trigger.sanitize('cky-consent'), null);
+	assert.equal(trigger.sanitize(7), null);
+});
+
+test('evaluate returns none for a null config', () => {
+	assert.equal(trigger.evaluate('cky-consent=ad:yes', null), 'none');
+});

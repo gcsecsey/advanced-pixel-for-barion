@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-08T18:29:11+00:00\n"
+"POT-Creation-Date: 2026-08-08T18:50:42+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: advanced-pixel-for-barion\n"
@@ -52,7 +52,7 @@ msgid "Barion Pixel Configuration"
 msgstr ""
 
 #: includes/class-wc-barion-admin.php:90
-#: includes/class-wc-barion-health.php:155
+#: includes/class-wc-barion-health.php:166
 msgid "Pixel ID"
 msgstr ""
 
@@ -109,7 +109,7 @@ msgid "Open my shop"
 msgstr ""
 
 #: includes/class-wc-barion-admin.php:281
-#: includes/class-wc-barion-admin.php:540
+#: includes/class-wc-barion-admin.php:546
 msgid "Next"
 msgstr ""
 
@@ -141,317 +141,331 @@ msgstr ""
 msgid "No signal from your shop. The recording link may have expired. Close this, then press Set up consent again."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:333
+#. translators: %d: number of health checks. The script replaces %d with the number.
+#: includes/class-wc-barion-admin.php:290
+#, php-format
+msgid "Hide %d checks"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:324
+msgid "Barion Pixel is recording your cookie banner. Make your choice in the banner, then return to the settings tab."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:339
 msgid "Barion Pixel is healthy"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:334
+#: includes/class-wc-barion-admin.php:340
 msgid "Barion Pixel needs attention"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:335
+#: includes/class-wc-barion-admin.php:341
 msgid "Action needed"
 msgstr ""
 
 #. translators: %d: number of health checks.
-#: includes/class-wc-barion-admin.php:353
+#: includes/class-wc-barion-admin.php:359
 #, php-format
 msgid "Show %d checks"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:397
-#: includes/class-wc-barion-admin.php:437
+#: includes/class-wc-barion-admin.php:403
+#: includes/class-wc-barion-admin.php:443
 msgid "Permission denied."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:404
+#: includes/class-wc-barion-admin.php:410
 msgid "The trigger could not be read."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:413
+#: includes/class-wc-barion-admin.php:419
 msgid "Record both the accept signal and the reject signal before saving."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:425
+#: includes/class-wc-barion-admin.php:431
 msgid "Consent setup saved."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:453
+#: includes/class-wc-barion-admin.php:459
 msgid "Unknown check."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:471
-#: includes/class-wc-barion-health.php:169
-#: includes/class-wc-barion-health.php:239
+#: includes/class-wc-barion-admin.php:477
+#: includes/class-wc-barion-health.php:180
+#: includes/class-wc-barion-health.php:268
 msgid "Set up consent"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:477
+#: includes/class-wc-barion-admin.php:483
 msgid "Barion may receive marketing data only after the visitor agrees. The plugin needs a reliable signal for accept and for reject."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:482
+#: includes/class-wc-barion-admin.php:488
 msgid "Teach the plugin my banner"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:483
+#: includes/class-wc-barion-admin.php:489
 msgid "You open your shop, accept, then reject. The plugin records what changes. This works with any cookie banner."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:490
+#: includes/class-wc-barion-admin.php:496
 msgid "Use the WP Consent API"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:494
+#: includes/class-wc-barion-admin.php:500
 msgid "A cookie banner plugin sets a consent type. Nothing more is needed."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:495
+#: includes/class-wc-barion-admin.php:501
 msgid "Not usable: no cookie banner plugin sets a consent type."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:504
+#: includes/class-wc-barion-admin.php:510
 msgid "Do nothing"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:505
+#: includes/class-wc-barion-admin.php:511
 msgid "Consent is never granted. Full tracking collects no marketing data."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:513
+#: includes/class-wc-barion-admin.php:519
 msgid "The recorder watches cookie changes and event names only. It runs for you alone and never for your visitors."
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:517
+#: includes/class-wc-barion-admin.php:523
 msgid "Grant consent to Barion when this is true:"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:519
+#: includes/class-wc-barion-admin.php:525
 msgid "Cookie name"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:523
+#: includes/class-wc-barion-admin.php:529
 msgid "Accepted value contains"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:527
+#: includes/class-wc-barion-admin.php:533
 msgid "Rejected value contains"
 msgstr ""
 
-#: includes/class-wc-barion-admin.php:539
+#: includes/class-wc-barion-admin.php:545
 msgid "Back"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:140
+#: includes/class-wc-barion-health.php:151
 msgid "Pixel ID is missing"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:141
+#: includes/class-wc-barion-health.php:152
 msgid "Nothing is tracked until you enter your Barion Pixel ID."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:148
+#: includes/class-wc-barion-health.php:159
 msgid "Pixel ID has the wrong format"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:149
+#: includes/class-wc-barion-health.php:160
 msgid "The ID must look like BP-0000000000-00. Barion ignores anything else."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:165
+#: includes/class-wc-barion-health.php:176
 msgid "No consent source is set up"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:166
+#: includes/class-wc-barion-health.php:177
 msgid "Barion never receives consent, so full tracking collects no marketing data. Teach the plugin your cookie banner."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:177
+#: includes/class-wc-barion-health.php:188
 msgid "Consent comes from your cookie banner, recorded by the wizard"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:178
+#: includes/class-wc-barion-health.php:189
 msgid "Consent comes from the WP Consent API"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:179
+#: includes/class-wc-barion-health.php:190
 msgid "Consent comes from Cookie Law Info"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:186
+#: includes/class-wc-barion-health.php:196
+msgid "The Cookie Law Info plugin was detected on the server. Turn on Debug Mode and read the browser console on your shop to confirm that this tier really runs."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:197
 msgid "Barion receives grantConsent and rejectConsent from this source."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:189
+#: includes/class-wc-barion-health.php:206
 msgid "Change"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:201
+#: includes/class-wc-barion-health.php:230
 msgid "A cookie banner plugin sets the consent type"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:202
+#: includes/class-wc-barion-health.php:231
 msgid "Visitor choices reach the plugin correctly."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:212
+#: includes/class-wc-barion-health.php:241
 msgid "No cookie banner plugin sets a consent type"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:213
+#: includes/class-wc-barion-health.php:242
 msgid "When nothing sets a consent type, the WP Consent API reports consent for every visitor, and the pixel sends grantConsent without any consent. Some banners set the consent type in the browser only, so check there before you act."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:216
+#: includes/class-wc-barion-health.php:245
 msgid "Check in browser"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:226
+#: includes/class-wc-barion-health.php:255
 msgid "Your cookie banner sets the consent type in the browser"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:227
+#: includes/class-wc-barion-health.php:256
 msgid "Nothing is set on the server, but the browser check found a consent type. Visitor choices reach the plugin correctly."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:235
+#: includes/class-wc-barion-health.php:264
 msgid "Every visitor is counted as consenting"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:236
+#: includes/class-wc-barion-health.php:265
 msgid "The browser check found marketing consent granted before anyone touched a banner. The pixel sends grantConsent for every visitor. This breaks the GDPR and the Barion terms. Install a cookie banner plugin that supports the WP Consent API, or teach the plugin your banner."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:248
+#: includes/class-wc-barion-health.php:277
 msgid "Consent is not granted automatically"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:249
+#: includes/class-wc-barion-health.php:278
 msgid "The browser check found no consent before any banner interaction."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:265
+#: includes/class-wc-barion-health.php:294
 msgid "Accept and reject are both recorded"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:266
+#: includes/class-wc-barion-health.php:295
 msgid "Barion requires both grantConsent and rejectConsent."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:271
+#: includes/class-wc-barion-health.php:300
 msgid "The reject signal is missing."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:272
+#: includes/class-wc-barion-health.php:301
 msgid "The accept signal is missing."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:277
+#: includes/class-wc-barion-health.php:306
 msgid "Only one consent signal is recorded"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:278
+#: includes/class-wc-barion-health.php:307
 msgid "Barion requires both grantConsent and rejectConsent. Record the missing one."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:281
+#: includes/class-wc-barion-health.php:310
 msgid "Finish setup"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:292
+#: includes/class-wc-barion-health.php:321
 msgid "WooCommerce is active"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:300
-#: includes/class-wc-barion-health.php:307
+#: includes/class-wc-barion-health.php:329
+#: includes/class-wc-barion-health.php:336
 msgid "WooCommerce is not active"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:301
+#: includes/class-wc-barion-health.php:330
 msgid "Full tracking is off, so nothing depends on WooCommerce."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:308
+#: includes/class-wc-barion-health.php:337
 msgid "Full tracking is on, but the e-commerce events need WooCommerce. Only the base pixel runs."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:317
+#: includes/class-wc-barion-health.php:346
 msgid "Full tracking is on"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:318
+#: includes/class-wc-barion-health.php:347
 msgid "contentView, addToCart, initiateCheckout, purchase, setEncryptedEmail"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:324
+#: includes/class-wc-barion-health.php:353
 msgid "Full tracking is off"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:325
+#: includes/class-wc-barion-health.php:354
 msgid "Only the base pixel runs. It sends pageView for fraud prevention."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:336
+#: includes/class-wc-barion-health.php:365
 msgid "Barion Payment Gateway holds a second Pixel ID"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:337
+#: includes/class-wc-barion-health.php:366
 msgid "Both plugins work together and the base script loads only once. You may remove the ID from the gateway to keep one source of truth."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:346
+#: includes/class-wc-barion-health.php:377
 msgid "Barion cookies are declared"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:347
+#: includes/class-wc-barion-health.php:378
 msgid "They appear in your cookie policy through the WP Consent API."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:353
+#: includes/class-wc-barion-health.php:384
 msgid "Barion cookies are not declared"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:354
+#: includes/class-wc-barion-health.php:385
 msgid "Barion sets ba_sid, ba_vid and BarionMarketingConsent on your domain. Without the WP Consent API plugin they cannot be added to your cookie policy automatically, so add them by hand."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:362
+#: includes/class-wc-barion-health.php:393
 msgid "Consent category: marketing"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:363
+#: includes/class-wc-barion-health.php:394
 msgid "Fixed, and not configurable. Barion requires consent for marketing purposes, so marketing is the only correct category. Your cookie banner maps its own advertising category onto it."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:372
+#: includes/class-wc-barion-health.php:403
 msgid "Barion pixel script reachable"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:373
+#: includes/class-wc-barion-health.php:404
 msgid "Loads bp.js from this browser. Nothing is sent to your server."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:376
+#: includes/class-wc-barion-health.php:407
 msgid "Test"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:385
+#: includes/class-wc-barion-health.php:416
 msgid "Barion pixel script is reachable"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:386
+#: includes/class-wc-barion-health.php:417
 msgid "bp.js loaded from this browser."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:392
+#: includes/class-wc-barion-health.php:423
 msgid "Barion pixel script did not load"
 msgstr ""
 
-#: includes/class-wc-barion-health.php:393
+#: includes/class-wc-barion-health.php:424
 msgid "bp.js did not load in this browser. An ad blocker or a network rule may block it. Your visitors may still reach it."
 msgstr ""
 
-#: includes/class-wc-barion-health.php:396
+#: includes/class-wc-barion-health.php:427
 msgid "Test again"
 msgstr ""
 

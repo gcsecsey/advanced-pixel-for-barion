@@ -15,6 +15,21 @@ if (!function_exists('__')) {
     }
 }
 
+// gather_facts() reads options and sanitizes the stored trigger through
+// WC_Barion_Pixel, so those two WordPress helpers need a stub as well.
+if (!function_exists('get_option')) {
+    function get_option($name, $default = false) {
+        return $default;
+    }
+}
+
+if (!function_exists('sanitize_text_field')) {
+    function sanitize_text_field($text) {
+        return trim(strip_tags($text));
+    }
+}
+
+require_once __DIR__ . '/../includes/class-wc-barion-pixel.php';
 require_once __DIR__ . '/../includes/class-wc-barion-health.php';
 
 $failures = 0;
@@ -147,6 +162,83 @@ $checks = WC_Barion_Health::evaluate(apb_facts());
 apb_assert('ok' === apb_check($checks, 'cookies_declared')['status'], 'declared when the consent API is active');
 $checks = WC_Barion_Health::evaluate(apb_facts(array('consent_api_active' => false, 'consent_type' => '')));
 apb_assert('info' === apb_check($checks, 'cookies_declared')['status'], 'not declared without the consent API');
+
+echo "The consent API tier is live even when no banner sets a consent type\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array('consent_type' => '')));
+apb_assert('wp-consent-api' === apb_check($checks, 'consent_source')['target'], 'the consent API is the source without a consent type');
+
+echo "Cookie Law Info is the only source\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array(
+    'consent_api_active' => false,
+    'consent_type'       => '',
+    'cli_active'         => true,
+)));
+apb_assert('cookie-law-info' === apb_check($checks, 'consent_source')['target'], 'Cookie Law Info is the source');
+apb_assert('info' === apb_check($checks, 'consent_source')['status'], 'a detected Cookie Law Info is a valid source');
+
+echo "Warnings without failures make the panel warn\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array(
+    'woocommerce_active' => false,
+    'reachability'       => array('ok' => false),
+)));
+apb_assert('warn' === WC_Barion_Health::overall_status($checks), 'overall is warn');
+
+echo "The reachability row reports the stored browser result\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array('reachability' => array('ok' => true))));
+apb_assert('ok' === apb_check($checks, 'reachability')['status'], 'a reachable script is ok');
+$checks = WC_Barion_Health::evaluate(apb_facts(array('reachability' => array('ok' => false))));
+apb_assert('warn' === apb_check($checks, 'reachability')['status'], 'an unreachable script warns');
+
+echo "The browser probe finds no consent type and no consent\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array(
+    'consent_type'  => '',
+    'browser_probe' => array('consent_type' => '', 'has_consent' => false),
+)));
+apb_assert('ok' === apb_check($checks, 'consent_type_set')['status'], 'no automatic consent is ok');
+
+echo "WooCommerce inactive while full tracking is off\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array(
+    'woocommerce_active' => false,
+    'full_tracking'      => false,
+)));
+apb_assert('info' === apb_check($checks, 'woocommerce')['status'], 'nothing depends on WooCommerce');
+
+echo "A learned trigger with reject but no accept\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array(
+    'consent_api_active' => false,
+    'consent_type'       => '',
+    'trigger'            => array(
+        'grant'  => null,
+        'reject' => array('cookie' => 'cky-consent', 'contains' => 'ad:no', 'events' => array()),
+    ),
+)));
+apb_assert('fail' === apb_check($checks, 'consent_both_signals')['status'], 'a missing accept signal fails');
+
+echo "The cookie declaration needs a Pixel ID as well as the consent API\n";
+$checks = WC_Barion_Health::evaluate(apb_facts(array('pixel_id' => '')));
+apb_assert('info' === apb_check($checks, 'cookies_declared')['status'], 'nothing is declared without a Pixel ID');
+
+echo "gather_facts() drops a trigger the front end would refuse\n";
+$facts = WC_Barion_Health::gather_facts(array(
+    'pixel_id'        => 'BP-1234567890-01',
+    'consent_trigger' => array(
+        'grant'  => array('cookie' => 'bad name;', 'contains' => 'ad:yes', 'events' => array()),
+        'reject' => array('cookie' => 'cky-consent', 'contains' => 'ad:no', 'events' => array()),
+    ),
+));
+apb_assert(null === $facts['trigger'], 'an illegal cookie name drops the whole trigger');
+$checks = WC_Barion_Health::evaluate($facts);
+apb_assert('learned' !== apb_check($checks, 'consent_source')['target'], 'an illegal trigger is not a learned source');
+
+$facts = WC_Barion_Health::gather_facts(array(
+    'pixel_id'        => 'BP-1234567890-01',
+    'consent_trigger' => array(
+        'grant'  => array('cookie' => 'cky-consent', 'contains' => 'ad:yes', 'events' => array()),
+        'reject' => array('cookie' => 'cky-consent', 'contains' => 'ad:no', 'events' => array()),
+    ),
+));
+$checks = WC_Barion_Health::evaluate($facts);
+apb_assert('learned' === apb_check($checks, 'consent_source')['target'], 'a clean trigger is a learned source');
 
 echo "\n";
 if ($failures > 0) {

@@ -286,6 +286,8 @@ class WC_Barion_Admin {
                 'testing'      => __('Testing…', 'advanced-pixel-for-barion'),
                 'probeFailed'  => __('The check did not finish. Try again.', 'advanced-pixel-for-barion'),
                 'recorderSilent' => __('No signal from your shop. The recording link may have expired. Close this, then press Set up consent again.', 'advanced-pixel-for-barion'),
+                /* translators: %d: number of health checks. The script replaces %d with the number. */
+                'hideChecks'   => __('Hide %d checks', 'advanced-pixel-for-barion'),
             ),
         ));
     }
@@ -317,6 +319,10 @@ class WC_Barion_Admin {
             WC_BARION_PIXEL_VERSION,
             false
         );
+
+        wp_localize_script('wc-barion-consent-recorder', 'wcBarionRecorder', array(
+            'banner' => __('Barion Pixel is recording your cookie banner. Make your choice in the banner, then return to the settings tab.', 'advanced-pixel-for-barion'),
+        ));
     }
 
     /**

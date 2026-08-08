@@ -91,7 +91,7 @@ Vtičnik preveri prisotnost funkcije `wp_has_consent()` JavaScript ob zagonu. Č
 
 1. Ob nalaganju strani preveri, ali je soglasje za `marketing` odobreno ali zavrnjeno
 2. Pokliče `bp('consent', 'grantConsent')`, če je tržno soglasje odobreno
-3. Pokliče `bp('consent', 'rejectConsent')`, če tržno soglasje ni odobreno
+3. Če tržno soglasje ni odobreno, ne stori nič — `rejectConsent` se ob nalaganju strani ne pošlje; pošlje se šele, ko obiskovalec odgovori v pasici (glej točko 4)
 4. Posluša za dogodek `wp_listen_for_consent_change` za posodobitve soglasja v realnem času — ustrezno odobri ali zavrne
 
 ### Podprti vtičniki za piškotke

@@ -24,7 +24,6 @@
 .apb-label { font-weight: 600; }
 .apb-desc { color: #50575e; margin-top: 3px; }
 .apb-action { flex: 0 0 auto; }
-.apb-mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; background: #f6f7f7; border: 1px solid #dcdcde; border-radius: 3px; padding: 1px 5px; }
 
 /* Wizard dialog */
 .apb-dialog { border: 0; border-radius: 4px; padding: 0; max-width: 560px; width: 92%; box-shadow: 0 4px 24px rgba(0,0,0,.3); }
@@ -42,4 +41,3 @@
 .apb-recorder { background: #f6f7f7; border: 1px dashed #c3c4c7; border-radius: 4px; padding: 13px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
 .apb-step { display: none; }
 .apb-step.is-active { display: block; }
-.apb-hidden { display: none; }

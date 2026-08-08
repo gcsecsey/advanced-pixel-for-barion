@@ -98,7 +98,7 @@ Das Plugin prüft zur Laufzeit, ob die JavaScript-Funktion `wp_has_consent()` ve
 
 1. Beim Seitenaufruf wird geprüft, ob die `marketing`-Einwilligung erteilt oder verweigert wurde
 2. `bp('consent', 'grantConsent')` wird aufgerufen, wenn die Marketing-Einwilligung erteilt wurde
-3. `bp('consent', 'rejectConsent')` wird aufgerufen, wenn die Marketing-Einwilligung nicht erteilt wurde
+3. Bleibt still, wenn die Marketing-Einwilligung nicht erteilt wurde — beim Seitenaufruf wird kein `rejectConsent` gesendet; es folgt erst, nachdem der Besucher im Banner geantwortet hat (siehe Punkt 4)
 4. Lauscht auf das `wp_listen_for_consent_change`-Event für Echtzeit-Consent-Aktualisierungen — erteilt oder verweigert entsprechend
 
 ### Unterstützte Cookie-Plugins

@@ -90,7 +90,7 @@ Plugin za běhu kontroluje přítomnost funkce `wp_has_consent()` v JavaScriptu.
 
 1. Při načtení stránky zkontroluje, zda je udělen nebo odmítnut souhlas s `marketing`
 2. Volá `bp('consent', 'grantConsent')`, pokud je marketingový souhlas udělen
-3. Volá `bp('consent', 'rejectConsent')`, pokud marketingový souhlas není udělen
+3. Pokud marketingový souhlas není udělen, neudělá nic — `rejectConsent` se při načtení stránky neodesílá; odešle se až poté, co návštěvník odpoví v cookie liště (viz bod 4)
 4. Naslouchá události `wp_listen_for_consent_change` pro aktualizace souhlasu v reálném čase — podle toho udělí nebo odmítne souhlas
 
 ### Podporované pluginy pro cookies

@@ -80,7 +80,10 @@
 	banner.setAttribute('style',
 		'position:fixed;z-index:2147483647;left:0;right:0;top:0;padding:10px 14px;' +
 		'background:#2271b1;color:#fff;font:14px -apple-system,system-ui,sans-serif;text-align:center');
-	banner.textContent = 'Barion Pixel is recording your cookie banner. Make your choice in the banner, then return to the settings tab.';
+	var strings = window.wcBarionRecorder || {};
+	banner.textContent =
+		strings.banner ||
+		'Barion Pixel is recording your cookie banner. Make your choice in the banner, then return to the settings tab.';
 	document.addEventListener('DOMContentLoaded', function () {
 		document.body.appendChild(banner);
 	});

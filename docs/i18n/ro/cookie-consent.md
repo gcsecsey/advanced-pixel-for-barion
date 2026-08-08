@@ -95,7 +95,7 @@ Plugin-ul verifică funcția JavaScript `wp_has_consent()` la execuție. Dacă W
 
 1. La încărcarea paginii, verifică dacă consimțământul `marketing` este acordat sau refuzat
 2. Apelează `bp('consent', 'grantConsent')` dacă consimțământul de marketing este acordat
-3. Apelează `bp('consent', 'rejectConsent')` dacă consimțământul de marketing nu este acordat
+3. Nu face nimic dacă consimțământul de marketing nu este acordat — `rejectConsent` nu este trimis la încărcarea paginii; este trimis abia după ce vizitatorul răspunde în bannerul de cookie (vezi punctul 4)
 4. Ascultă evenimentul `wp_listen_for_consent_change` pentru actualizări de consimțământ în timp real — acordă sau refuză în consecință
 
 ### Plugin-uri de cookie suportate

@@ -98,7 +98,7 @@ A bővítmény futásidőben ellenőrzi a `wp_has_consent()` JavaScript függvé
 
 1. Az oldal betöltésekor ellenőrzi, hogy a `marketing` hozzájárulás meg van-e adva vagy elutasítva
 2. Meghívja a `bp('consent', 'grantConsent')` függvényt, ha a marketing hozzájárulás meg van adva
-3. Meghívja a `bp('consent', 'rejectConsent')` függvényt, ha a marketing hozzájárulás nincs meg adva
+3. Nem tesz semmit, ha a marketing hozzájárulás nincs megadva — az oldal betöltésekor nem küld `rejectConsent` hívást; azt csak akkor küldi el, miután a látogató válaszolt a sávban (lásd a 4. pontot)
 4. Figyeli a `wp_listen_for_consent_change` eseményt a valós idejű hozzájárulás frissítésekhez — ennek megfelelően ad vagy utasít el hozzájárulást
 
 ### Támogatott cookie bővítmények

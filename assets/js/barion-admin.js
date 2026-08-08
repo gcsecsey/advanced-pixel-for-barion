@@ -11,8 +11,19 @@
 	var recorderTimer = null;
 
 	if (toggle && panel) {
+		var showLabel = toggle.textContent.trim();
+		var hideLabel = cfg.strings && cfg.strings.hideChecks
+			? cfg.strings.hideChecks.replace('%d', panel.querySelectorAll('.apb-row').length)
+			: showLabel;
+
+		var syncToggle = function () {
+			toggle.textContent = panel.classList.contains('is-collapsed') ? showLabel : hideLabel;
+		};
+
+		syncToggle();
 		toggle.addEventListener('click', function () {
 			panel.classList.toggle('is-collapsed');
+			syncToggle();
 		});
 	}
 
@@ -142,6 +153,13 @@
 			return;
 		}
 
+		// The recorder keeps polling for two minutes, so a cookie change made while
+		// the admin reads or edits step 3 would overwrite the reject reading and
+		// refill the fields under their hands. Only step 2 records.
+		if (2 !== state.step) {
+			return;
+		}
+
 		// The recorder re-sends the same baseline diff every 250ms, so an unchanged
 		// payload is a repeat, not a new signal. Without this guard the grant reading
 		// is immediately stored again as the reject reading.
@@ -175,9 +193,18 @@
 			return b.value.length - a.value.length;
 		})[0];
 
+		// A lone % is not a valid escape sequence, so decodeURIComponent throws on it.
+		// readCookie() in barion-consent-trigger.js falls back the same way.
+		var contains;
+		try {
+			contains = decodeURIComponent(best.value);
+		} catch (e) {
+			contains = best.value;
+		}
+
 		state.recorded[state.side] = {
 			cookie: best.name,
-			contains: decodeURIComponent(best.value),
+			contains: contains,
 			events: data.events.slice(0, 5),
 		};
 

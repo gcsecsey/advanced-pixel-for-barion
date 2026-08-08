@@ -477,13 +477,4 @@ class WC_Barion_Pixel {
         );
     }
 
-    /**
-     * Get the plugin options.
-     *
-     * @return array The settings array.
-     */
-    public function get_options() {
-        return $this->options;
-    }
-
 }

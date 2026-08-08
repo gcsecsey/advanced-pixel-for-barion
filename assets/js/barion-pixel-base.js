@@ -70,7 +70,7 @@
 		return match ? decodeURIComponent(match[1]) : '';
 	}
 
-	// Tier 0: a trigger recorded by the admin wizard. An explicit setting by the
+	// Tier 1: a trigger recorded by the admin wizard. An explicit setting by the
 	// shop owner beats every auto-detected consent manager.
 	function wcBarionApplyLearnedTrigger() {
 		var api = window.wcBarionConsentTrigger;
@@ -129,12 +129,12 @@
 	}
 
 	function wcBarionDetectConsent() {
-		// --- Tier 0: a trigger recorded by the admin wizard ---
+		// --- Tier 1: a trigger recorded by the admin wizard ---
 		if (wcBarionApplyLearnedTrigger()) {
 			return;
 		}
 
-		// --- Tier 1: WP Consent API integration ---
+		// --- Tier 2: WP Consent API integration ---
 		if (typeof wp_has_consent === 'function') {
 			if (wp_has_consent('marketing')) {
 				window.wcBarionGrantConsent();
@@ -158,7 +158,7 @@
 			return;
 		}
 
-		// --- Tier 2: Cookie Law Info / CookieYes direct integration (fallback) ---
+		// --- Tier 3: Cookie Law Info / CookieYes direct integration (fallback) ---
 		if (typeof CLI !== 'undefined' && CLI.allowedCategories) {
 			if (wcBarionGetCliCookie('cookielawinfo-checkbox-non-necessary') === 'yes') {
 				window.wcBarionGrantConsent();
@@ -189,7 +189,7 @@
 			return;
 		}
 
-		// --- Tier 3: Manual integration ---
+		// --- Tier 4: Manual integration ---
 		if (debug) {
 			console.log(
 				'[Barion Pixel] No consent manager detected. Call window.wcBarionGrantConsent() or window.wcBarionRejectConsent() manually.'

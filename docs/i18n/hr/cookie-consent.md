@@ -91,7 +91,7 @@ Dodatak provjerava JavaScript funkciju `wp_has_consent()` za vrijeme izvođenja.
 
 1. Pri učitavanju stranice provjerava je li `marketing` pristanak odobren ili odbijen
 2. Poziva `bp('consent', 'grantConsent')` ako je marketinški pristanak odobren
-3. Poziva `bp('consent', 'rejectConsent')` ako marketinški pristanak nije odobren
+3. Ne radi ništa ako marketinški pristanak nije odobren — `rejectConsent` se ne šalje pri učitavanju stranice; šalje se tek nakon što posjetitelj odgovori u traci (vidi točku 4)
 4. Sluša događaj `wp_listen_for_consent_change` za ažuriranja pristanka u stvarnom vremenu — odobrava ili odbija prema tome
 
 ### Podržani dodaci za kolačiće
