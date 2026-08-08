@@ -93,7 +93,7 @@ class WC_Barion_Health {
             'full_tracking'      => !empty($options['enable_full_tracking']),
             'consent_api_active' => function_exists('wp_has_consent'),
             'consent_type'       => function_exists('wp_get_consent_type') ? (string) wp_get_consent_type() : '',
-            'cli_active'         => defined('CLI_PLUGIN_FILE') || function_exists('cookielawinfo_init'),
+            'cli_active'         => defined('CLI_PLUGIN_PATH') || defined('CLI_PLUGIN_FILENAME') || class_exists('Cookie_Law_Info'),
             'trigger'            => isset($options['consent_trigger']) ? $options['consent_trigger'] : null,
             'gateway_pixel_id'   => isset($gateway['barion_pixel_id']) ? $gateway['barion_pixel_id'] : '',
             'browser_probe'      => isset($probe['consent']) ? $probe['consent'] : null,
