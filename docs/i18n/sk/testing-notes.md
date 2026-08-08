@@ -112,6 +112,32 @@ bp.js zaznamenáva vlastné chyby validácie s numerickým prefixom. Bežné chy
 
 ---
 
+## Panel stavu a sprievodca súhlasom
+
+Záznamník aj sprievodca závisia od banneru na cookies tretej strany, takže potrebujú manuálne
+kontroly.
+
+1. **Tichý súhlas.** Aktivuj WP Consent API a deaktivuj každý plugin s bannerom na cookies. Panel
+   zobrazí žltý riadok „No cookie banner plugin sets a consent type". Stlač **Check in browser**.
+   Riadok sa zafarbí načerveno.
+2. **Brána záznamníka.** Odhlás sa a otvor `/?apb_record_consent=anything`. Over, že
+   `barion-consent-recorder.js` chýba v zdrojovom kóde stránky. Zopakuj ako administrátor s
+   neplatným nonce; musí naďalej chýbať.
+3. **Zaznamenaj prijatie.** Aktivuj banner na cookies. Stlač **Set up consent**, potom **Open my
+   shop**. Prijmi v banneri. Protokol sprievodcu zobrazí zmenené cookie.
+4. **Zaznamenaj odmietnutie.** Vymaž cookies na tej karte, znovu načítaj a odmietni. Sprievodca
+   dôjde ku kroku 3 s vyplnenými poľami.
+5. **Napoly naučený spúšťač.** Skús uložiť s prázdnou hodnotou odmietnutia. Sprievodca to odmietne.
+6. **Frontend.** So zapnutým režimom ladenia prijmi v banneri. Konzola zaznamená
+   `Consent granted via the recorded cookie trigger`. Odmietni, a zaznamená sa zodpovedajúci
+   riadok pre odmietnutie.
+7. **Dostupnosť.** Stlač **Test**. So zapnutým blokátorom reklám nahlási varovanie.
+8. **Dve odlišné hodnoty.** Po zaznamenaní prijatia a následne odmietnutia otvor krok 3 a over, že
+   prijatá a odmietnutá hodnota sú rôzne. Ak sú rovnaké, spúšťač nemôže fungovať, pretože
+   nejednoznačné čítanie sa považuje za žiadny súhlas.
+
+---
+
 ## Bežné problémy
 
 ### Udalosti sa nespúšťajú

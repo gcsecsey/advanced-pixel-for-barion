@@ -12,15 +12,83 @@ Az alap pixel szkript mindig betöltődik a csalás megelőzése érdekében, de
 
 **Fontos:** A cookie bannernek mind elfogadási, mind elutasítási lehetőséget kell kínálnia. A "cookie fal" (csak elfogadás) 2020 óta nem felel meg a GDPR-nak, és a Barion visszautasítja.
 
-A bővítmény a hozzájárulás-integráció három szintjét támogatja, sorrendben ellenőrizve:
+A bővítmény a hozzájárulás-integráció négy szintjét támogatja, sorrendben ellenőrizve:
 
-1. **WP Consent API** (ajánlott) — univerzális, minden nagyobb cookie bővítménnyel működik
-2. **Cookie Law Info** (tartalék) — közvetlen integráció CookieYes/Cookie Law Info-t használó oldalakhoz
-3. **Manuális** — egyéni hozzájárulás kezelőkhöz vagy speciális esetekhez
+1. **Rögzített trigger** — a beállítási varázsló által rögzített cookie-jel; csak akkor nyer, ha
+   mind az elfogadási, mind az elutasítási jel rögzítve van, mert a bolttulajdonos szándékosan
+   állította be. A félig betanított trigger — amelynél csak az egyik jel van rögzítve — teljesen
+   figyelmen kívül marad, és a bővítmény a következő szintre lép, mert a Barion mind a
+   `grantConsent`, mind a `rejectConsent` hívást megköveteli.
+2. **WP Consent API** (ajánlott) — univerzális, minden nagyobb cookie bővítménnyel működik
+3. **Cookie Law Info** (tartalék) — közvetlen integráció CookieYes/Cookie Law Info-t használó oldalakhoz
+4. **Manuális** — egyéni hozzájárulás kezelőkhöz vagy speciális esetekhez
 
 ---
 
-## 1. szint: WP Consent API (ajánlott)
+## Az állapotpanel
+
+A Beállítások › Barion Pixel az állapotpanellel nyílik meg. Ez lefuttatja az alábbi összes
+ellenőrzést, és először a legrosszabb eredményt mutatja. Ha minden rendben van, egyetlen zöld
+sorra záródik össze.
+
+A legfontosabb ellenőrzés a **„No cookie banner plugin sets a consent type"** (egyetlen
+cookie-banner bővítmény sem állít be hozzájárulás-típust). A WP Consent API minden kategóriára
+hozzájárulást jelent, ha semmi nem állít be hozzájárulás-típust:
+
+> If there's no consent management plugin to set it, it will return `false`. This will cause all
+> consent categories to return `true`.
+
+Egy olyan oldal, amelyen aktív a WP Consent API, de nincs cookie-banner, ezért minden látogatóra
+megadja a Barion hozzájárulást, anélkül hogy bármilyen tényleges hozzájárulás történt volna. Ez
+sérti a GDPR-t és a Barion feltételeit.
+
+Néhány banner csak a böngészőben állítja be a hozzájárulás típusát, ezért a panel először
+figyelmeztetést jelez, és felkínálja a **Check in browser** gombot. Ez az ellenőrzés bármilyen
+interakció előtt beolvassa a valós értékeket a frontendről, és ennek megfelelően pirosra vagy
+zöldre színezi a sort.
+
+### A Barion cookie-jai
+
+A `bp.js` három első féltől származó cookie-t állít be a saját domainjén. Minden névhez futásidőben
+hozzáfűzi a domain hash-ét.
+
+| Cookie | Élettartam | Cél |
+|--------|------------|-----|
+| `ba_sid` | 30 perc | Egy munkamenetbe csoportosítja az oldalmegtekintéseket. A Barion csalásmegelőzésre használja. |
+| `ba_vid` | 1,5 év | Azonosítja a visszatérő látogatót a marketing-analitika céljából. |
+| `BarionMarketingConsent` | 1,5 év, törlődik, ha a látogató elutasítja | Rögzíti a hozzájárulási döntést. |
+
+Ha a WP Consent API bővítmény aktív, a bővítmény automatikusan bejelenti mindhármat, így azok
+megjelennek a cookie-szabályzatodban. Enélkül kézzel kell hozzáadnod őket.
+
+## A beállítási varázsló
+
+Ha egyetlen hozzájárulási forrás sem működik, a panel felkínálja a **Set up consent** lehetőséget.
+A varázsló új lapon megnyitja a boltodat, ott elfogadod a saját bannereden, a bővítmény pedig
+rögzíti, melyik cookie változott meg. Ugyanezt megismétled elutasításra is. A Barion mind a
+`grantConsent`, mind a `rejectConsent` hívást megköveteli, így a varázsló addig nem menti el a
+beállítást, amíg mindkettő nincs meg.
+
+A varázsló egy cookie-nevet, az elfogadott és elutasított értéket, valamint legfeljebb öt
+eseménynevet tárol. Soha nem tárol vagy futtat olyan JavaScriptet, amelyet te adtál meg. A
+rögzítő csak egy bejelentkezett, érvényes nonce-szal érkező adminisztrátor számára töltődik be;
+látogató számára soha.
+
+### Miért rögzített a hozzájárulási kategória
+
+A bővítmény mindig a `marketing` kategóriát kéri, és nem kínál választást. A WP Consent API öt
+rögzített kategóriát határoz meg, a cookie-banner bővítmények pedig kódban saját kategóriáikat
+ezekre képezik le. A CookieYes az Advertisement-et a marketingre, az Analytics-et a statistics-re,
+a Functional-t a preferences-re, a Performance-t pedig a functional-ra képezi le. Ezt a
+leképezést nem tudod megváltoztatni.
+
+A Barion hozzájárulást kér marketingcélokra, ezért a `marketing` az egyetlen helyes kategória. Egy
+választó lehetővé tenné, hogy a Barion egy statisztikai jelölőnégyzeten süljön el, ami sérti a
+Barion feltételeit.
+
+---
+
+## 2. szint: WP Consent API (ajánlott)
 
 A [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) egy WordPress szabvány a hozzájárulás kommunikációjához. Minden nagyobb cookie hozzájárulás bővítmény támogatja.
 
@@ -58,7 +126,7 @@ A Barion Pixel a `marketing` hozzájárulási kategória alatt van regisztrálva
 
 ---
 
-## 2. szint: Cookie Law Info (tartalék)
+## 3. szint: Cookie Law Info (tartalék)
 
 Ha a WP Consent API nem érhető el, a bővítmény közvetlen integrációra vált a [Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes bővítménnyel.
 
@@ -76,7 +144,7 @@ Nincs szükség konfigurációra. Telepítsd mindkét bővítményt, és az inte
 
 ---
 
-## 3. szint: Manuális integráció
+## 4. szint: Manuális integráció
 
 Egyéni hozzájárulás kezelőkhöz vagy olyan környezetekhez, ahol sem a WP Consent API, sem a Cookie Law Info nem érhető el.
 
@@ -169,11 +237,13 @@ Az alap pixel mindig betöltődik a Barion csalás megelőzési céljaira. A `gr
 1. Engedélyezd a **Hibakeresési módot** a Beállítások > Barion Pixel menüpontban
 2. Nyisd meg a böngésző konzolt (F12)
 3. Keresd a hozzájárulással kapcsolatos naplóüzeneteket:
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — 1. szint, felhasználó elfogadta
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — 1. szint, felhasználó elutasította
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — 2. szint, felhasználó elfogadta
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — 2. szint, felhasználó elutasította
-   - `[Barion Pixel] No consent manager detected...` — 3. szint (manuális mód)
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — 1. szint, elfogadva
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — 1. szint, elutasítva
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — 2. szint, felhasználó elfogadta
+   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — 2. szint, felhasználó elutasította
+   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — 3. szint, felhasználó elfogadta
+   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — 3. szint, felhasználó elutasította
+   - `[Barion Pixel] No consent manager detected...` — 4. szint (manuális mód)
    - `[Barion Pixel] Consent granted (grantConsent)` — hozzájárulás megadva (bármely szint)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — hozzájárulás elutasítva (bármely szint)
 4. Teszteld az elfogadási és elutasítási folyamatot is a cookie banneren

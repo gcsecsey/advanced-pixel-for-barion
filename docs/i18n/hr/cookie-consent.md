@@ -12,15 +12,76 @@ Osnovna skripta pixela uvijek se učitava radi sprječavanja prijevare, ali mark
 
 **Važno:** Tvoj banner za kolačiće mora nuditi i opciju prihvaćanja i opciju odbijanja. "Zid kolačića" (samo prihvaćanje) nije usklađen s GDPR-om od 2020. godine i Barion ga neće prihvatiti.
 
-Dodatak podržava tri razine integracije pristanka, provjeravane po redu:
+Dodatak podržava četiri razine integracije pristanka, provjeravane po redu:
 
-1. **WP Consent API** (preporučeno) — univerzalan, radi sa svim glavnim dodacima za kolačiće
-2. **Cookie Law Info** (rezervna opcija) — izravna integracija za stranice koje koriste CookieYes/Cookie Law Info
-3. **Ručno** — za prilagođene upravitelje pristanka ili rubne slučajeve
+1. **Zabilježeni okidač** — signal kolačića koji je uhvatio čarobnjak za postavljanje; pobjeđuje
+   samo kada su zabilježena oba signala, prihvaćanje i odbijanje, jer ih je vlasnik trgovine
+   namjerno postavio. Napola naučen okidač — zabilježen samo jedan signal — potpuno se
+   zanemaruje, a dodatak prelazi na sljedeću razinu, jer Barion zahtijeva i `grantConsent` i
+   `rejectConsent`.
+2. **WP Consent API** (preporučeno) — univerzalan, radi sa svim glavnim dodacima za kolačiće
+3. **Cookie Law Info** (rezervna opcija) — izravna integracija za stranice koje koriste CookieYes/Cookie Law Info
+4. **Ručno** — za prilagođene upravitelje pristanka ili rubne slučajeve
 
 ---
 
-## Razina 1: WP Consent API (Preporučeno)
+## Ploča stanja
+
+Postavke › Barion Pixel otvara se s pločom stanja. Ona pokreće sve provjere navedene niže i prvo
+prikazuje najgori rezultat. Kada sve prođe, sažima se u jedan zeleni redak.
+
+Najvažnija provjera je **"No cookie banner plugin sets a consent type"** (nijedan dodatak s
+bannerom za kolačiće ne postavlja vrstu pristanka). WP Consent API prijavljuje pristanak za svaku
+kategoriju kada ništa ne postavlja vrstu pristanka:
+
+> If there's no consent management plugin to set it, it will return `false`. This will cause all
+> consent categories to return `true`.
+
+Stranica s aktivnim WP Consent API-jem, ali bez bannera za kolačiće stoga odobrava Barion pristanak
+za svakog posjetitelja, bez ikakvog stvarno prikupljenog pristanka. To krši GDPR i Barion uvjete.
+
+Neki banneri postavljaju vrstu pristanka samo u pregledniku, pa ploča prvo prijavljuje upozorenje i
+nudi gumb **Check in browser**. Ta provjera čita stvarne vrijednosti s vašeg frontenda prije bilo
+kakve interakcije te sukladno tome oboji redak crveno ili zeleno.
+
+### Barionovi kolačići
+
+`bp.js` postavlja tri kolačića prve strane na vašoj vlastitoj domeni. Svakom se nazivu za vrijeme
+izvođenja dodaje hash vaše domene.
+
+| Kolačić | Trajanje | Svrha |
+|---------|----------|-------|
+| `ba_sid` | 30 minuta | Grupira preglede stranica u jednu sesiju. Barion ga koristi za sprječavanje prijevare. |
+| `ba_vid` | 1,5 godina | Identificira povratnog posjetitelja radi marketinške analitike. |
+| `BarionMarketingConsent` | 1,5 godina, uklanja se kada posjetitelj odbije | Bilježi odabir pristanka. |
+
+Uz aktivan dodatak WP Consent API, dodatak sva tri automatski prijavljuje, pa se pojavljuju u vašoj
+politici kolačića. Bez njega ih je potrebno dodati ručno.
+
+## Čarobnjak za postavljanje
+
+Ako nijedan izvor pristanka ne radi, ploča nudi **Set up consent**. Čarobnjak otvara vašu trgovinu
+u novoj kartici, vi prihvaćate u vlastitom banneru, a dodatak bilježi koji se kolačić promijenio.
+Isto ponavljate za odbijanje. Barion zahtijeva i `grantConsent` i `rejectConsent`, pa čarobnjak
+odbija spremiti dok ne prikupi oboje.
+
+Čarobnjak pohranjuje naziv kolačića, prihvaćenu i odbijenu vrijednost te do pet naziva događaja.
+Nikada ne pohranjuje niti pokreće JavaScript koji sami dostavite. Snimač se učitava samo za
+prijavljenog administratora koji stigne s valjanim nonceom; posjetitelju se nikada ne učitava.
+
+### Zašto je kategorija pristanka fiksna
+
+Dodatak uvijek traži kategoriju `marketing` i ne nudi izbor. WP Consent API definira pet fiksnih
+kategorija, a dodaci s bannerima za kolačiće u kodu mapiraju svoje vlastite kategorije na njih.
+CookieYes mapira Advertisement na marketing, Analytics na statistics, Functional na preferences i
+Performance na functional. Tu mapu ne možete promijeniti.
+
+Barion zahtijeva pristanak u marketinške svrhe, pa je `marketing` jedina ispravna kategorija.
+Izbornik bi omogućio pokretanje Bariona na potvrdnom okviru za statistiku, što krši Barion uvjete.
+
+---
+
+## Razina 2: WP Consent API (Preporučeno)
 
 [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) je WordPress standard za komunikaciju o pristanku. Podržavaju ga svi glavni dodaci za pristanak na kolačiće.
 
@@ -58,7 +119,7 @@ Barion Pixel je registriran u kategoriji pristanka `marketing` u WP Consent API-
 
 ---
 
-## Razina 2: Cookie Law Info (Rezervna opcija)
+## Razina 3: Cookie Law Info (Rezervna opcija)
 
 Ako WP Consent API nije dostupan, dodatak se vraća na izravnu integraciju s dodatkom [Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes.
 
@@ -76,7 +137,7 @@ Nije potrebna konfiguracija. Instaliraj oba dodatka i integracija radi automatsk
 
 ---
 
-## Razina 3: Ručna integracija
+## Razina 4: Ručna integracija
 
 Za prilagođene upravitelje pristanka ili okruženja gdje niti WP Consent API niti Cookie Law Info nisu dostupni.
 
@@ -169,11 +230,13 @@ Osnovni pixel uvijek se učitava za Barionovo sprječavanje prijevare. Pozivi `g
 1. Omogući **Način rada za otklanjanje pogrešaka** u Postavke > Barion Pixel
 2. Otvori konzolu preglednika (F12)
 3. Traži poruke u konzoli vezane za pristanak:
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Razina 1, korisnik prihvatio
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Razina 1, korisnik odbio
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Razina 2, korisnik prihvatio
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Razina 2, korisnik odbio
-   - `[Barion Pixel] No consent manager detected...` — Razina 3 (ručni način)
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Razina 1, prihvaćeno
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Razina 1, odbijeno
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Razina 2, korisnik prihvatio
+   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Razina 2, korisnik odbio
+   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Razina 3, korisnik prihvatio
+   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Razina 3, korisnik odbio
+   - `[Barion Pixel] No consent manager detected...` — Razina 4 (ručni način)
    - `[Barion Pixel] Consent granted (grantConsent)` — pristanak je odobren (bilo koja razina)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — pristanak je odbijen (bilo koja razina)
 4. Testiraj tokove prihvaćanja i odbijanja na svom banneru za kolačiće

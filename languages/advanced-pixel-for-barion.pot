@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Advanced Pixel for Barion 1.0.0\n"
+"Project-Id-Version: Advanced Pixel for Barion 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/advanced-pixel-for-barion\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-24T20:24:18+00:00\n"
+"POT-Creation-Date: 2026-08-08T18:15:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: advanced-pixel-for-barion\n"
@@ -39,50 +39,439 @@ msgstr ""
 msgid "https://github.com/gcsecsey"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:121
+#: includes/class-wc-barion-admin.php:65
 msgid "Barion Pixel Settings"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:122
+#: includes/class-wc-barion-admin.php:66
 msgid "Barion Pixel"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:139
+#: includes/class-wc-barion-admin.php:83
 msgid "Barion Pixel Configuration"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:146
+#: includes/class-wc-barion-admin.php:90
+#: includes/class-wc-barion-health.php:155
 msgid "Pixel ID"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:154
+#: includes/class-wc-barion-admin.php:98
 msgid "Enable Full Pixel Tracking"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:162
+#: includes/class-wc-barion-admin.php:106
 msgid "Debug Mode"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:214
+#: includes/class-wc-barion-admin.php:130
+msgid "The Pixel ID must look like BP-0000000000-00. Your previous ID was kept."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:179
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
 msgstr ""
 
-#: advanced-pixel-for-barion.php:231
+#: includes/class-wc-barion-admin.php:183
+msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:201
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:248
+#: includes/class-wc-barion-admin.php:218
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:250
+#: includes/class-wc-barion-admin.php:220
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
 msgstr ""
 
-#: advanced-pixel-for-barion.php:267
+#: includes/class-wc-barion-admin.php:237
 msgid "Enable debug mode (logs events to browser console)"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:708
-msgid "Advanced Pixel for Barion: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
+#: includes/class-wc-barion-admin.php:277
+msgid "Your shop opens in a new tab. Accept cookies in your banner there, then return here."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:278
+msgid "Now reject cookies in that tab. Clear your cookies first if the banner does not appear again."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:279
+msgid "Recording. Waiting for the banner."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:280
+msgid "Open my shop"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:281
+#: includes/class-wc-barion-admin.php:540
+msgid "Next"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:282
+msgid "Save"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:283
+msgid "Consent setup saved. Reloading."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:284
+msgid "Record both accept and reject before saving."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:285
+msgid "No cookie changed. Make a choice in the banner on the other tab."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:286
+msgid "Testing…"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:287
+msgid "The check did not finish. Try again."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:288
+msgid "No signal from your shop. The recording link may have expired. Close this, then press Set up consent again."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:333
+msgid "Barion Pixel is healthy"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:334
+msgid "Barion Pixel needs attention"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:335
+msgid "Action needed"
+msgstr ""
+
+#. translators: %d: number of health checks.
+#: includes/class-wc-barion-admin.php:353
+#, php-format
+msgid "Show %d checks"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:397
+#: includes/class-wc-barion-admin.php:437
+msgid "Permission denied."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:404
+msgid "The trigger could not be read."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:413
+msgid "Record both the accept signal and the reject signal before saving."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:425
+msgid "Consent setup saved."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:453
+msgid "Unknown check."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:471
+#: includes/class-wc-barion-health.php:169
+#: includes/class-wc-barion-health.php:239
+msgid "Set up consent"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:477
+msgid "Barion may receive marketing data only after the visitor agrees. The plugin needs a reliable signal for accept and for reject."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:482
+msgid "Teach the plugin my banner"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:483
+msgid "You open your shop, accept, then reject. The plugin records what changes. This works with any cookie banner."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:490
+msgid "Use the WP Consent API"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:494
+msgid "A cookie banner plugin sets a consent type. Nothing more is needed."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:495
+msgid "Not usable: no cookie banner plugin sets a consent type."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:504
+msgid "Do nothing"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:505
+msgid "Consent is never granted. Full tracking collects no marketing data."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:513
+msgid "The recorder watches cookie changes and event names only. It runs for you alone and never for your visitors."
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:517
+msgid "Grant consent to Barion when this is true:"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:519
+msgid "Cookie name"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:523
+msgid "Accepted value contains"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:527
+msgid "Rejected value contains"
+msgstr ""
+
+#: includes/class-wc-barion-admin.php:539
+msgid "Back"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:140
+msgid "Pixel ID is missing"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:141
+msgid "Nothing is tracked until you enter your Barion Pixel ID."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:148
+msgid "Pixel ID has the wrong format"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:149
+msgid "The ID must look like BP-0000000000-00. Barion ignores anything else."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:165
+msgid "No consent source is set up"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:166
+msgid "Barion never receives consent, so full tracking collects no marketing data. Teach the plugin your cookie banner."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:177
+msgid "Consent comes from your cookie banner, recorded by the wizard"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:178
+msgid "Consent comes from the WP Consent API"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:179
+msgid "Consent comes from Cookie Law Info"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:186
+msgid "Barion receives grantConsent and rejectConsent from this source."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:189
+msgid "Change"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:201
+msgid "A cookie banner plugin sets the consent type"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:202
+msgid "Visitor choices reach the plugin correctly."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:212
+msgid "No cookie banner plugin sets a consent type"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:213
+msgid "When nothing sets a consent type, the WP Consent API reports consent for every visitor, and the pixel sends grantConsent without any consent. Some banners set the consent type in the browser only, so check there before you act."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:216
+msgid "Check in browser"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:226
+msgid "Your cookie banner sets the consent type in the browser"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:227
+msgid "Nothing is set on the server, but the browser check found a consent type. Visitor choices reach the plugin correctly."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:235
+msgid "Every visitor is counted as consenting"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:236
+msgid "The browser check found marketing consent granted before anyone touched a banner. The pixel sends grantConsent for every visitor. This breaks the GDPR and the Barion terms. Install a cookie banner plugin that supports the WP Consent API, or teach the plugin your banner."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:248
+msgid "Consent is not granted automatically"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:249
+msgid "The browser check found no consent before any banner interaction."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:265
+msgid "Accept and reject are both recorded"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:266
+msgid "Barion requires both grantConsent and rejectConsent."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:271
+msgid "The reject signal is missing."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:272
+msgid "The accept signal is missing."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:277
+msgid "Only one consent signal is recorded"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:278
+msgid "Barion requires both grantConsent and rejectConsent. Record the missing one."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:281
+msgid "Finish setup"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:292
+msgid "WooCommerce is active"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:300
+#: includes/class-wc-barion-health.php:307
+msgid "WooCommerce is not active"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:301
+msgid "Full tracking is off, so nothing depends on WooCommerce."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:308
+msgid "Full tracking is on, but the e-commerce events need WooCommerce. Only the base pixel runs."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:317
+msgid "Full tracking is on"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:318
+msgid "contentView, addToCart, initiateCheckout, purchase, setEncryptedEmail"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:324
+msgid "Full tracking is off"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:325
+msgid "Only the base pixel runs. It sends pageView for fraud prevention."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:336
+msgid "Barion Payment Gateway holds a second Pixel ID"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:337
+msgid "Both plugins work together and the base script loads only once. You may remove the ID from the gateway to keep one source of truth."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:346
+msgid "Barion cookies are declared"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:347
+msgid "They appear in your cookie policy through the WP Consent API."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:353
+msgid "Barion cookies are not declared"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:354
+msgid "Barion sets ba_sid, ba_vid and BarionMarketingConsent on your domain. Without the WP Consent API plugin they cannot be added to your cookie policy automatically, so add them by hand."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:362
+msgid "Consent category: marketing"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:363
+msgid "Fixed, and not configurable. Barion requires consent for marketing purposes, so marketing is the only correct category. Your cookie banner maps its own advertising category onto it."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:372
+msgid "Barion pixel script reachable"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:373
+msgid "Loads bp.js from this browser. Nothing is sent to your server."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:376
+msgid "Test"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:385
+msgid "Barion pixel script is reachable"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:386
+msgid "bp.js loaded from this browser."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:392
+msgid "Barion pixel script did not load"
+msgstr ""
+
+#: includes/class-wc-barion-health.php:393
+msgid "bp.js did not load in this browser. An ad blocker or a network rule may block it. Your visitors may still reach it."
+msgstr ""
+
+#: includes/class-wc-barion-health.php:396
+msgid "Test again"
+msgstr ""
+
+#: includes/class-wc-barion-pixel.php:149
+msgid "30 minutes"
+msgstr ""
+
+#: includes/class-wc-barion-pixel.php:150
+msgid "Groups a visitor's page views into one session. Barion uses it for fraud prevention. The full name has a hash of your domain appended."
+msgstr ""
+
+#: includes/class-wc-barion-pixel.php:157
+#: includes/class-wc-barion-pixel.php:165
+msgid "1.5 years"
+msgstr ""
+
+#: includes/class-wc-barion-pixel.php:158
+msgid "Identifies a returning visitor for Barion marketing analytics. The full name has a hash of your domain appended."
+msgstr ""
+
+#: includes/class-wc-barion-pixel.php:166
+msgid "Records whether the visitor accepted marketing tracking. Removed when they reject it. The full name has a hash of your domain appended."
 msgstr ""

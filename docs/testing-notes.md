@@ -108,6 +108,30 @@ bp.js logs its own validation errors with a numeric prefix. Common ones:
 
 ---
 
+## Health panel and consent wizard
+
+The recorder and the wizard depend on a third-party cookie banner, so they need manual checks.
+
+1. **Silent consent.** Activate WP Consent API and deactivate every cookie banner plugin. The
+   panel shows an amber "No cookie banner plugin sets a consent type" row. Press **Check in
+   browser**. The row turns red.
+2. **Recorder gate.** Log out and open `/?apb_record_consent=anything`. Confirm
+   `barion-consent-recorder.js` is absent from the page source. Repeat as an administrator with
+   an invalid nonce; it must still be absent.
+3. **Record accept.** Activate a cookie banner. Press **Set up consent**, then **Open my shop**.
+   Accept in the banner. The wizard log shows the changed cookie.
+4. **Record reject.** Clear cookies on that tab, reload, and reject. The wizard reaches step 3
+   with the fields filled.
+5. **Half a trigger.** Try to save with the reject value empty. The wizard refuses.
+6. **Front end.** With Debug Mode on, accept in the banner. The console logs
+   `Consent granted via the recorded cookie trigger`. Reject, and it logs the reject line.
+7. **Reachability.** Press **Test**. With an ad blocker on, it reports a warning.
+8. **Two distinct readings.** After recording accept and then reject, open step 3 and confirm the
+   accepted value and the rejected value are different. If they are identical the trigger cannot
+   work, because an ambiguous reading is treated as no consent.
+
+---
+
 ## Common Issues
 
 ### Events not firing

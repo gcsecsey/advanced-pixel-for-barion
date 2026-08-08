@@ -112,6 +112,32 @@ bp.js înregistrează propriile erori de validare cu un prefix numeric. Cele mai
 
 ---
 
+## Panoul de stare și asistentul de consimțământ
+
+Recorder-ul și asistentul depind de un banner de cookie al unei terțe părți, așa că necesită
+verificări manuale.
+
+1. **Consimțământ silențios.** Activează WP Consent API și dezactivează fiecare plugin de banner
+   de cookie. Panoul afișează o linie chihlimbarie „No cookie banner plugin sets a consent type".
+   Apasă **Check in browser**. Linia devine roșie.
+2. **Blocarea recorder-ului.** Deloghează-te și deschide `/?apb_record_consent=anything`.
+   Confirmă că `barion-consent-recorder.js` lipsește din sursa paginii. Repetă ca administrator cu
+   un nonce invalid; trebuie să lipsească în continuare.
+3. **Înregistrează acceptarea.** Activează un banner de cookie. Apasă **Set up consent**, apoi
+   **Open my shop**. Acceptă în banner. Jurnalul asistentului arată cookie-ul schimbat.
+4. **Înregistrează refuzul.** Șterge cookie-urile în acea filă, reîncarcă și refuză. Asistentul
+   ajunge la pasul 3 cu câmpurile completate.
+5. **Declanșator pe jumătate.** Încearcă să salvezi cu valoarea de refuz goală. Asistentul refuză.
+6. **Frontend.** Cu Modul depanare activat, acceptă în banner. Consola înregistrează
+   `Consent granted via the recorded cookie trigger`. Refuză, și înregistrează linia
+   corespunzătoare de refuz.
+7. **Accesibilitate.** Apasă **Test**. Cu un blocator de reclame activ, raportează un avertisment.
+8. **Două valori distincte.** După ce înregistrezi acceptarea și apoi refuzul, deschide pasul 3 și
+   confirmă că valoarea acceptată și cea refuzată sunt diferite. Dacă sunt identice, declanșatorul
+   nu poate funcționa, pentru că o citire ambiguă este tratată ca lipsă de consimțământ.
+
+---
+
 ## Probleme frecvente
 
 ### Evenimentele nu se declanșează

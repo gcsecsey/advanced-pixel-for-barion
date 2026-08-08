@@ -112,6 +112,32 @@ bp.js bilježi vlastite pogreške validacije s numeričkim prefiksom. Uobičajen
 
 ---
 
+## Ploča stanja i čarobnjak za pristanak
+
+Snimač i čarobnjak ovise o banneru za kolačiće trećih strana, pa zahtijevaju ručne provjere.
+
+1. **Tihi pristanak.** Aktivirajte WP Consent API i deaktivirajte svaki dodatak s bannerom za
+   kolačiće. Ploča prikazuje žuti redak "No cookie banner plugin sets a consent type". Pritisnite
+   **Check in browser**. Redak postaje crven.
+2. **Zapreka snimača.** Odjavite se i otvorite `/?apb_record_consent=anything`. Potvrdite da
+   `barion-consent-recorder.js` nedostaje u izvornom kodu stranice. Ponovite kao administrator s
+   nevažećim nonceom; i dalje mora nedostajati.
+3. **Zabilježi prihvaćanje.** Aktivirajte banner za kolačiće. Pritisnite **Set up consent**, zatim
+   **Open my shop**. Prihvatite u banneru. Zapisnik čarobnjaka prikazuje promijenjeni kolačić.
+4. **Zabilježi odbijanje.** Obrišite kolačiće na toj kartici, ponovno učitajte i odbijte. Čarobnjak
+   dolazi do koraka 3 s popunjenim poljima.
+5. **Napola postavljen okidač.** Pokušajte spremiti s praznom vrijednošću odbijanja. Čarobnjak to
+   odbija.
+6. **Frontend.** Uz uključen način za otklanjanje pogrešaka, prihvatite u banneru. Konzola
+   bilježi `Consent granted via the recorded cookie trigger`. Odbijte, i bilježi se odgovarajući
+   redak za odbijanje.
+7. **Dostupnost.** Pritisnite **Test**. Uz uključen blokator oglasa, prijavljuje upozorenje.
+8. **Dvije različite vrijednosti.** Nakon što zabilježite prihvaćanje pa odbijanje, otvorite korak
+   3 i potvrdite da su prihvaćena i odbijena vrijednost različite. Ako su identične, okidač ne
+   može raditi jer se dvosmisleno očitanje tretira kao izostanak pristanka.
+
+---
+
 ## Česti problemi
 
 ### Događaji se ne pokreću

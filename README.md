@@ -29,6 +29,8 @@ Barion Pixel integration for WooCommerce with full e-commerce event tracking, co
   - `setEncryptedEmail`: Sends billing email to Barion on purchase (encrypted by bp.js)
 - **WP Consent API Integration**: Universal cookie consent support — works with CookieYes, Complianz, Real Cookie Banner, GDPR Cookie Compliance, Cookie Notice, and more
 - **Cookie Law Info Fallback**: Direct integration for sites using CookieYes/Cookie Law Info
+- **Health Panel**: Checks your Pixel ID, WooCommerce, and the whole consent setup in one place — including the silent-consent trap that grants Barion consent for every visitor
+- **Consent Setup Wizard**: Records the accept and reject signals of any cookie banner by observation, so no code is needed
 - **Admin Settings Panel**: Easy configuration through WordPress admin
 - **Debug Mode**: Console logging for testing and development
 - **bp.js Double-Load Detection**: Safely coexists with other plugins that load bp.js (e.g., Barion Payment Gateway)

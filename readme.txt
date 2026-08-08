@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.0.3
+Stable tag: 1.1.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -57,6 +57,8 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 * Base Pixel with automatic pageView tracking
 * Full e-commerce event tracking with all required fields
 * WP Consent API integration for universal cookie consent support
+* **Health Panel**: Checks your Pixel ID, WooCommerce, and the whole consent setup in one place — including the silent-consent trap that grants Barion consent for every visitor
+* **Consent Setup Wizard**: Records the accept and reject signals of any cookie banner by observation, so no code is needed
 * Client-side add-to-cart tracking (compatible with page caching)
 * Variable product support (tracks variation prices)
 * Duplicate purchase prevention
@@ -112,6 +114,10 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 1. Settings page — enter your Barion Pixel ID and configure tracking options.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Health Panel on the settings screen checks your Pixel ID, WooCommerce, and your whole consent setup in one place, worst result first — including the silent-consent trap where a site with the WP Consent API active but no cookie banner grants Barion consent for every visitor.
+* New: Consent Setup Wizard records the accept and reject signals of any cookie banner by observation — no code needed. It becomes the highest-priority consent source once both signals are recorded; a half-taught trigger (only one signal recorded) is ignored and the plugin falls through to the next available source.
 
 = 1.0.3 =
 * Fix: emails containing `+` in the local part (e.g. `alice+tag@example.com`), or with TLDs longer than four letters (e.g. `.museum`, `.online`), were rejected by bp.js with `Format of e-mail address or hash is invalid`. The plugin now SHA-1 hashes the email client-side (via the Web Crypto API) before passing it to bp.js, which bypasses bp.js's restrictive internal email regex. The Barion Pixel API explicitly supports pre-computed SHA-1 hashes.

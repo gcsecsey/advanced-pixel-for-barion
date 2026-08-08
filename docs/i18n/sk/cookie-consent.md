@@ -12,15 +12,76 @@ Základný pixelový skript sa načíta vždy kvôli prevencii podvodov, ale ži
 
 **Dôležité:** Tvoj banner na cookies musí ponúkať možnosť prijať aj odmietnuť. „Cookie wall" (iba prijatie) nie je v súlade s GDPR od roku 2020 a Barion ho odmietne.
 
-Plugin podporuje tri úrovne integrácie súhlasu, kontrolované v tomto poradí:
+Plugin podporuje štyri úrovne integrácie súhlasu, kontrolované v tomto poradí:
 
-1. **WP Consent API** (odporúčané) — univerzálne, funguje so všetkými hlavnými pluginmi na cookies
-2. **Cookie Law Info** (záložné) — priama integrácia pre weby používajúce CookieYes/Cookie Law Info
-3. **Manuálne** — pre vlastné správcovia súhlasu alebo okrajové prípady
+1. **Zaznamenaný spúšťač** — signál cookie zachytený sprievodcom nastavením; vyhráva iba vtedy,
+   keď sú zaznamenané obe hodnoty, prijatie aj odmietnutie, pretože ich majiteľ obchodu nastavil
+   zámerne. Napoly naučený spúšťač — zaznamenaná len jedna hodnota — sa úplne ignoruje a plugin
+   prejde na ďalšiu úroveň, pretože Barion vyžaduje `grantConsent` aj `rejectConsent`.
+2. **WP Consent API** (odporúčané) — univerzálne, funguje so všetkými hlavnými pluginmi na cookies
+3. **Cookie Law Info** (záložné) — priama integrácia pre weby používajúce CookieYes/Cookie Law Info
+4. **Manuálne** — pre vlastné správcovia súhlasu alebo okrajové prípady
 
 ---
 
-## Úroveň 1: WP Consent API (odporúčané)
+## Panel stavu
+
+Nastavenia › Barion Pixel sa otvorí s panelom stavu. Ten spustí všetky nižšie uvedené kontroly a
+najprv zobrazí najhorší výsledok. Keď všetko prejde, zbalí sa do jedného zeleného riadku.
+
+Najdôležitejšou kontrolou je **„No cookie banner plugin sets a consent type"** (žiadny plugin s
+bannerom na cookies nenastavuje typ súhlasu). WP Consent API nahlási súhlas pre každú kategóriu,
+keď nič nenastaví typ súhlasu:
+
+> If there's no consent management plugin to set it, it will return `false`. This will cause all
+> consent categories to return `true`.
+
+Web s aktívnym WP Consent API, ale bez banneru na cookies, tak udeľuje súhlas Barion pre každého
+návštevníka, bez toho, aby bol akýkoľvek súhlas skutočne získaný. To porušuje GDPR aj podmienky
+Barion.
+
+Niektoré bannery nastavujú typ súhlasu iba v prehliadači, takže panel najprv nahlási varovanie a
+ponúkne tlačidlo **Check in browser**. Táto kontrola načíta skutočné hodnoty z vášho frontendu ešte
+pred akoukoľvek interakciou a podľa toho zafarbí riadok načerveno alebo nazeleno.
+
+### Cookies Barion
+
+`bp.js` nastavuje na vašej vlastnej doméne tri cookies prvej strany. Ku každému názvu sa za behu
+pripojí hash vašej domény.
+
+| Cookie | Doba platnosti | Účel |
+|--------|-----------------|------|
+| `ba_sid` | 30 minút | Zoskupuje zobrazenia stránok do jednej relácie. Barion ju používa na prevenciu podvodov. |
+| `ba_vid` | 1,5 roka | Identifikuje vracajúceho sa návštevníka pre marketingovú analytiku. |
+| `BarionMarketingConsent` | 1,5 roka, odstránená pri odmietnutí návštevníka | Zaznamenáva voľbu súhlasu. |
+
+Keď je aktívny plugin WP Consent API, plugin automaticky deklaruje všetky tri, takže sa objavia vo
+vašich zásadách používania cookies. Bez neho je potrebné pridať ich ručne.
+
+## Sprievodca nastavením
+
+Ak nefunguje žiadny zdroj súhlasu, panel ponúkne **Set up consent**. Sprievodca otvorí váš obchod
+na novej karte, vy tam prijmete súhlas vo svojom vlastnom banneri a plugin zaznamená, ktoré cookie
+sa zmenilo. To isté zopakujete pre odmietnutie. Barion vyžaduje `grantConsent` aj `rejectConsent`,
+takže sprievodca odmietne uloženie, kým nemá obe hodnoty.
+
+Sprievodca ukladá názov cookie, prijatú a odmietnutú hodnotu a až päť názvov udalostí. Nikdy
+neukladá ani nespúšťa JavaScript, ktorý by ste dodali vy sami. Záznamník sa načíta iba pre
+prihláseného administrátora, ktorý príde s platným nonce; návštevníkovi sa nikdy nenačíta.
+
+### Prečo je kategória súhlasu pevne daná
+
+Plugin vždy žiada o kategóriu `marketing` a neponúka žiadnu voľbu. WP Consent API definuje päť
+pevných kategórií a pluginy s bannermi na cookies mapujú svoje vlastné kategórie na tieto v kóde.
+CookieYes mapuje Advertisement na marketing, Analytics na statistics, Functional na preferences a
+Performance na functional. Toto mapovanie nemožno zmeniť.
+
+Barion vyžaduje súhlas na marketingové účely, takže `marketing` je jediná správna kategória. Výber
+kategórie by umožnil spustiť Barion na zaškrtnutí pri štatistikách, čo porušuje podmienky Barion.
+
+---
+
+## Úroveň 2: WP Consent API (odporúčané)
 
 [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) je štandard WordPress pre komunikáciu o súhlase. Podporujú ho všetky hlavné pluginy na súhlas s cookies.
 
@@ -58,7 +119,7 @@ Barion Pixel je zaregistrovaný v kategórii súhlasu `marketing` vo WP Consent 
 
 ---
 
-## Úroveň 2: Cookie Law Info (záložné)
+## Úroveň 3: Cookie Law Info (záložné)
 
 Ak WP Consent API nie je dostupné, plugin sa vráti k priamej integrácii s pluginom [Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes.
 
@@ -76,7 +137,7 @@ Nie je potrebná žiadna konfigurácia. Nainštaluj oba pluginy a integrácia bu
 
 ---
 
-## Úroveň 3: Manuálna integrácia
+## Úroveň 4: Manuálna integrácia
 
 Pre vlastných správcov súhlasu alebo prostredia, kde nie je k dispozícii ani WP Consent API ani Cookie Law Info.
 
@@ -169,11 +230,13 @@ Základný pixel sa načíta vždy kvôli prevencii podvodov Barion. Volania `gr
 1. Povoľ **Režim ladenia** v Nastavenia > Barion Pixel
 2. Otvor konzolu prehliadača (F12)
 3. Hľadaj správy týkajúce sa súhlasu v protokole:
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Úroveň 1, používateľ prijal
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Úroveň 1, používateľ odmietol
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Úroveň 2, používateľ prijal
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Úroveň 2, používateľ odmietol
-   - `[Barion Pixel] No consent manager detected...` — Úroveň 3 (manuálny režim)
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Úroveň 1, prijaté
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Úroveň 1, odmietnuté
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Úroveň 2, používateľ prijal
+   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Úroveň 2, používateľ odmietol
+   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Úroveň 3, používateľ prijal
+   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Úroveň 3, používateľ odmietol
+   - `[Barion Pixel] No consent manager detected...` — Úroveň 4 (manuálny režim)
    - `[Barion Pixel] Consent granted (grantConsent)` — súhlas bol udelený (akákoľvek úroveň)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — súhlas bol odmietnutý (akákoľvek úroveň)
 4. Otestuj toky prijatia aj odmietnutia na svojom banneri na cookies

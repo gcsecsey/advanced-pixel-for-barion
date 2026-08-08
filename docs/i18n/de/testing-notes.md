@@ -112,6 +112,34 @@ bp.js protokolliert seine eigenen Validierungsfehler mit einem numerischen Präf
 
 ---
 
+## Health Panel und Consent-Assistent
+
+Der Recorder und der Assistent hängen von einem Cookie-Banner eines Drittanbieters ab, daher
+benötigen sie manuelle Prüfungen.
+
+1. **Stiller Consent.** Aktiviere die WP Consent API und deaktiviere jedes Cookie-Banner-Plugin.
+   Das Panel zeigt eine gelbe Zeile „No cookie banner plugin sets a consent type". Klicke auf
+   **Check in browser**. Die Zeile wird rot.
+2. **Recorder-Sperre.** Melde dich ab und öffne `/?apb_record_consent=anything`. Bestätige, dass
+   `barion-consent-recorder.js` im Seitenquelltext fehlt. Wiederhole dies als Administrator mit
+   einem ungültigen Nonce; es muss weiterhin fehlen.
+3. **Zustimmung aufzeichnen.** Aktiviere einen Cookie-Banner. Klicke auf **Set up consent**, dann
+   auf **Open my shop**. Stimme im Banner zu. Das Assistenten-Log zeigt das geänderte Cookie.
+4. **Ablehnung aufzeichnen.** Lösche die Cookies in diesem Tab, lade neu und lehne ab. Der
+   Assistent erreicht Schritt 3 mit ausgefüllten Feldern.
+5. **Halber Trigger.** Versuche zu speichern, während der Ablehnungswert leer ist. Der Assistent
+   verweigert dies.
+6. **Frontend.** Bei aktiviertem Debug-Modus stimme im Banner zu. Die Konsole protokolliert
+   `Consent granted via the recorded cookie trigger`. Lehne ab, und sie protokolliert die
+   entsprechende Ablehnungszeile.
+7. **Erreichbarkeit.** Klicke auf **Test**. Bei aktiviertem Werbeblocker meldet es eine Warnung.
+8. **Zwei unterschiedliche Werte.** Nachdem du zuerst Zustimmung, dann Ablehnung aufgezeichnet
+   hast, öffne Schritt 3 und bestätige, dass der zugestimmte und der abgelehnte Wert
+   unterschiedlich sind. Sind sie identisch, kann der Trigger nicht funktionieren, weil ein
+   mehrdeutiger Wert als „kein Consent" gewertet wird.
+
+---
+
 ## Häufige Probleme
 
 ### Events werden nicht ausgelöst

@@ -112,6 +112,31 @@ bp.js zaznamenává vlastní validační chyby s číselnou předponou. Běžné
 
 ---
 
+## Panel stavu a průvodce souhlasem
+
+Záznamník i průvodce závisí na banneru cookies třetí strany, takže je třeba je ověřit ručně.
+
+1. **Tichý souhlas.** Aktivujte WP Consent API a deaktivujte všechny pluginy s bannerem cookies.
+   Panel zobrazí žlutý řádek „No cookie banner plugin sets a consent type". Stiskněte **Check in
+   browser**. Řádek zčervená.
+2. **Brána záznamníku.** Odhlaste se a otevřete `/?apb_record_consent=anything`. Ověřte, že
+   `barion-consent-recorder.js` chybí ve zdrojovém kódu stránky. Zopakujte jako administrátor s
+   neplatným nonce; skript musí i nadále chybět.
+3. **Zaznamenat přijetí.** Aktivujte banner cookies. Stiskněte **Set up consent**, poté **Open my
+   shop**. V banneru přijměte souhlas. Protokol průvodce ukáže změněné cookie.
+4. **Zaznamenat odmítnutí.** Na téže kartě vymažte cookies, obnovte stránku a odmítněte souhlas.
+   Průvodce dojde ke kroku 3 s vyplněnými poli.
+5. **Napůl naučený spouštěč.** Zkuste uložit s prázdnou hodnotou odmítnutí. Průvodce to odmítne.
+6. **Frontend.** Se zapnutým režimem ladění přijměte souhlas v banneru. Konzole zaznamená
+   `Consent granted via the recorded cookie trigger`. Odmítněte a zaznamená se odpovídající řádek
+   pro odmítnutí.
+7. **Dostupnost.** Stiskněte **Test**. Se zapnutým blokátorem reklam nahlásí varování.
+8. **Dvě odlišné hodnoty.** Po zaznamenání přijetí a poté odmítnutí otevřete krok 3 a ověřte, že
+   přijatá a odmítnutá hodnota jsou různé. Pokud jsou stejné, spouštěč nemůže fungovat, protože
+   nejednoznačné čtení se považuje za žádný souhlas.
+
+---
+
 ## Běžné problémy
 
 ### Události se nespouštějí

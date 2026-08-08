@@ -112,6 +112,33 @@ bp.js beleži svoje validacijske napake s številčno predpono. Pogoste napake:
 
 ---
 
+## Plošča stanja in čarovnik za soglasje
+
+Snemalnik in čarovnik sta odvisna od pasice za piškotke tretje osebe, zato potrebujeta ročne
+preverbe.
+
+1. **Tiho soglasje.** Aktivirajte WP Consent API in deaktivirajte vsak vtičnik za pasico
+   piškotkov. Plošča prikaže rumeno vrstico "No cookie banner plugin sets a consent type".
+   Pritisnite **Check in browser**. Vrstica postane rdeča.
+2. **Zapora snemalnika.** Odjavite se in odprite `/?apb_record_consent=anything`. Potrdite, da
+   `barion-consent-recorder.js` manjka v izvorni kodi strani. Ponovite kot administrator z
+   neveljavnim nonce; še vedno mora manjkati.
+3. **Zabeležite sprejem.** Aktivirajte pasico za piškotke. Pritisnite **Set up consent**, nato
+   **Open my shop**. Sprejmite v pasici. Dnevnik čarovnika prikaže spremenjeni piškotek.
+4. **Zabeležite zavrnitev.** Počistite piškotke na tem zavihku, znova naložite in zavrnite.
+   Čarovnik pride do koraka 3 z izpolnjenimi polji.
+5. **Napol naučen sprožilec.** Poskusite shraniti s prazno vrednostjo zavrnitve. Čarovnik to
+   zavrne.
+6. **Frontend.** Z vklopljenim načinom za odpravljanje napak sprejmite v pasici. Konzola zabeleži
+   `Consent granted via the recorded cookie trigger`. Zavrnite, in zabeleži se ustrezna vrstica za
+   zavrnitev.
+7. **Dosegljivost.** Pritisnite **Test**. Z vklopljenim blokatorjem oglasov javi opozorilo.
+8. **Dve različni vrednosti.** Ko zabeležite sprejem in nato zavrnitev, odprite korak 3 in
+   potrdite, da sta sprejeta in zavrnjena vrednost različni. Če sta enaki, sprožilec ne more
+   delovati, ker se dvoumno branje obravnava kot brez soglasja.
+
+---
+
 ## Pogoste težave
 
 ### Dogodki se ne sprožijo

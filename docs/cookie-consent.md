@@ -8,15 +8,74 @@ The base pixel script always loads for fraud prevention, but no marketing data i
 
 **Important:** Your cookie banner must offer both an accept and a reject option. A "cookie wall" (accept-only) is not GDPR compliant since 2020 and will be rejected by Barion.
 
-The plugin supports three tiers of consent integration, checked in order:
+The plugin supports four tiers of consent integration, checked in order:
 
-1. **WP Consent API** (recommended) — universal, works with all major cookie plugins
-2. **Cookie Law Info** (fallback) — direct integration for sites using CookieYes/Cookie Law Info
-3. **Manual** — for custom consent managers or edge cases
+1. **Recorded trigger** — a cookie signal captured by the setup wizard; it wins only when both
+   the accept and the reject signal are recorded, because the shop owner set it deliberately. A
+   half-taught trigger — only one signal recorded — is ignored entirely, and the plugin falls
+   through to the next tier, because Barion requires both `grantConsent` and `rejectConsent`.
+2. **WP Consent API** (recommended) — universal, works with all major cookie plugins
+3. **Cookie Law Info** (fallback) — direct integration for sites using CookieYes/Cookie Law Info
+4. **Manual** — for custom consent managers or edge cases
 
 ---
 
-## Tier 1: WP Consent API (Recommended)
+## The health panel
+
+Settings › Barion Pixel opens with a health panel. It runs every check below and shows the worst
+result first. When everything passes, it collapses to one green line.
+
+The most important check is **"No cookie banner plugin sets a consent type"**. The WP Consent API
+reports consent for every category when nothing sets a consent type:
+
+> If there's no consent management plugin to set it, it will return `false`. This will cause all
+> consent categories to return `true`.
+
+A site with the WP Consent API active but no cookie banner therefore grants Barion consent for
+every visitor, with no consent collected. That breaks the GDPR and the Barion terms.
+
+Some banners set the consent type in the browser only, so the panel first reports a warning and
+offers a **Check in browser** button. That check reads the real values from your front end before
+any interaction, and turns the row red or green accordingly.
+
+### The Barion cookies
+
+`bp.js` sets three first-party cookies on your own domain. Each name gets a hash of your domain
+appended at runtime.
+
+| Cookie | Duration | Purpose |
+|--------|----------|---------|
+| `ba_sid` | 30 minutes | Groups page views into one session. Used by Barion for fraud prevention. |
+| `ba_vid` | 1.5 years | Identifies a returning visitor for marketing analytics. |
+| `BarionMarketingConsent` | 1.5 years, removed when the visitor rejects | Records the consent choice. |
+
+With the WP Consent API plugin active, the plugin declares all three automatically, so they appear
+in your cookie policy. Without it, add them by hand.
+
+## The setup wizard
+
+If no consent source works, the panel offers **Set up consent**. The wizard opens your shop in a
+new tab, you accept in your own banner, and the plugin records which cookie changed. You repeat
+for reject. Barion requires both `grantConsent` and `rejectConsent`, so the wizard refuses to save
+until it has both.
+
+The wizard stores a cookie name, the accepted and rejected values, and up to five event names. It
+never stores or runs JavaScript that you supply. The recorder loads only for a logged-in
+administrator who arrives with a valid nonce; it never loads for a visitor.
+
+### Why the consent category is fixed
+
+The plugin always asks for the `marketing` category and offers no choice. The WP Consent API
+defines five fixed categories, and cookie banner plugins map their own categories onto them in
+code. CookieYes maps Advertisement to marketing, Analytics to statistics, Functional to
+preferences, and Performance to functional. You cannot change that map.
+
+Barion requires consent for marketing purposes, so `marketing` is the only correct category. A
+selector would let you fire Barion on a statistics checkbox, which breaks the Barion terms.
+
+---
+
+## Tier 2: WP Consent API (Recommended)
 
 The [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) is a WordPress standard for consent communication. It's supported by all major cookie consent plugins.
 
@@ -54,7 +113,7 @@ The Barion Pixel is registered under the `marketing` consent category in the WP 
 
 ---
 
-## Tier 2: Cookie Law Info (Fallback)
+## Tier 3: Cookie Law Info (Fallback)
 
 If the WP Consent API is not available, the plugin falls back to direct integration with the [Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes plugin.
 
@@ -72,7 +131,7 @@ No configuration needed. Install both plugins and the integration works automati
 
 ---
 
-## Tier 3: Manual Integration
+## Tier 4: Manual Integration
 
 For custom consent managers or environments where neither WP Consent API nor Cookie Law Info is available.
 
@@ -165,11 +224,13 @@ The base pixel always loads for Barion's fraud prevention. The `grantConsent` / 
 1. Enable **Debug Mode** in Settings > Barion Pixel
 2. Open the browser console (F12)
 3. Look for consent-related log messages:
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Tier 1, user accepted
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Tier 1, user declined
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Tier 2, user accepted
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Tier 2, user declined
-   - `[Barion Pixel] No consent manager detected...` — Tier 3 (manual mode)
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Tier 1, accepted
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Tier 1, rejected
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Tier 2, user accepted
+   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Tier 2, user declined
+   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Tier 3, user accepted
+   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Tier 3, user declined
+   - `[Barion Pixel] No consent manager detected...` — Tier 4 (manual mode)
    - `[Barion Pixel] Consent granted (grantConsent)` — consent was granted (any tier)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — consent was rejected (any tier)
 4. Test both accept and reject flows on your cookie banner

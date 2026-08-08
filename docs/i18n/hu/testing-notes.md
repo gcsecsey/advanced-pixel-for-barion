@@ -112,6 +112,36 @@ A bp.js numerikus előtaggal naplózza saját validációs hibáit. Leggyakoribb
 
 ---
 
+## Állapotpanel és hozzájárulási varázsló
+
+A rögzítő és a varázsló egy harmadik féltől származó cookie-bannertől függ, ezért kézi
+ellenőrzést igényelnek.
+
+1. **Néma hozzájárulás.** Aktiváld a WP Consent API-t, és kapcsolj ki minden cookie-banner
+   bővítményt. A panel borostyánsárga „No cookie banner plugin sets a consent type" sort mutat.
+   Nyomd meg a **Check in browser** gombot. A sor pirosra vált.
+2. **A rögzítő zárolása.** Jelentkezz ki, és nyisd meg a `/?apb_record_consent=anything` címet.
+   Ellenőrizd, hogy a `barion-consent-recorder.js` hiányzik az oldal forráskódjából. Ismételd meg
+   adminisztrátorként érvénytelen nonce-szal; továbbra is hiányoznia kell.
+3. **Elfogadás rögzítése.** Aktiválj egy cookie-bannert. Nyomd meg a **Set up consent** gombot,
+   majd az **Open my shop** gombot. Fogadd el a bannerben. A varázsló naplója mutatja a
+   megváltozott cookie-t.
+4. **Elutasítás rögzítése.** Töröld a cookie-kat azon a lapon, tölts be újra, és utasítsd el. A
+   varázsló eléri a 3. lépést a kitöltött mezőkkel.
+5. **Félig betanított trigger.** Próbáld meg menteni üres elutasítási értékkel. A varázsló
+   megtagadja.
+6. **Frontend.** Bekapcsolt hibakeresési móddal fogadd el a bannerben. A konzol naplózza:
+   `Consent granted via the recorded cookie trigger`. Utasítsd el, és a megfelelő elutasítási sor
+   naplózódik.
+7. **Elérhetőség.** Nyomd meg a **Test** gombot. Bekapcsolt hirdetésblokkolóval figyelmeztetést
+   jelez.
+8. **Két különböző érték.** Miután rögzítetted az elfogadást, majd az elutasítást, nyisd meg a 3.
+   lépést, és ellenőrizd, hogy az elfogadott és az elutasított érték különbözik-e. Ha azonosak, a
+   trigger nem tud működni, mert a kétértelmű olvasatot a bővítmény hozzájárulás hiányaként
+   kezeli.
+
+---
+
 ## Gyakori problémák
 
 ### Nem aktiválódnak az események
