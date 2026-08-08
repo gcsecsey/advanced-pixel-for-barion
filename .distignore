@@ -7,3 +7,5 @@
 docs/
 README.md
 CONSENT_INTEGRATION.md
+tests/
+.superpowers/
