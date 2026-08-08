@@ -82,3 +82,46 @@ test('sanitize caps the contains value at 256 characters', () => {
 	const long = 'x'.repeat(300);
 	assert.equal(trigger.sanitize({ cookie: 'c', contains: long, events: [] }).contains.length, 256);
 });
+
+test('eventNames collects and deduplicates names across both triggers', () => {
+	assert.deepEqual(
+		trigger.eventNames({
+			grant: { cookie: 'c', contains: 'yes', events: ['a', 'b'] },
+			reject: { cookie: 'c', contains: 'no', events: ['b', 'c'] },
+		}),
+		['a', 'b', 'c']
+	);
+});
+
+test('eventNames returns an empty list for a null config', () => {
+	assert.deepEqual(trigger.eventNames(null), []);
+});
+
+test('eventNames never returns a name sanitize would reject', () => {
+	assert.deepEqual(
+		trigger.eventNames({
+			grant: { cookie: 'c', contains: '', events: ['good_one', 'bad name'] },
+			reject: { cookie: 'c', contains: '', events: [] },
+		}),
+		['good_one']
+	);
+});
+
+test('eventNames skips a side whose trigger is invalid', () => {
+	assert.deepEqual(
+		trigger.eventNames({
+			grant: { cookie: 'bad name;', contains: '', events: ['x'] },
+			reject: { cookie: 'c', contains: '', events: ['y'] },
+		}),
+		['y']
+	);
+});
+
+test('falls back to the raw value when the cookie value cannot be decoded', () => {
+	// A lone % is not a valid escape sequence, so decodeURIComponent throws.
+	assert.equal(trigger.matches('cky-consent=100%', { cookie: 'cky-consent', contains: '100%', events: [] }), true);
+});
+
+test('a value that cannot be decoded does not produce a false grant', () => {
+	assert.equal(trigger.evaluate('cky-consent=100%', { grant: GRANT, reject: REJECT }), 'none');
+});
