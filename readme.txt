@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,11 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Changelog ==
 
+= 1.0.6 =
+* Fix: `initiateCheckout` and `setEncryptedEmail` never fired on the WooCommerce Checkout block, which has been the default for new stores since WooCommerce 8.3. The plugin only listened for the classic checkout's PHP hooks and its `#billing_email` field, and the block has neither. It now reads the Cart and Checkout blocks' data store. Classic checkout behaviour is unchanged.
+* Fix: `addToCart` never fired on shop or category pages, on any store. The events script was only loaded on pages that already had an event queued, which no archive page does, so the add-to-cart listeners were never present where customers actually add to cart. This affected classic stores too, and dates back to 1.0.1.
+* Fix: `addToCart` now also works with the block product buttons used by the Product Collection block. These run on the Interactivity API and fire neither the classic jQuery event nor the block data store, so cart contents are now read from the WooCommerce Store API.
+
 = 1.0.5 =
 * Fix: the bundled Hungarian, Czech, Slovak, German, Croatian, Romanian, Slovenian and Serbian translations never loaded, so the settings screen stayed in English. WordPress only searches `wp-content/languages/plugins` unless a plugin registers its own directory, and the plugin never did. It now registers `languages/` on `init`.
 
@@ -146,6 +151,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.6 =
+Important fix for every store. The addToCart event never fired on shop or category pages. Checkout and email events were also missing on the block checkout. All of them are sent now.
 
 = 1.0.5 =
 Fixes the bundled translations, which never loaded. If you run WordPress in Hungarian, Czech, Slovak, German, Croatian, Romanian, Slovenian or Serbian, the plugin's settings screen is now translated.
