@@ -65,6 +65,23 @@
 		});
 	}
 
+	// Validate before sending so partial typing doesn't reach bp.js. We accept
+	// any value bp.js would accept: a plain email (HTML5 spec regex,
+	// https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address),
+	// or a pre-computed SHA-1 hash.
+	var EMAIL_RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
+	var lastSentEmail = '';
+
+	// Idempotent by design: a repeat value is a no-op. Both the classic change
+	// listener and the block store subscription depend on that.
+	function fireIfNew(raw) {
+		var val = (raw || '').trim().toLowerCase();
+		if (!EMAIL_RE.test(val) && !SHA1_HEX_RE.test(val)) return;
+		if (val === lastSentEmail) return;
+		lastSentEmail = val;
+		sendEncryptedEmail(val);
+	}
+
 	// Fire queued events (contentView, initiateCheckout, purchase)
 	for (var i = 0; i < events.length; i++) {
 		if (typeof bp !== 'undefined') {
@@ -84,21 +101,6 @@
 	// Per Barion docs, setEncryptedEmail must fire whenever the user provides their email
 	// (during checkout), not only on the thank-you page.
 	if (isCheckout) {
-		// Validate before sending so partial typing doesn't reach bp.js. We
-		// accept any value bp.js would accept: a plain email (HTML5 spec
-		// regex, https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address),
-		// or a pre-computed SHA-1 hash.
-		var EMAIL_RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
-		var lastSentEmail = '';
-
-		function fireIfNew(raw) {
-			var val = (raw || '').trim().toLowerCase();
-			if (!EMAIL_RE.test(val) && !SHA1_HEX_RE.test(val)) return;
-			if (val === lastSentEmail) return;
-			lastSentEmail = val;
-			sendEncryptedEmail(val);
-		}
-
 		// Only bind once per email field instance to avoid stacking listeners
 		// on updated_checkout (which fires multiple times during normal use).
 		function bindEmailField() {
@@ -212,4 +214,143 @@
 			});
 		});
 	}
+
+	// --- Block surfaces (product buttons, Cart block, Checkout block) ---
+	// None of these run the classic PHP hooks or render #billing_email.
+	//
+	// Add to cart reads the Store API. The wc-blocks_added_to_cart event says the
+	// cart changed but not what changed (its detail is only { preserveCartData }),
+	// and product buttons run on the Interactivity API, which does not load the
+	// wc/store/cart data store at all. The Store API is the one source available
+	// on every block surface, and it returns the same item shape the data store
+	// does, so wcBarionDiffCartItems works against either.
+	//
+	// The checkout email still comes from the data store, because it changes
+	// keystroke by keystroke and polling an endpoint for that would be wasteful.
+	var cartApiUrl = config.cartApiUrl || '';
+	var knownItems = null;
+	var baselineReady = null;
+	var addInFlight = false;
+
+	function fetchCartItems() {
+		if (!cartApiUrl || typeof fetch !== 'function') {
+			return Promise.reject(new Error('Store API unavailable'));
+		}
+		return fetch(cartApiUrl, {
+			credentials: 'same-origin',
+			headers: { Accept: 'application/json' },
+		})
+			.then(function (response) {
+				return response.json();
+			})
+			.then(function (cart) {
+				return (cart && cart.items) || [];
+			});
+	}
+
+	// Snapshot the cart before the customer can add anything, so the first add
+	// has something to diff against.
+	function ensureBaseline() {
+		if (null !== knownItems) {
+			return Promise.resolve();
+		}
+		if (!baselineReady) {
+			baselineReady = fetchCartItems().then(
+				function (items) {
+					knownItems = items;
+				},
+				function () {
+					knownItems = [];
+				}
+			);
+		}
+		return baselineReady;
+	}
+
+	function trackBlockAddToCart() {
+		if (typeof wcBarionDiffCartItems !== 'function') {
+			return;
+		}
+		addInFlight = true;
+		ensureBaseline()
+			.then(fetchCartItems)
+			.then(function (items) {
+				var added = wcBarionDiffCartItems(knownItems || [], items);
+				knownItems = items;
+				addInFlight = false;
+				for (var i = 0; i < added.length; i++) {
+					fireAddToCart({
+						contentType: 'Product',
+						currency: currency,
+						id: added[i].id,
+						name: added[i].name,
+						quantity: added[i].quantity,
+						unit: 'pcs',
+						unitPrice: added[i].unitPrice,
+						totalItemPrice: added[i].unitPrice * added[i].quantity,
+						step: 1,
+					});
+				}
+			})
+			.catch(function () {
+				addInFlight = false;
+			});
+	}
+
+	function initBlockSurfaces() {
+		var cartStore =
+			window.wp && wp.data && typeof wp.data.select === 'function'
+				? wp.data.select('wc/store/cart')
+				: null;
+		var hasCartStore = !!(cartStore && typeof cartStore.getCartData === 'function');
+		var hasProductButtons = !!document.querySelector(
+			'[data-wp-on--click="actions.addCartItem"], .wc-block-components-product-button__button'
+		);
+
+		if (!hasCartStore && !hasProductButtons) {
+			return;
+		}
+
+		if (hasCartStore) {
+			// Free baseline: no request needed where the store is already loaded.
+			knownItems = (cartStore.getCartData() || {}).items || [];
+
+			wp.data.subscribe(function () {
+				var current = wp.data.select('wc/store/cart');
+				if (!current) {
+					return;
+				}
+				// Keep the baseline fresh across quantity edits in the Cart block,
+				// but never while an add is being measured against it.
+				if (!addInFlight) {
+					knownItems = (current.getCartData() || {}).items || knownItems;
+				}
+				if (isCheckout && typeof current.getCustomerData === 'function') {
+					var customer = current.getCustomerData() || {};
+					var billing = customer.billingAddress || {};
+					if (billing.email) {
+						fireIfNew(billing.email);
+					}
+				}
+			});
+		} else {
+			ensureBaseline();
+		}
+
+		// Quantity edits in the Cart block do not dispatch this, so they are
+		// excluded without any extra gating.
+		document.body.addEventListener('wc-blocks_added_to_cart', trackBlockAddToCart);
+
+		if (debug) {
+			console.log(
+				'[Barion Pixel] Block surfaces detected (cart store: ' +
+					hasCartStore +
+					', product buttons: ' +
+					hasProductButtons +
+					')'
+			);
+		}
+	}
+
+	initBlockSurfaces();
 })();

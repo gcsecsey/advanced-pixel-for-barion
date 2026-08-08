@@ -5,7 +5,7 @@
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
  * Author: Gergely Csecsey
  * Author URI: https://github.com/gcsecsey
- * Version: 1.0.5
+ * Version: 1.0.6
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * WC requires at least: 5.0
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_BARION_PIXEL_VERSION', '1.0.5');
+define('WC_BARION_PIXEL_VERSION', '1.0.6');
 define('WC_BARION_PIXEL_PATH', plugin_dir_path(__FILE__));
 define('WC_BARION_PIXEL_URL', plugin_dir_url(__FILE__));
 
@@ -97,7 +97,6 @@ class WC_Barion_Pixel {
             // WooCommerce event hooks (only if full tracking is enabled)
             if ($this->is_full_tracking_enabled()) {
                 add_action('woocommerce_after_single_product', array($this, 'track_content_view'));
-                add_action('woocommerce_before_checkout_form', array($this, 'track_initiate_checkout'));
                 add_action('woocommerce_thankyou', array($this, 'track_purchase'), 10, 1);
                 add_action('woocommerce_thankyou', array($this, 'track_set_encrypted_email'), 10, 1);
                 // Priority must be < 20 so wp_print_footer_scripts (priority 20) prints the enqueued script.
@@ -379,15 +378,50 @@ class WC_Barion_Pixel {
             }
         }
 
+        if ($is_checkout) {
+            $this->queue_initiate_checkout();
+        }
+
+        // Ask WooCommerce what this page actually loaded rather than guessing at
+        // block names with has_block(). The Cart and Checkout blocks register this
+        // handle in WooCommerce's src/Blocks/AssetsController.php.
+        $has_block_store = wp_script_is('wc-blocks-data-store', 'enqueued');
+
+        // Add to cart happens on shop and archive pages, not only where an event
+        // is already queued. Without this the addToCart listeners never load on
+        // the pages that actually fire them.
+        $can_add_to_cart = $has_block_store
+            || (function_exists('is_woocommerce') && is_woocommerce())
+            || (function_exists('is_cart') && is_cart());
+
         // Only enqueue if there's something to do
-        if (empty($this->events) && null === $single_product && null === $this->encrypted_email && !$is_checkout) {
+        if (empty($this->events) && null === $single_product && null === $this->encrypted_email
+            && !$is_checkout && !$can_add_to_cart) {
             return;
+        }
+
+        wp_enqueue_script(
+            'wc-barion-cart-diff',
+            WC_BARION_PIXEL_URL . 'assets/js/barion-cart-diff.js',
+            array(),
+            WC_BARION_PIXEL_VERSION,
+            true
+        );
+        $deps = array('wc-barion-pixel-base', 'wc-barion-cart-diff');
+
+        // wp.data is needed only for the checkout email, which the Cart and
+        // Checkout blocks expose through their data store. Add to cart reads the
+        // Store API instead: product buttons run on the Interactivity API and
+        // never load this store, so a page can have add-to-cart without it.
+        if ($has_block_store) {
+            $deps[] = 'wp-data';
+            $deps[] = 'wc-blocks-data-store';
         }
 
         wp_enqueue_script(
             'wc-barion-pixel-events',
             WC_BARION_PIXEL_URL . 'assets/js/barion-pixel-events.js',
-            array('wc-barion-pixel-base'),
+            $deps,
             WC_BARION_PIXEL_VERSION,
             true
         );
@@ -399,15 +433,19 @@ class WC_Barion_Pixel {
             'email'          => $this->encrypted_email,
             'isCheckout'     => $is_checkout,
             'loggedInEmail'  => $logged_in_email,
+            // Built with rest_url() so it survives plain permalinks and a custom REST prefix.
+            'cartApiUrl'     => function_exists('rest_url') ? rest_url('wc/store/v1/cart') : '',
         ));
     }
 
     /**
-     * Track initiate checkout event (WooCommerce woocommerce_before_checkout_form hook callback)
+     * Queue the initiateCheckout event from the current cart.
+     * Called from enqueue_events_script() rather than from
+     * woocommerce_before_checkout_form, which the Checkout block never fires.
      *
      * @return void
      */
-    public function track_initiate_checkout() {
+    private function queue_initiate_checkout() {
         if (!WC()->cart) {
             return;
         }

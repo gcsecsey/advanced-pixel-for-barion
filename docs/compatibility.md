@@ -9,6 +9,17 @@
 | WooCommerce 5.0+ | Supported |
 | WooCommerce 11.0 | Tested |
 
+### Cart and Checkout blocks
+
+Supported since 1.0.6. On block surfaces the plugin reads the `wc/store/cart`
+data store rather than the classic PHP hooks and DOM selectors, because the
+blocks fire neither.
+
+**Known limitation.** The `purchase` event runs through `woocommerce_thankyou`,
+which the block Order Confirmation template fires from its "Additional
+Information" block. Removing that block from the template silently stops
+purchase tracking. Keep it in the template.
+
 ---
 
 ## Barion Payment Gateway (woocommerce-barion)
