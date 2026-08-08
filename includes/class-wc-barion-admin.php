@@ -116,11 +116,29 @@ class WC_Barion_Admin {
         $sanitized = array();
 
         if (isset($input['pixel_id'])) {
-            $sanitized['pixel_id'] = sanitize_text_field($input['pixel_id']);
+            $pixel_id = sanitize_text_field($input['pixel_id']);
+
+            // Keep the stored ID rather than overwrite a working pixel with a typo.
+            if ('' !== $pixel_id && !preg_match(WC_Barion_Health::PIXEL_ID_PATTERN, $pixel_id)) {
+                add_settings_error(
+                    'wc_barion_pixel_settings',
+                    'pixel_id_format',
+                    __('The Pixel ID must look like BP-0000000000-00. Your previous ID was kept.', 'advanced-pixel-for-barion'),
+                    'error'
+                );
+                $pixel_id = isset($this->options['pixel_id']) ? $this->options['pixel_id'] : '';
+            }
+
+            $sanitized['pixel_id'] = $pixel_id;
         }
 
         $sanitized['enable_full_tracking'] = isset($input['enable_full_tracking']) ? true : false;
         $sanitized['debug_mode'] = isset($input['debug_mode']) ? true : false;
+
+        // The wizard owns this key; the settings form never posts it.
+        if (isset($this->options['consent_trigger'])) {
+            $sanitized['consent_trigger'] = $this->options['consent_trigger'];
+        }
 
         return $sanitized;
     }

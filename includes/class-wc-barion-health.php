@@ -76,6 +76,32 @@ class WC_Barion_Health {
     }
 
     /**
+     * Read WordPress state into a facts array for evaluate().
+     *
+     * This is the only method in this class that touches WordPress.
+     *
+     * @param array $options The wc_barion_pixel_settings option.
+     * @return array Facts array.
+     */
+    public static function gather_facts($options) {
+        $gateway = get_option('woocommerce_barion_settings', array());
+        $probe   = get_option('wc_barion_pixel_probe', array());
+
+        return array(
+            'pixel_id'           => isset($options['pixel_id']) ? $options['pixel_id'] : '',
+            'woocommerce_active' => class_exists('WooCommerce'),
+            'full_tracking'      => !empty($options['enable_full_tracking']),
+            'consent_api_active' => function_exists('wp_has_consent'),
+            'consent_type'       => function_exists('wp_get_consent_type') ? (string) wp_get_consent_type() : '',
+            'cli_active'         => defined('CLI_PLUGIN_FILE') || function_exists('cookielawinfo_init'),
+            'trigger'            => isset($options['consent_trigger']) ? $options['consent_trigger'] : null,
+            'gateway_pixel_id'   => isset($gateway['barion_pixel_id']) ? $gateway['barion_pixel_id'] : '',
+            'browser_probe'      => isset($probe['consent']) ? $probe['consent'] : null,
+            'reachability'       => isset($probe['reachability']) ? $probe['reachability'] : null,
+        );
+    }
+
+    /**
      * Decide which consent tier is live. Mirrors the order in barion-pixel-base.js.
      *
      * @param array $facts Facts array.
