@@ -4,43 +4,54 @@
 
 # Integrare consimțământ cookie
 
-## Prezentare generală
+Aici sursa de adevăr este pagina proprie a Barion:
+[Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements).
+Tot acolo găsești textul de bară de consimțământ recomandat de Barion și lista actuală a
+partenerilor de publicitate. Citește-o înainte de lansarea în producție — conformitatea este
+responsabilitatea comerciantului, nu a plugin-ului.
 
-Barion Pixel necesită consimțământul explicit al utilizatorului înainte de a colecta date de marketing (conformitate GDPR). Plugin-ul trebuie să apeleze `bp('consent', 'grantConsent')` când utilizatorul acceptă și `bp('consent', 'rejectConsent')` când utilizatorul refuză. Ambele evenimente sunt obligatorii conform cerințelor Barion.
+## Ce face plugin-ul
 
-Scriptul pixelului de bază se încarcă întotdeauna pentru prevenirea fraudei, dar nu se colectează date de marketing până când consimțământul nu este acordat sau refuzat în mod explicit.
+Scriptul pixelului de bază se încarcă întotdeauna, iar `pageView` se trimite întotdeauna. Barion
+documentează acest lucru ca interes legitim: pixelul de bază există pentru prevenirea fraudei la
+plată, iar datele colectate fără consimțământ de marketing sunt folosite doar în acest scop.
 
-**Important:** Bannerul tău de cookie-uri trebuie să ofere atât o opțiune de acceptare, cât și una de refuz. Un „zid de cookie-uri" (numai acceptare) nu este conform cu GDPR din 2020 și va fi respins de Barion.
+Peste asta, plugin-ul apelează `bp('consent', 'grantConsent')` când clientul acceptă cookie-urile
+de marketing și `bp('consent', 'rejectConsent')` când le refuză. Barion le listează pe ambele ca
+obligatorii. Bara ta trebuie deci să ofere o opțiune reală de refuz — la o bară care cunoaște doar
+acceptul, plugin-ul nu are ce semnala.
 
-Regulile proprii ale Barion în această privință: [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements) (în limba engleză).
+Plugin-ul caută un manager de consimțământ în această ordine și se oprește la primul găsit:
 
-Plugin-ul suportă trei niveluri de integrare a consimțământului, verificate în ordine:
-
-1. **WP Consent API** (recomandat) — universal, funcționează cu toate plugin-urile majore de cookie
-2. **Cookie Law Info** (fallback) — integrare directă pentru site-urile care folosesc CookieYes/Cookie Law Info
-3. **Manual** — pentru manageri de consimțământ personalizați sau cazuri speciale
+1. **WP Consent API** (recomandat) — universal, funcționează cu toate plugin-urile mari de cookie-uri
+2. **Cookie Law Info** (rezervă) — integrare directă pentru CookieYes / Cookie Law Info
+3. **Manual** — pentru manageri de consimțământ proprii
 
 ---
 
-## Nivelul 1: WP Consent API (Recomandat)
+## Nivelul 1: WP Consent API (recomandat)
 
-[WP Consent API](https://wordpress.org/plugins/wp-consent-api/) este un standard WordPress pentru comunicarea consimțământului. Este suportat de toate plugin-urile majore de consimțământ cookie.
+[WP Consent API](https://wordpress.org/plugins/wp-consent-api/) este standardul WordPress pentru
+transmiterea consimțământului între plugin-uri. Barion Pixel se înregistrează în categoria
+`marketing`.
 
 ### Cum funcționează
 
-Plugin-ul verifică funcția JavaScript `wp_has_consent()` la execuție. Dacă WP Consent API este disponibil:
+După `DOMContentLoaded`, plugin-ul verifică dacă există funcția `wp_has_consent()`. Dacă există:
 
-1. La încărcarea paginii, verifică dacă consimțământul `marketing` este acordat sau refuzat
-2. Apelează `bp('consent', 'grantConsent')` dacă consimțământul de marketing este acordat
-3. Apelează `bp('consent', 'rejectConsent')` dacă consimțământul de marketing nu este acordat
-4. Ascultă evenimentul `wp_listen_for_consent_change` pentru actualizări de consimțământ în timp real — acordă sau refuză în consecință
+1. Dacă acordul `marketing` este deja dat, `grantConsent` se trimite imediat.
+2. De atunci încolo, plugin-ul ascultă `wp_listen_for_consent_change` și trimite `grantConsent` sau `rejectConsent` la fiecare schimbare.
 
-### Plugin-uri de cookie suportate
+Observă ce *nu* apare în listă: la o încărcare de pagină fără consimțământ de marketing, plugin-ul
+tace, în loc să trimită `rejectConsent`. Cât timp clientul nu a răspuns barei, nu e nimic de
+raportat — iar răspunsul sosește prin evenimentul de schimbare.
 
-Orice plugin care implementează WP Consent API va funcționa automat:
+### Plugin-uri de cookie-uri suportate
 
-| Plugin | Instalări active | Note |
-|--------|----------------|-------|
+Funcționează automat orice plugin care implementează WP Consent API:
+
+| Plugin | Instalări active | Notă |
+|--------|------------------|------|
 | [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5M+ | WP Consent API integrat |
 | [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ | Co-creator al WP Consent API |
 | [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ | Compatibil cu WP Consent API |
@@ -49,38 +60,34 @@ Orice plugin care implementează WP Consent API va funcționa automat:
 
 ### Configurare
 
-1. Instalează și activează plugin-ul [WP Consent API](https://wordpress.org/plugins/wp-consent-api/)
-2. Instalează și configurează plugin-ul preferat de consimțământ cookie (vezi tabelul de mai sus)
-3. Instalează și configurează Advanced Pixel for Barion
-4. Nu este necesară configurare suplimentară — consimțământul este gestionat automat
+1. Instalează și activează [WP Consent API](https://wordpress.org/plugins/wp-consent-api/).
+2. Instalează și configurează plugin-ul tău de consimțământ pentru cookie-uri.
+3. Instalează și configurează Advanced Pixel for Barion.
 
-### Categoria de consimțământ
-
-Barion Pixel este înregistrat în categoria de consimțământ `marketing` din WP Consent API. Aceasta este categoria standard pentru pixelii de urmărire utilizați pentru retargeting și analiză.
+Nimic în plus — consimțământul este tratat automat.
 
 ---
 
-## Nivelul 2: Cookie Law Info (Fallback)
+## Nivelul 2: Cookie Law Info (rezervă)
 
-Dacă WP Consent API nu este disponibil, plugin-ul trece la integrarea directă cu plugin-ul [Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes.
+Se folosește când WP Consent API nu este disponibil, dar
+[Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes este.
 
 ### Cum funcționează
 
-1. Verifică obiectul global JavaScript `CLI`
-2. Dacă cookie-urile sunt deja acceptate (vizitator care revine), acordă consimțământul imediat
-3. Dacă cookie-urile nu sunt acceptate, refuză consimțământul imediat
-4. Ascultă evenimentul `cli_user_preference_set` când utilizatorul interacționează cu bannerul de cookie
-5. Acordă sau refuză în funcție de valoarea cookie-ului `cookielawinfo-checkbox-necessary`
+1. Plugin-ul verifică obiectul global `CLI` și `allowedCategories` al acestuia.
+2. Dacă cookie-ul `cookielawinfo-checkbox-non-necessary` are deja valoarea `yes` — un vizitator revenit care a acceptat — `grantConsent` se trimite imediat.
+3. Sunt urmărite clicurile pe elementele `.cli_action_button` din bară. La scurt timp după clic, plugin-ul recitește cookie-ul și trimite `grantConsent` sau `rejectConsent` în consecință.
 
 ### Configurare
 
-Nu este necesară nicio configurare. Instalează ambele plugin-uri și integrarea funcționează automat.
+Niciuna. Instalează ambele plugin-uri și funcționează.
 
 ---
 
 ## Nivelul 3: Integrare manuală
 
-Pentru manageri de consimțământ personalizați sau medii în care nici WP Consent API, nici Cookie Law Info nu sunt disponibile.
+Pentru manageri de consimțământ proprii sau acolo unde nimic din cele de mai sus nu se aplică.
 
 ### Metoda 1: Funcții JavaScript (recomandat)
 
@@ -100,26 +107,26 @@ function onMarketingConsentRejected() {
 }
 ```
 
-### Metoda 2: Evenimente DOM personalizate
+### Metoda 2: Evenimente DOM proprii
 
 ```javascript
-// Acordă consimțământul
+// Acordarea consimțământului
 document.dispatchEvent(new Event('wcBarionGrantConsent'));
 
-// Refuză consimțământul
+// Refuzul consimțământului
 document.dispatchEvent(new Event('wcBarionRejectConsent'));
 ```
 
 ### Metoda 3: Hook de acțiune WordPress
 
 ```php
-// În plugin-ul tău de manager de consimțământ sau temă
+// În plugin-ul tău de management al consimțământului sau în temă
 add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
     <script>
-    // Logica ta personalizată de consimțământ aici
+    // Aici vine logica ta de consimțământ
     </script>
     <?php
 }
@@ -154,29 +161,47 @@ function OptanonWrapper() {
 
 ---
 
+## Ce trebuie să faci tu
+
+Plugin-ul transmite consimțământul mai departe. Politicile nu ți le scrie și bara nu ți-o
+configurează, iar Barion cere ambele. Din
+[cerințele Barion](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements):
+
+- **Adaugă cookie-urile Barion în politica ta de cookie-uri.** `ba_vid`, `ba_vid.xxx`, `ba_sid` și `ba_sid.xxx` intră la cookie-urile esențiale — servesc prevenirii fraudei pe baza interesului legitim al Barion și nu necesită consimțământ. `BarionMarketingConsent.xxx` și cookie-urile partenerilor media și de publicitate intră la cookie-urile de marketing și necesită consimțământ.
+- **Menționează Barion Pixel în politica ta de confidențialitate** și pune un link către [nota de confidențialitate](https://www.barion.com/en/privacy-notice/) a Barion.
+- **Permite clienților să își modifice sau retragă consimțământul oricând** și întreabă-i din nou. Barion cere ca bara să reapară cel puțin o dată la 13 luni și recomandă 30 de zile.
+- **Folosește textul de bară recomandat de Barion** unde poți. Se află pe pagina de cerințe și acoperă partajarea de date cu partenerii pe care o presupune Barion Pixel.
+
+---
+
 ## Cum afectează consimțământul pixelul
 
-| Stare | Pixel de bază (bp.js) | pageView | Colectarea datelor de marketing |
-|-------|--------------------|----------|--------------------------|
-| Înainte de orice acțiune de consimțământ | Încărcat | Se declanșează (prevenirea fraudei) | Nu se colectează date |
-| După `grantConsent` | Încărcat | Se declanșează | Colectarea completă de date activată |
-| După `rejectConsent` | Încărcat | Se declanșează (prevenirea fraudei) | Nu se colectează date de marketing |
-
-Pixelul de bază se încarcă întotdeauna pentru prevenirea fraudei Barion. Apelurile `grantConsent` / `rejectConsent` controlează dacă se colectează date de marketing.
+| Stare | Pixel de bază (bp.js) | pageView | Colectare date de marketing |
+|-------|-----------------------|----------|-----------------------------|
+| Înainte de orice decizie de consimțământ | Încărcat | Se trimite (prevenirea fraudei) | Nu |
+| După `grantConsent` | Încărcat | Se trimite | Da |
+| După `rejectConsent` | Încărcat | Se trimite (prevenirea fraudei) | Nu |
 
 ---
 
 ## Testare
 
-1. Activează **Mod depanare** în Setări > Barion Pixel
-2. Deschide consola browserului (F12)
-3. Caută mesajele de jurnal legate de consimțământ:
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Nivelul 1, utilizator a acceptat
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Nivelul 1, utilizator a refuzat
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Nivelul 2, utilizator a acceptat
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Nivelul 2, utilizator a refuzat
-   - `[Barion Pixel] No consent manager detected...` — Nivelul 3 (mod manual)
-   - `[Barion Pixel] Consent granted (grantConsent)` — consimțământul a fost acordat (orice nivel)
-   - `[Barion Pixel] Consent rejected (rejectConsent)` — consimțământul a fost refuzat (orice nivel)
-4. Testează atât fluxul de acceptare, cât și cel de refuz pe bannerul tău de cookie
-5. Funcțiile de consimțământ pot fi apelate de mai multe ori în siguranță (idempotente)
+1. Activează **modul depanare** în Setări > Barion Pixel.
+2. Deschide consola browserului (F12).
+3. Urmărește aceste mesaje:
+
+| Mesaj | Semnificație |
+|-------|--------------|
+| `Consent auto-granted via WP Consent API` | Nivelul 1, consimțământul exista deja la încărcare |
+| `Consent granted via WP Consent API change event` | Nivelul 1, clientul tocmai a acceptat |
+| `Consent rejected via WP Consent API change event` | Nivelul 1, clientul tocmai a refuzat |
+| `Cookie Law Info detected, initial non-necessary cookie: …` | A preluat nivelul 2, cu valoarea cookie-ului citită |
+| `Cookie Law Info button clicked, non-necessary cookie: …` | Nivelul 2, clientul a folosit bara |
+| `No consent manager detected…` | Nivelul 3 — nu s-a găsit nimic, apelează funcțiile singur |
+| `Consent granted (grantConsent)` | `grantConsent` a ajuns la bp.js (orice nivel) |
+| `Consent rejected (rejectConsent)` | `rejectConsent` a ajuns la bp.js (orice nivel) |
+
+Toate mesajele au prefixul `[Barion Pixel]`.
+
+4. Testează pe bara ta atât calea de acceptare, cât și pe cea de refuz.
+5. Funcțiile de consimțământ pot fi apelate repetat în siguranță.

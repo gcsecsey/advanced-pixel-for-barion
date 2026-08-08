@@ -13,21 +13,43 @@
 | WooCommerce 5.0+ | Unterstützt |
 | WooCommerce 11.0 | Getestet |
 
+### Cart- und Checkout-Block
+
+Unterstützt seit 1.0.6. Die Blöcke lösen weder die klassischen PHP-Hooks noch die zuvor genutzten
+DOM-Selektoren aus, deshalb liest das Plugin auf Block-Oberflächen die WooCommerce-Daten direkt:
+den Store-API-Warenkorb für `addToCart` und den Datenspeicher `wc/store/cart` für die
+Kassen-E-Mail.
+
+**Bekannte Einschränkung.** Das `purchase`-Event läuft über `woocommerce_thankyou`, das im
+Block-Template der Bestellbestätigung vom Block „Weitere Informationen“ ausgelöst wird. Entfernst
+du diesen Block aus dem Template, endet das Purchase-Tracking stillschweigend. Lass ihn im
+Template.
+
 ---
 
-## Barion Payment Gateway (woocommerce-barion)
+## Weitere Quellen des Basis-Pixels
 
-Das Plugin [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) von szelpe ist **ausschließlich ein Zahlungsabwickler** — es fügt Barion als Zahlungsmethode zur WooCommerce-Kasse hinzu. Es implementiert kein Barion Pixel-Event-Tracking.
+Barion dokumentiert mehrere Wege, das Basis-Pixel auf eine Seite zu bekommen, und ein Shop kann
+leicht mehrere davon gleichzeitig haben:
 
-**Koexistenz:** Beide Plugins funktionieren konfliktfrei zusammen. Das Advanced Pixel for Barion-Plugin übernimmt das Tracking; das Payment Gateway die Zahlungsabwicklung.
+- das [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) von szelpe und andere Barion-Gateway-Plugins, die ein optionales Pixel-ID-Feld haben
+- ein [Google-Tag-Manager-Tag](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
+- ein Snippet im Theme-Header
 
-**Pixel-ID-Überschneidung:** Das Payment Gateway verfügt über ein optionales Pixel-ID-Feld zum Laden des Basis-Pixels. Wenn beide Plugins eine Pixel-ID konfiguriert haben:
+Das Plugin prüft `window.bp` und `window.BarionAnalyticsObject`, bevor es `bp.js` lädt. Sind beide
+schon vorhanden, überspringt es das Laden des Skripts und sendet nur seinen eigenen `init`-Aufruf,
+sodass das Pixel nie doppelt geladen wird. Im Debug-Modus erscheint dazu
+`[Barion Pixel] bp.js already loaded by another plugin`.
 
-- Advanced Pixel for Barion erkennt, ob `bp.js` bereits geladen wurde, und überspringt das erneute Laden des Skripts
-- Ein informativer Admin-Hinweis empfiehlt, die Pixel-ID-Konfiguration an einem Ort zu bündeln
-- Beide Plugins funktionieren unabhängig davon weiterhin korrekt
+**Empfehlung:** halte die Pixel-ID an einer Stelle. Wenn du auch ein Barion-Payment-Gateway
+betreibst, konfiguriere die ID hier und lasse das Feld im Gateway leer; lädst du das Basis-Pixel
+bereits über den Google Tag Manager, entferne dieses Tag. Zu vermeiden ist vor allem der Fall
+zweier unterschiedlicher Pixel-IDs auf einer Seite — ein doppeltes Skript kann das Plugin
+unterdrücken, eine doppelte Identität nicht.
 
-**Empfehlung:** Wenn du beide Plugins verwendest, konfiguriere die Pixel-ID nur in den Einstellungen von Advanced Pixel for Barion und lasse das Feld in den Payment-Gateway-Einstellungen leer.
+Wenn auch im Barion Payment Gateway eine Pixel-ID konfiguriert ist, zeigt die Einstellungsseite
+einen informativen Hinweis. Beide Plugins funktionieren so oder so weiter: jenes übernimmt die
+Zahlungen, dieses das Tracking.
 
 ---
 

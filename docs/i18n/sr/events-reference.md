@@ -4,27 +4,65 @@
 
 # Referenca Barion Pixel događaja
 
+Merodavne za značenje pojedinog događaja i za svojstva koja on prihvata su Barionove sopstvene
+stranice:
+
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference) — svaki događaj, svako svojstvo i koja su obavezna
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) — sami događaji
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel) — odgovori na nezgodne slučajeve
+
+Ova stranica opisuje samo šta **ovaj dodatak** šalje i kada.
+
 ## Pregled
 
-Dodatak podržava dva načina rada:
+Dodatak ima dva režima rada:
 
-- **Osnovni piksel** (uvek aktivan kada je Pixel ID konfigurisan): Učitava `bp.js` i automatski aktivira `pageView` na svakoj stranici. Koristi se za sprečavanje prevara.
-- **Potpuno praćenje** (opcionalno, uključuje se u administraciji): Dodaje praćenje događaja e-trgovine za marketinšku analitiku i niže provizije Bariona.
+- **Osnovni piksel** (aktivan čim je postavljen Pixel ID): učitava `bp.js` i automatski šalje `pageView`. Barion ga traži radi sprečavanja prevara i preduslov je za korišćenje Barion Smart Gatewaya uopšte.
+- **Potpuno praćenje** (opciono, prekidač u administraciji): dodaje događaje e-trgovine. Barion Metrics ih zahteva, a potpuna implementacija piksela zajedno sa usklađenom trakom za saglasnost je ono što prodavnici otvara povoljnije uslove Smart Gatewaya.
 
-Barionova sopstvena referenca za ove događaje: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) i [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (na engleskom).
+### Sažetak događaja
 
-### Pregled događaja
-
-| Događaj | Režim | bp() poziv | Okidač |
-|---------|-------|-----------|--------|
+| Događaj | Režim | Poziv bp() | Okidač |
+|---------|-------|------------|--------|
 | pageView | Osnovni | Automatski (bp.js) | Svako učitavanje stranice |
-| grantConsent | Osnovni | `bp('consent', 'grantConsent')` | Saglasnost za kolačiće prihvaćena |
-| rejectConsent | Osnovni | `bp('consent', 'rejectConsent')` | Saglasnost za kolačiće odbijena |
-| contentView | Potpuni | `bp('track', 'contentView', data)` | Stranica pojedinačnog proizvoda |
-| addToCart | Potpuni | `bp('track', 'addToCart', data)` | Radnja dodavanja u korpu |
-| initiateCheckout | Potpuni | `bp('track', 'initiateCheckout', data)` | Učitavanje stranice za završetak porudžbine |
-| purchase | Potpuni | `bp('track', 'purchase', data)` | Stranica zahvalnice |
-| setEncryptedEmail | Potpuni | `bp('identity', 'setEncryptedEmail', hash)` | Stranica zahvalnice i unos e-pošte na naplati |
+| grantConsent | Osnovni | `bp('consent', 'grantConsent')` | Marketinška saglasnost prihvaćena |
+| rejectConsent | Osnovni | `bp('consent', 'rejectConsent')` | Marketinška saglasnost odbijena |
+| contentView | Potpuni | `bp('track', 'contentView', data)` | Stranica proizvoda |
+| addToCart | Potpuni | `bp('track', 'addToCart', data)` | Dodavanje u korpu |
+| initiateCheckout | Potpuni | `bp('track', 'initiateCheckout', data)` | Učitavanje stranice naplate |
+| purchase | Potpuni | `bp('track', 'purchase', data)` | Stranica potvrde porudžbine |
+| setEncryptedEmail | Potpuni | `bp('identity', 'setEncryptedEmail', hash)` | Stranica potvrde porudžbine i unos imejla na naplati |
+
+---
+
+## Polja stavke
+
+`contentView` i svaki element niza `contents` koriste isti oblik:
+
+| Polje | Tip | Vrednost |
+|-------|-----|----------|
+| contentType | string | `'Product'` |
+| currency | string | Valuta prodavnice, kod `purchase` valuta porudžbine |
+| id | string | ID proizvoda |
+| name | string | Prikazani naziv proizvoda |
+| quantity | int | Vidi pojedini događaj |
+| unit | string | `'pcs'` |
+| unitPrice | float | Vidi pojedini događaj |
+| totalItemPrice | float | `unitPrice * quantity` |
+
+Dva izuzetka od te tabele:
+
+- **`contentView` ne šalje `totalItemPrice`.** bp.js ga odbija uz `Invalid key totalItemPrice in contentView event`, a ni Barionova referenca ga ne navodi kao svojstvo contentViewa. Unutar elemenata `contents` je pak obavezan — vidi [Beleške o testiranju](testing-notes.md).
+- **`quantity` je kod `contentView` uvek `1`**, jer kupac gleda jedan proizvod.
+
+Dodatak ne šalje nijedno opciono svojstvo sadržaja (`brand`, `category`, `description`, `ean`,
+`imageUrl`, `variant`) ni svojstvo `list`. U Barionovoj referenci sva su opciona.
+
+**Varijabilni proizvodi.** `contentView` i `addToCart` sa stranice proizvoda javljaju nadređeni
+proizvod, jer stranica govori o njemu. Redovi korpe i porudžbine javljaju izabranu varijaciju, jer
+nju WooCommerce stavlja u korpu. Barion traži da stavka kroz sve događaje ima isti naziv i
+identifikator, pa u prodavnici građenoj na varijacijama isti proizvod može doći do Bariona pod dva
+identiteta.
 
 ---
 
@@ -32,17 +70,15 @@ Barionova sopstvena referenca za ove događaje: [Barion Pixel API reference](htt
 
 ### pageView
 
-Aktivira se automatski kada se učita `bp.js`. Nije potrebna konfiguracija osim postavljanja Pixel ID-a.
+Šalje se automatski čim se `bp.js` učita. Osim Pixel ID-a nema šta da se podesi.
 
-### grantConsent
+### grantConsent / rejectConsent
 
-Aktivira se kada korisnik prihvati marketinške kolačiće. Automatski se upravlja putem WP Consent API ili Cookie Law Info, ili ručno putem `window.wcBarionGrantConsent()`.
+Šalju se kada kupac prihvati ili odbije marketinške kolačiće. Barion oba navodi kao obavezna.
+Rešavaju se automatski preko WP Consent API-ja ili Cookie Law Infoa, odnosno ručno preko
+`window.wcBarionGrantConsent()` / `window.wcBarionRejectConsent()`.
 
-### rejectConsent
-
-Aktivira se kada korisnik odbije marketinške kolačiće. Automatski se upravlja putem WP Consent API ili Cookie Law Info, ili ručno putem `window.wcBarionRejectConsent()`. I `grantConsent` i `rejectConsent` su obavezni prema zahtevima Bariona.
-
-Pogledaj [Integracija saglasnosti za kolačiće](cookie-consent.md) za detalje.
+Vidi [Integraciju saglasnosti za kolačiće](cookie-consent.md).
 
 ---
 
@@ -50,129 +86,108 @@ Pogledaj [Integracija saglasnosti za kolačiće](cookie-consent.md) za detalje.
 
 ### contentView
 
-**Okidač:** Stranica pojedinačnog proizvoda (hook `woocommerce_after_single_product`)
+**Okidač:** stranica proizvoda, hook `woocommerce_after_single_product`.
 
-**Poslata polja:**
-
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta prodavnice u WooCommerce (npr. `'HUF'`) |
-| id | string | ID proizvoda |
-| name | string | Prikazano ime proizvoda |
-| quantity | int | `1` (uvek — pregled jednog proizvoda) |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena proizvoda |
-
-> **Napomena:** `totalItemPrice` nije svojstvo događaja contentView. bp.js ga odbija u realnom vremenu sa porukom "Invalid key totalItemPrice in contentView event", a ni API referenca ga ne navodi za ovaj događaj. Umesto toga je obavezan unutar stavki niza `contents`.
+`unitPrice` je trenutna cena proizvoda. Kod varijabilnog proizvoda to je cena koju WooCommerce
+prikazuje pre izbora varijacije.
 
 ---
 
 ### addToCart
 
-**Okidač:** JavaScript na strani klijenta (aktivira se odmah pri radnji dodavanja u korpu)
+**Okidač:** samo dodavanje u korpu. Svi putevi su na strani klijenta, pa događaj preživi keširanje
+stranica. Ima ih tri, a koji se koristi zavisi od toga kako prodavnica iscrtava svoje dugmiće:
 
-**Implementacija:** Dva puta, oba upravljana na strani klijenta radi kompatibilnosti sa keširanjem stranica:
+1. **Klasično AJAX dodavanje u korpu** (stranice prodavnice i arhiva). Osluškuje WooCommerceov jQuery događaj `added_to_cart` i čita atribute dugmeta `data-product_id`, `data-product_name`, `data-product_price` i `data-quantity`.
+2. **Klasična stranica proizvoda.** Presreće slanje `form.cart`. Podaci o proizvodu ugrađeni su u podnožje; kod varijabilnog proizvoda `display_price` izabrane varijacije čita se iz WooCommerceovih jQuery podataka `product_variations`.
+3. **Blokovske površine** (dugmići bloka Product Collection, blok Cart). One rade na Interactivity API-ju i ne šalju ni jQuery događaj ni upotrebljive podatke, pa dodatak upoređuje korpu iz [Store API-ja](https://developer.woocommerce.com/docs/apis/store-api/) sa poslednjim poznatim stanjem i javlja razliku. Promena količine u bloku Cart ne pokreće `wc-blocks_added_to_cart`, pa se automatski izostavlja.
 
-1. **AJAX dodavanje u korpu** (stranice prodavnice/arhive): Osluškuje WooCommerce jQuery događaj `added_to_cart`. Čita podatke o proizvodu iz atributa podataka dugmeta `<button>` (`data-product_id`, `data-product_name`, `data-product_price`, `data-quantity`).
+**Polja događaja:** gornja polja stavke i `step: 1`.
 
-2. **Slanje forme na stranici pojedinačnog proizvoda**: Presreće slanje forme `form.cart`. Podaci o proizvodu su ugrađeni kao JSON u podnožju. Za varijabilne proizvode, čita `display_price` odabrane varijacije iz WooCommerce jQuery podataka `product_variations`.
-
-**Poslata polja:**
-
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta prodavnice |
-| id | string | ID proizvoda |
-| name | string | Ime proizvoda |
-| quantity | int | Dodata količina |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena po jedinici |
-| totalItemPrice | float | `unitPrice * quantity` |
-| step | int | `1` |
+`quantity` je ono što je kupac zaista dodao. `unitPrice` dolazi, zavisno od puta, iz podataka
+dugmeta, iz izabrane varijacije ili iz stavke Store API-ja.
 
 ---
 
 ### initiateCheckout
 
-**Okidač:** Učitavanje stranice za završetak porudžbine (hook `woocommerce_before_checkout_form`)
-
-**Poslata polja:**
+**Okidač:** učitavanje stranice naplate. Prepoznaje se preko `is_checkout()` uz izuzimanje krajnje
+tačke `order-received` — ne preko `woocommerce_before_checkout_form`, jer taj hook blok Checkout
+nikada ne pokreće.
 
 | Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contents | array | Niz stavki korpe (pogledaj ispod) |
+|-------|-----|----------|
+| contents | array | Jedna stavka po redu korpe |
 | currency | string | Valuta prodavnice |
-| revenue | float | Međuzbir korpe + porez (bez dostave — možda još nije izračunata) |
+| revenue | float | Međuzbir korpe + porez |
 | step | int | `1` |
 
-**Polja stavke u sadržaju:**
-
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta prodavnice |
-| id | string | ID proizvoda |
-| name | string | Ime proizvoda |
-| quantity | int | Količina stavke |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena po jedinici |
-| totalItemPrice | float | `unitPrice * quantity` |
+Dostava je iz `revenue` namerno izostavljena: na početku naplate kupac obično još nije izabrao
+način dostave, pa WooCommerce nema šta da doda.
 
 ---
 
 ### purchase
 
-**Okidač:** Stranica zahvalnice (hook `woocommerce_thankyou`)
-
-**Sprečavanje duplikata:** Koristi post meta `_wc_barion_tracked` da spreči aktiviranje pri ponovnom učitavanju stranice.
-
-**Poslata polja:**
+**Okidač:** stranica potvrde porudžbine, hook `woocommerce_thankyou`.
 
 | Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contents | array | Niz stavki porudžbine (pogledaj ispod) |
+|-------|-----|----------|
+| contents | array | Jedna stavka po redu porudžbine |
 | currency | string | Valuta porudžbine |
-| revenue | float | Ukupan iznos porudžbine (uključuje dostavu, porez, popuste) |
+| revenue | float | Ukupan iznos porudžbine, sa dostavom, porezom i popustima |
 | step | int | `1` |
 
-**Polja stavke u sadržaju:**
+`unitPrice` je ovde `(item_total + item_tax) / quantity`, pa odražava kupone i druge popuste. Zato
+prihodi iz `purchase` i `initiateCheckout` nisu uporedivi red po red.
 
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta porudžbine |
-| id | string | ID proizvoda |
-| name | string | Ime stavke |
-| quantity | int | Količina stavke |
-| unit | string | `'pcs'` |
-| unitPrice | float | `(item_total + item_tax) / quantity` (odražava popuste) |
-| totalItemPrice | float | `unitPrice * quantity` |
+**Sprečavanje duplikata:** porudžbina dobija meta oznaku `_wc_barion_tracked`, pa ponovno
+učitavanje stranice potvrde ne šalje drugi `purchase`.
 
-**Napomena o prihodu:** Događaj `purchase` koristi ukupan iznos porudžbine (uključujući dostavu), dok `initiateCheckout` koristi samo međuzbir + porez (dostava možda nije izračunata na početku završetka porudžbine).
+**Poznato odstupanje.** Barion traži `purchase` kada je plaćanje zaista uspelo, a `purchase` sa
+`step: -1` kada nije. Dodatak šalje `purchase` sa `step: 1` kad god kupac dođe na stranicu potvrde
+porudžbine — što se kod oflajn načina plaćanja, poput bankovnog prenosa ili pouzeća, dešava dok je
+porudžbina još neplaćena. `step: -1` nikada ne šalje.
 
 ---
 
 ### setEncryptedEmail
 
-**Okidač:** Stranica zahvalnice (hook `woocommerce_thankyou`) i stranica naplate — kod prijavljenih korisnika jednom pri učitavanju, a zatim svaki put kada kupac unese drugu važeću adresu e-pošte za naplatu.
+**Poziv bp():** `bp('identity', 'setEncryptedEmail', hash)`
 
-**bp() poziv:** `bp('identity', 'setEncryptedEmail', hash)`
+**Okidači:**
 
-Adresa se pretvara u mala slova i hešira algoritmom SHA-1 u pregledaču (Web Crypto API) pre nego što stigne do `bp.js`. Barion API prihvata unapred izračunat SHA-1 heš umesto obične adrese, a prethodno heširanje zaobilazi sopstveni regularni izraz za e-poštu u `bp.js`, koji odbija `+` u lokalnom delu i TLD duže od četiri slova. Vrednost koja je već 40-cifreni heksadecimalni heš prosleđuje se nepromenjena; ako Web Crypto API nije dostupan (kontekst bez HTTPS-a), šalje se obična adresa.
+- Stranica potvrde porudžbine, ako porudžbina ima imejl adresu za naplatu.
+- Stranica naplate, jednom pri učitavanju za prijavljene kupce.
+- Stranica naplate, kad god kupac unese drugu važeću adresu za naplatu — iz polja `#billing_email` na klasičnoj naplati ili iz skladišta podataka blokova Cart i Checkout na blokovskoj naplati.
 
-Vrednosti koje nisu ni važeća adresa e-pošte (prema [HTML5 specifikaciji](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) ni SHA-1 heš nikada se ne šalju, pa delimično kucanje na naplati ne stiže do `bp.js`.
+Adresa se pretvara u mala slova i u pregledaču hešira algoritmom SHA-1 (Web Crypto API) pre nego
+što stigne do `bp.js`. Barion umesto obične adrese prihvata unapred izračunat SHA-1 heš, a
+prethodno heširanje zaobilazi sopstveni regularni izraz bp.js-a koji odbija `+` u lokalnom delu i
+TLD-ove duže od četiri slova. Vrednost koja je već 40-znakovni heksadecimalni heš prosleđuje se
+nepromenjena. Ako Web Crypto API nije dostupan — van HTTPS-a — šalje se obična adresa.
 
-Na stranici zahvalnice aktivira se samo kada porudžbina ima adresu e-pošte za naplatu.
+Vrednosti koje nisu ni važeća imejl adresa (prema
+[HTML5 specifikaciji](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) ni
+SHA-1 heš nikad se ne šalju, pa delimično kucanje na naplati ne dolazi do `bp.js`. Ponovljena
+vrednost ne radi ništa.
 
 ---
 
-## Događaji koji NISU implementirani
+## Događaji koje dodatak ne šalje
 
-| Događaj | Razlog |
-|---------|--------|
-| `customEvent` | Nije potreban za standardno praćenje e-trgovine |
-| `initiatePurchase` | Barionov spisak obaveznih događaja kaže: implementiraj `initiatePurchase` ILI `purchase` — mi koristimo `purchase` |
-| `setEncryptedPhone` | Opcionalno; broj telefona nije pouzdano dostupan u svim tokovima WooCommerce |
-| `search` | Opcionalno; nije deo obaveznog skupa događaja |
+Barionova referenca događaja navodi ih među **obaveznim** rukovaocima događaja. FAQ dodaje da
+događaj kome u tvojoj prodavnici ne odgovara nijedna korisnička namera nije potrebno
+implementirati — to pokriva neke od njih, ali ne sve.
+
+| Događaj | Zašto ne |
+|---------|----------|
+| `initiatePurchase` | Ovde suvišan. Barion traži `initiatePurchase` *ili* `purchase`; dodatak šalje `purchase` |
+| `setEncryptedPhone` | Telefon za naplatu je u WooCommerce-u opcion i u mnogim prodavnicama ga nema |
+| `search`, `categorySelection`, `addPaymentInfo`, `removeFromCart` | Primenljivi na tipičnu WooCommerce prodavnicu, ali još nisu implementirani |
+
+Preporučeni rukovaoci — `customizeProduct`, `setUserProperties`, `signUp`, `clickPromo`,
+`clickProduct`, `clickProductDetail`, `error` — kao ni `customEvent` takođe nisu implementirani.
+
+Ako tvojoj prodavnici neki od njih treba, osnovni piksel ostavlja `bp()` na objektu `window`, pa
+`bp('track', 'search', { ... })` radi iz tvoje sopstvene teme ili dodatka.

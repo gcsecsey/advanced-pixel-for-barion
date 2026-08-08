@@ -46,8 +46,12 @@ Rufe die Einstellungsseite unter **Einstellungen > Barion Pixel** im WordPress-A
 #### Pixel-ID (Erforderlich)
 Gib deine Barion Pixel-ID ein (Format: `BP-0000000000-00`). Das Basis-Pixel wird auf allen Seiten geladen, sobald dies eingestellt ist.
 
+Die ID findest du in deiner Barion-Wallet unter **Merchant Management > Details**. Jeder Shop hat eine eigene, und Sandbox und Live-Umgebung vergeben unterschiedliche IDs. Eine ID, die mit `BPT` beginnt, ist keine Pixel-ID und funktioniert nicht.
+
 #### Vollständiges Pixel-Tracking aktivieren
 Umschalten, um das E-Commerce-Event-Tracking zu aktivieren/deaktivieren. Wenn deaktiviert, wird nur das Basis-Pixel geladen (pageView zur Betrugsprävention).
+
+Barion verlangt eine vollständige Pixel-Implementierung samt regelkonformem Consent-Banner, bevor ein Shop bessere Konditionen für das Barion Smart Gateway oder Zugang zu Barion Metrics erhält. Dieses Plugin deckt die Implementierung ab; die Freigabe erteilt Barion.
 
 #### Debug-Modus
 Aktivieren, um alle Barion Pixel-Events für Testzwecke in der Browser-Konsole zu protokollieren.
@@ -71,8 +75,9 @@ Barions eigene Anleitungen zur Einrichtung des Pixels (auf Englisch). Die Option
 - [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
 - [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
 - [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
-- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference)
 - [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel)
 
 ## Kompatibilität
 
@@ -88,11 +93,27 @@ Barions eigene Anleitungen zur Einrichtung des Pixels (auf Englisch). Die Option
 - WooCommerce 5.0+ (für vollständiges Event-Tracking)
 - Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) für universelle Cookie-Consent-Unterstützung
 
+## Mitwirken
+
+Fehlerberichte, Pull Requests und Übersetzungen sind willkommen — siehe [Beitragsleitfaden](de/contributing.md).
+
 ## Lizenz
 
 GPL-2.0-or-later — siehe [LICENSE](../../LICENSE) für Details.
 
 ## Änderungsprotokoll
+
+### 1.0.6
+- Behoben: `initiateCheckout` und `setEncryptedEmail` wurden im WooCommerce-Checkout-Block nie ausgelöst, der seit WooCommerce 8.3 die Voreinstellung für neue Shops ist. Das Plugin horchte nur auf die PHP-Hooks der klassischen Kasse und deren Feld `#billing_email`, und der Block hat beides nicht. Es liest jetzt den Datenspeicher der Cart- und Checkout-Blöcke; das Verhalten der klassischen Kasse bleibt unverändert
+- Behoben: `addToCart` wurde auf Shop- und Kategorieseiten nie ausgelöst, in keinem Shop. Das Event-Skript wurde nur auf Seiten geladen, auf denen bereits ein Event in der Warteschlange stand — auf Archivseiten nie. Die Add-to-Cart-Listener fehlten also genau dort, wo Kunden tatsächlich in den Warenkorb legen. Der Fehler stammt aus 1.0.1
+- Behoben: `addToCart` funktioniert jetzt auch mit den Produkt-Buttons des Product-Collection-Blocks. Diese laufen über die Interactivity API und lösen weder das klassische jQuery-Event noch den Block-Datenspeicher aus, deshalb wird der Warenkorbinhalt über die WooCommerce Store API gelesen
+
+### 1.0.5
+- Behoben: die mitgelieferten Übersetzungen (Ungarisch, Tschechisch, Slowakisch, Deutsch, Kroatisch, Rumänisch, Slowenisch und Serbisch) wurden nie geladen, die Einstellungsseite blieb englisch. WordPress durchsucht nur `wp-content/languages/plugins`, solange ein Plugin kein eigenes Verzeichnis registriert — und genau das fehlte. Jetzt wird `languages/` beim `init` registriert
+
+### 1.0.4
+- Kompatibilität: getestet mit WordPress 7.0 und WooCommerce 11.0
+- Geändert: `Requires PHP` von 7.2 auf 7.4 angehoben. WordPress 7.0 hat die Unterstützung für PHP 7.2 und 7.3 eingestellt, damit war 7.2 keine Version mehr, auf der das Plugin laufen konnte
 
 ### 1.0.3
 - Behoben: `setEncryptedEmail` wurde bei einem einzigen Aufruf der Kassenseite mehrfach gesendet

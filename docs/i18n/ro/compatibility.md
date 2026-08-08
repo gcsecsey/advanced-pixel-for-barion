@@ -13,21 +13,42 @@
 | WooCommerce 5.0+ | Suportat |
 | WooCommerce 11.0 | Testat |
 
+### Blocurile Cart și Checkout
+
+Suportate din 1.0.6. Blocurile nu declanșează nici hook-urile PHP clasice, nici selectorii DOM
+folosiți anterior de plugin, așa că pe suprafețele cu blocuri acesta citește datele WooCommerce
+direct: coșul din Store API pentru `addToCart` și depozitul de date `wc/store/cart` pentru e-mailul
+de la finalizare.
+
+**Limitare cunoscută.** Evenimentul `purchase` trece prin `woocommerce_thankyou`, declanșat în
+șablonul cu blocuri Order Confirmation de blocul „Informații suplimentare”. Dacă elimini acest bloc
+din șablon, urmărirea achizițiilor se oprește fără niciun semn. Păstrează-l în șablon.
+
 ---
 
-## Barion Payment Gateway (woocommerce-barion)
+## Alte surse ale pixelului de bază
 
-Plugin-ul [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) creat de szelpe este **exclusiv un procesor de plăți** — adaugă Barion ca metodă de plată la finalizarea comenzii în WooCommerce. Nu implementează urmărirea evenimentelor Barion Pixel.
+Barion documentează mai multe moduri de a aduce pixelul de bază într-o pagină, iar un magazin poate
+ajunge ușor cu mai multe dintre ele deodată:
 
-**Coexistență:** Ambele plugin-uri funcționează împreună fără conflicte. Plugin-ul Advanced Pixel for Barion gestionează urmărirea; gateway-ul de plată gestionează plățile.
+- [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) creat de szelpe și alte plugin-uri de plată Barion, care au un câmp opțional pentru ID Pixel
+- un [tag Google Tag Manager](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
+- un fragment lipit în header-ul temei
 
-**Suprapunere ID Pixel:** Gateway-ul de plată are un câmp opțional pentru ID Pixel pentru încărcarea pixelului de bază. Dacă ambele plugin-uri au un ID Pixel configurat:
+Plugin-ul verifică `window.bp` și `window.BarionAnalyticsObject` înainte să încarce `bp.js`. Dacă
+ambele sunt deja acolo, omite încărcarea scriptului și trimite doar propriul apel `init`, astfel
+încât pixelul nu se încarcă niciodată de două ori. În modul depanare, acest lucru apare ca
+`[Barion Pixel] bp.js already loaded by another plugin`.
 
-- Advanced Pixel for Barion detectează dacă `bp.js` este deja încărcat și omite reîncărcarea scriptului
-- O notificare informativă în administrare sugerează consolidarea configurației ID Pixel într-un singur loc
-- Ambele plugin-uri continuă să funcționeze corect indiferent de situație
+**Recomandare:** păstrează ID-ul Pixel într-un singur loc. Dacă folosești și un gateway de plată
+Barion, configurează ID-ul aici și lasă câmpul gateway-ului gol; dacă încarci deja pixelul de bază
+prin Google Tag Manager, elimină acel tag. Cazul de evitat cu adevărat este acela cu două ID-uri
+Pixel diferite pe aceeași pagină — un script duplicat poate fi suprimat de plugin, o identitate
+duplicată nu.
 
-**Recomandare:** Dacă folosești ambele plugin-uri, configurează ID-ul Pixel doar în setările Advanced Pixel for Barion și lasă-l gol în setările gateway-ului de plată.
+Când și Barion Payment Gateway are un ID Pixel configurat, pagina de setări afișează o notificare
+informativă. Ambele plugin-uri funcționează oricum mai departe: acela gestionează plățile, acesta
+urmărirea.
 
 ---
 
