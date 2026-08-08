@@ -29,13 +29,12 @@
 		{
 			"step": "installPlugin",
 			"pluginData": {
-				"resource": "url",
-				"url": "https://github.com/gcsecsey/advanced-pixel-for-barion/archive/refs/heads/main.zip"
+				"resource": "wordpress.org/plugins",
+				"slug": "advanced-pixel-for-barion"
+			},
+			"options": {
+				"activate": true
 			}
-		},
-		{
-			"step": "runPHP",
-			"code": "<?php if ( is_dir( '/wordpress/wp-content/plugins/advanced-pixel-for-barion-main' ) && ! is_dir( '/wordpress/wp-content/plugins/advanced-pixel-for-barion' ) ) { rename( '/wordpress/wp-content/plugins/advanced-pixel-for-barion-main', '/wordpress/wp-content/plugins/advanced-pixel-for-barion' ); require '/wordpress/wp-load.php'; $active = get_option( 'active_plugins', array() ); $active = array_map( function( $p ) { return str_replace( 'advanced-pixel-for-barion-main/', 'advanced-pixel-for-barion/', $p ); }, $active ); update_option( 'active_plugins', $active ); } ?>"
 		},
 		{
 			"step": "runPHP",
