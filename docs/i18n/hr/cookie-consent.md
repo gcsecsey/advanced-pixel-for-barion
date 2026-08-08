@@ -126,10 +126,10 @@ Ako WP Consent API nije dostupan, dodatak se vraća na izravnu integraciju s dod
 ### Kako radi
 
 1. Provjerava globalni JavaScript objekt `CLI`
-2. Ako su kolačići već prihvaćeni (povratni posjetitelj), odmah odobrava pristanak
-3. Ako kolačići nisu prihvaćeni, odmah odbija pristanak
-4. Sluša događaj `cli_user_preference_set` kada korisnik stupi u interakciju s bannerom za kolačiće
-5. Odobrava ili odbija na temelju vrijednosti kolačića `cookielawinfo-checkbox-necessary`
+2. Čita kolačić `cookielawinfo-checkbox-non-necessary`; ako je njegova vrijednost točno `yes`, odmah odobrava pristanak
+3. Inače ne poduzima ništa dok posjetitelj ne stupi u interakciju s bannerom
+4. Sluša klikove na bilo koji element koji odgovara `.cli_action_button`
+5. 100 milisekundi nakon klika ponovno čita isti kolačić i sukladno tome odobrava ili odbija pristanak
 
 ### Postavljanje
 
@@ -230,14 +230,21 @@ Osnovni pixel uvijek se učitava za Barionovo sprječavanje prijevare. Pozivi `g
 1. Omogući **Način rada za otklanjanje pogrešaka** u Postavke > Barion Pixel
 2. Otvori konzolu preglednika (F12)
 3. Traži poruke u konzoli vezane za pristanak:
-   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Razina 1, prihvaćeno
-   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Razina 1, odbijeno
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Razina 2, korisnik prihvatio
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Razina 2, korisnik odbio
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Razina 3, korisnik prihvatio
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Razina 3, korisnik odbio
-   - `[Barion Pixel] No consent manager detected...` — Razina 4 (ručni način)
+   - `[Barion Pixel] bp.js loaded by Advanced Pixel for Barion` — ovaj je dodatak učitao bp.js
+   - `[Barion Pixel] bp.js already loaded by another plugin, skipping script load` — drugi dodatak (npr. Barion Payment Gateway) već je učitao bp.js
+   - `[Barion Pixel] Base pixel initialized with ID: <id>` — osnovni pixel radi s vašim Pixel ID-om
    - `[Barion Pixel] Consent granted (grantConsent)` — pristanak je odobren (bilo koja razina)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — pristanak je odbijen (bilo koja razina)
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Razina 2, pristanak je već bio dan pri učitavanju stranice
+   - `[Barion Pixel] Consent granted via WP Consent API change event` — Razina 2, korisnik je prihvatio u banneru
+   - `[Barion Pixel] Consent rejected via WP Consent API change event` — Razina 2, korisnik je odbio u banneru
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Razina 1, prihvaćeno
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Razina 1, odbijeno
+   - `[Barion Pixel] Cookie Law Info detected, initial non-necessary cookie: <value>` — Razina 3, vrijednost kolačića pročitana pri učitavanju stranice
+   - `[Barion Pixel] Cookie Law Info button clicked, non-necessary cookie: <value>` — Razina 3, vrijednost kolačića pročitana nakon klika u banneru
+   - `[Barion Pixel] No consent manager detected. Call window.wcBarionGrantConsent() or window.wcBarionRejectConsent() manually.` — Razina 4 (ručni način)
+
+   Namjerno ne postoji poruka kada pristanak nedostaje pri prvom učitavanju putem WP Consent
+   API-ja — dodatak bilježi samo kada djeluje, a ne kada šuti.
 4. Testiraj tokove prihvaćanja i odbijanja na svom banneru za kolačiće
 5. Funkcije pristanka sigurno je pozivati više puta (idempotentne su)

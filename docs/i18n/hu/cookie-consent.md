@@ -133,10 +133,10 @@ Ha a WP Consent API nem érhető el, a bővítmény közvetlen integrációra v�
 ### Működési elv
 
 1. Ellenőrzi a `CLI` JavaScript globális objektum jelenlétét
-2. Ha a cookie-k már el vannak fogadva (visszatérő látogató), azonnal megadja a hozzájárulást
-3. Ha a cookie-k nincsenek elfogadva, azonnal elutasítja a hozzájárulást
-4. Figyeli a `cli_user_preference_set` eseményt, amikor a felhasználó interakcióba lép a cookie bannerrel
-5. A `cookielawinfo-checkbox-necessary` cookie értéke alapján ad vagy utasít el hozzájárulást
+2. Beolvassa a `cookielawinfo-checkbox-non-necessary` cookie-t; ha az értéke pontosan `yes`, azonnal megadja a hozzájárulást
+3. Egyébként semmit nem tesz, amíg a látogató nem lép interakcióba a bannerrel
+4. Figyeli a kattintásokat minden olyan elemen, amely illeszkedik a `.cli_action_button` szelektorra
+5. Kattintás után 100 ezredmásodperccel újra beolvassa ugyanazt a cookie-t, és ennek megfelelően adja meg vagy utasítja el a hozzájárulást
 
 ### Beállítás
 
@@ -237,14 +237,22 @@ Az alap pixel mindig betöltődik a Barion csalás megelőzési céljaira. A `gr
 1. Engedélyezd a **Hibakeresési módot** a Beállítások > Barion Pixel menüpontban
 2. Nyisd meg a böngésző konzolt (F12)
 3. Keresd a hozzájárulással kapcsolatos naplóüzeneteket:
-   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — 1. szint, elfogadva
-   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — 1. szint, elutasítva
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — 2. szint, felhasználó elfogadta
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — 2. szint, felhasználó elutasította
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — 3. szint, felhasználó elfogadta
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — 3. szint, felhasználó elutasította
-   - `[Barion Pixel] No consent manager detected...` — 4. szint (manuális mód)
+   - `[Barion Pixel] bp.js loaded by Advanced Pixel for Barion` — ez a bővítmény töltötte be a bp.js-t
+   - `[Barion Pixel] bp.js already loaded by another plugin, skipping script load` — egy másik bővítmény (pl. a Barion Payment Gateway) már betöltötte a bp.js-t
+   - `[Barion Pixel] Base pixel initialized with ID: <id>` — az alap pixel fut a Pixel ID-ddel
    - `[Barion Pixel] Consent granted (grantConsent)` — hozzájárulás megadva (bármely szint)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — hozzájárulás elutasítva (bármely szint)
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — 2. szint, a hozzájárulás már megvolt az oldal betöltésekor
+   - `[Barion Pixel] Consent granted via WP Consent API change event` — 2. szint, a felhasználó elfogadta a bannerben
+   - `[Barion Pixel] Consent rejected via WP Consent API change event` — 2. szint, a felhasználó elutasította a bannerben
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — 1. szint, elfogadva
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — 1. szint, elutasítva
+   - `[Barion Pixel] Cookie Law Info detected, initial non-necessary cookie: <value>` — 3. szint, az oldal betöltésekor beolvasott cookie-érték
+   - `[Barion Pixel] Cookie Law Info button clicked, non-necessary cookie: <value>` — 3. szint, a bannerbeli kattintás után beolvasott cookie-érték
+   - `[Barion Pixel] No consent manager detected. Call window.wcBarionGrantConsent() or window.wcBarionRejectConsent() manually.` — 4. szint (manuális mód)
+
+   Szándékosan nincs üzenet, ha az első betöltéskor a WP Consent API-n keresztül nincs
+   hozzájárulás — a bővítmény csak akkor naplóz, amikor tesz valamit, nem akkor, amikor
+   hallgat.
 4. Teszteld az elfogadási és elutasítási folyamatot is a cookie banneren
 5. A hozzájárulás függvények biztonságosan hívhatók többször is (idempotens)

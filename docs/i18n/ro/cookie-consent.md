@@ -130,10 +130,10 @@ Dacă WP Consent API nu este disponibil, plugin-ul trece la integrarea directă 
 ### Cum funcționează
 
 1. Verifică obiectul global JavaScript `CLI`
-2. Dacă cookie-urile sunt deja acceptate (vizitator care revine), acordă consimțământul imediat
-3. Dacă cookie-urile nu sunt acceptate, refuză consimțământul imediat
-4. Ascultă evenimentul `cli_user_preference_set` când utilizatorul interacționează cu bannerul de cookie
-5. Acordă sau refuză în funcție de valoarea cookie-ului `cookielawinfo-checkbox-necessary`
+2. Citește cookie-ul `cookielawinfo-checkbox-non-necessary`; dacă valoarea sa este exact `yes`, acordă consimțământul imediat
+3. Altfel, nu face nimic până când vizitatorul interacționează cu bannerul
+4. Ascultă click-urile pe orice element care se potrivește cu `.cli_action_button`
+5. La 100 de milisecunde după un click, recitește același cookie și acordă sau refuză consimțământul în consecință
 
 ### Configurare
 
@@ -234,14 +234,22 @@ Pixelul de bază se încarcă întotdeauna pentru prevenirea fraudei Barion. Ape
 1. Activează **Mod depanare** în Setări > Barion Pixel
 2. Deschide consola browserului (F12)
 3. Caută mesajele de jurnal legate de consimțământ:
-   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Nivelul 1, acceptat
-   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Nivelul 1, refuzat
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Nivelul 2, utilizator a acceptat
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Nivelul 2, utilizator a refuzat
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Nivelul 3, utilizator a acceptat
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Nivelul 3, utilizator a refuzat
-   - `[Barion Pixel] No consent manager detected...` — Nivelul 4 (mod manual)
+   - `[Barion Pixel] bp.js loaded by Advanced Pixel for Barion` — acest plugin a încărcat bp.js
+   - `[Barion Pixel] bp.js already loaded by another plugin, skipping script load` — un alt plugin (de ex. Barion Payment Gateway) a încărcat deja bp.js
+   - `[Barion Pixel] Base pixel initialized with ID: <id>` — pixelul de bază rulează cu ID-ul tău Pixel
    - `[Barion Pixel] Consent granted (grantConsent)` — consimțământul a fost acordat (orice nivel)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — consimțământul a fost refuzat (orice nivel)
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Nivelul 2, consimțământ deja acordat la încărcarea paginii
+   - `[Barion Pixel] Consent granted via WP Consent API change event` — Nivelul 2, utilizatorul a acceptat în banner
+   - `[Barion Pixel] Consent rejected via WP Consent API change event` — Nivelul 2, utilizatorul a refuzat în banner
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Nivelul 1, acceptat
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Nivelul 1, refuzat
+   - `[Barion Pixel] Cookie Law Info detected, initial non-necessary cookie: <value>` — Nivelul 3, valoarea cookie-ului citită la încărcarea paginii
+   - `[Barion Pixel] Cookie Law Info button clicked, non-necessary cookie: <value>` — Nivelul 3, valoarea cookie-ului citită după un click în banner
+   - `[Barion Pixel] No consent manager detected. Call window.wcBarionGrantConsent() or window.wcBarionRejectConsent() manually.` — Nivelul 4 (mod manual)
+
+   Nu există în mod deliberat niciun mesaj atunci când consimțământul lipsește la prima
+   încărcare prin WP Consent API — plugin-ul înregistrează doar atunci când acționează, nu
+   atunci când tace.
 4. Testează atât fluxul de acceptare, cât și cel de refuz pe bannerul tău de cookie
 5. Funcțiile de consimțământ pot fi apelate de mai multe ori în siguranță (idempotente)

@@ -120,10 +120,10 @@ If the WP Consent API is not available, the plugin falls back to direct integrat
 ### How it works
 
 1. Checks for the `CLI` JavaScript global object
-2. If cookies are already accepted (returning visitor), grants consent immediately
-3. If cookies are not accepted, rejects consent immediately
-4. Listens for the `cli_user_preference_set` event when the user interacts with the cookie banner
-5. Grants or rejects based on the `cookielawinfo-checkbox-necessary` cookie value
+2. Reads the `cookielawinfo-checkbox-non-necessary` cookie; if its value is exactly `yes`, grants consent immediately
+3. Otherwise takes no action until the visitor interacts with the banner
+4. Listens for clicks on any element matching `.cli_action_button`
+5. 100 milliseconds after a click, re-reads the same cookie and grants or rejects consent accordingly
 
 ### Setup
 
@@ -224,14 +224,21 @@ The base pixel always loads for Barion's fraud prevention. The `grantConsent` / 
 1. Enable **Debug Mode** in Settings > Barion Pixel
 2. Open the browser console (F12)
 3. Look for consent-related log messages:
-   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Tier 1, accepted
-   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Tier 1, rejected
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Tier 2, user accepted
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Tier 2, user declined
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Tier 3, user accepted
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Tier 3, user declined
-   - `[Barion Pixel] No consent manager detected...` — Tier 4 (manual mode)
+   - `[Barion Pixel] bp.js loaded by Advanced Pixel for Barion` — this plugin loaded bp.js
+   - `[Barion Pixel] bp.js already loaded by another plugin, skipping script load` — another plugin (e.g. the Barion Payment Gateway) already loaded bp.js
+   - `[Barion Pixel] Base pixel initialized with ID: <id>` — the base pixel is running with your Pixel ID
    - `[Barion Pixel] Consent granted (grantConsent)` — consent was granted (any tier)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — consent was rejected (any tier)
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Tier 2, already consented when the page loaded
+   - `[Barion Pixel] Consent granted via WP Consent API change event` — Tier 2, user accepted in the banner
+   - `[Barion Pixel] Consent rejected via WP Consent API change event` — Tier 2, user declined in the banner
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Tier 1, accepted
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Tier 1, rejected
+   - `[Barion Pixel] Cookie Law Info detected, initial non-necessary cookie: <value>` — Tier 3, the cookie value read when the page loaded
+   - `[Barion Pixel] Cookie Law Info button clicked, non-necessary cookie: <value>` — Tier 3, the cookie value read after a banner click
+   - `[Barion Pixel] No consent manager detected. Call window.wcBarionGrantConsent() or window.wcBarionRejectConsent() manually.` — Tier 4 (manual mode)
+
+   There is deliberately no message when consent is absent on first load through the WP Consent
+   API — the plugin only logs when it acts, not when it stays silent.
 4. Test both accept and reject flows on your cookie banner
 5. The consent functions are safe to call multiple times (idempotent)

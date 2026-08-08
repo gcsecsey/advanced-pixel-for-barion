@@ -126,10 +126,10 @@ Barion Pixel je registriran v kategoriji soglasja `marketing` v WP Consent API. 
 ### Kako deluje
 
 1. Preveri prisotnost globalnega objekta `CLI` JavaScript
-2. Če so piškotki že sprejeti (vračajoči se obiskovalec), takoj odobri soglasje
-3. Če piškotki niso sprejeti, takoj zavrne soglasje
-4. Posluša za dogodek `cli_user_preference_set`, ko uporabnik interagira s pasico za piškotke
-5. Odobri ali zavrne glede na vrednost piškotka `cookielawinfo-checkbox-necessary`
+2. Prebere piškotek `cookielawinfo-checkbox-non-necessary`; če je njegova vrednost natanko `yes`, takoj odobri soglasje
+3. Sicer ne stori ničesar, dokler obiskovalec ne interagira s pasico
+4. Posluša klike na kateri koli element, ki ustreza `.cli_action_button`
+5. 100 milisekund po kliku znova prebere isti piškotek in glede na to odobri ali zavrne soglasje
 
 ### Nastavitev
 
@@ -230,14 +230,21 @@ Osnovni piksel se vedno naloži za Barionovo preprečevanje goljufij. Klici `gra
 1. Omogočite **Način za odpravljanje napak** v Nastavitve > Barion Pixel
 2. Odprite konzolo brskalnika (F12)
 3. Poiščite sporočila dnevnika, povezana s soglasjem:
-   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Raven 1, sprejeto
-   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Raven 1, zavrnjeno
-   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Raven 2, uporabnik sprejel
-   - `[Barion Pixel] Consent auto-rejected via WP Consent API` — Raven 2, uporabnik zavrnil
-   - `[Barion Pixel] Consent auto-granted via Cookie Law Info` — Raven 3, uporabnik sprejel
-   - `[Barion Pixel] Consent auto-rejected via Cookie Law Info` — Raven 3, uporabnik zavrnil
-   - `[Barion Pixel] No consent manager detected...` — Raven 4 (ročni način)
+   - `[Barion Pixel] bp.js loaded by Advanced Pixel for Barion` — ta vtičnik je naložil bp.js
+   - `[Barion Pixel] bp.js already loaded by another plugin, skipping script load` — drug vtičnik (npr. Barion Payment Gateway) je že naložil bp.js
+   - `[Barion Pixel] Base pixel initialized with ID: <id>` — osnovni piksel deluje z vašim Pixel ID
    - `[Barion Pixel] Consent granted (grantConsent)` — soglasje odobreno (katera koli raven)
    - `[Barion Pixel] Consent rejected (rejectConsent)` — soglasje zavrnjeno (katera koli raven)
+   - `[Barion Pixel] Consent auto-granted via WP Consent API` — Raven 2, soglasje je bilo dano že ob nalaganju strani
+   - `[Barion Pixel] Consent granted via WP Consent API change event` — Raven 2, uporabnik je sprejel v pasici
+   - `[Barion Pixel] Consent rejected via WP Consent API change event` — Raven 2, uporabnik je zavrnil v pasici
+   - `[Barion Pixel] Consent granted via the recorded cookie trigger` — Raven 1, sprejeto
+   - `[Barion Pixel] Consent rejected via the recorded cookie trigger` — Raven 1, zavrnjeno
+   - `[Barion Pixel] Cookie Law Info detected, initial non-necessary cookie: <value>` — Raven 3, vrednost piškotka, prebrana ob nalaganju strani
+   - `[Barion Pixel] Cookie Law Info button clicked, non-necessary cookie: <value>` — Raven 3, vrednost piškotka, prebrana po kliku v pasici
+   - `[Barion Pixel] No consent manager detected. Call window.wcBarionGrantConsent() or window.wcBarionRejectConsent() manually.` — Raven 4 (ročni način)
+
+   Namerno ni sporočila, kadar soglasja ob prvem nalaganju prek WP Consent API ni — vtičnik
+   beleži samo, kadar ukrepa, ne kadar molči.
 4. Preizkusite tako tok sprejemanja kot zavrnitve na vaši pasici za piškotke
 5. Funkcije soglasja je varno klicati večkrat (idempotentne)
