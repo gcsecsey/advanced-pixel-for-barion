@@ -127,7 +127,12 @@ class WC_Barion_Pixel {
     }
 
     /**
-     * Clean a stored consent trigger. Mirrors sanitize() in barion-consent-trigger.js.
+     * Clean a stored consent trigger.
+     *
+     * Deliberately stricter than sanitize() in barion-consent-trigger.js: this
+     * side guards what enters the database, so it also runs sanitize_text_field()
+     * on the value. The cookie-name pattern, the event-name pattern, the
+     * 256-character cap and the 5-entry cap match the JavaScript rules.
      *
      * @param mixed $trigger The raw trigger from the option or a request.
      * @return array|null The cleaned trigger, or null when it breaks a rule.
