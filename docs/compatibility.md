@@ -7,7 +7,7 @@
 | Version | Status |
 |---------|--------|
 | WooCommerce 5.0+ | Supported |
-| WooCommerce 9.6 | Tested |
+| WooCommerce 11.0 | Tested |
 
 ---
 
@@ -67,11 +67,11 @@ The plugin supports all cookie consent plugins that implement the [WP Consent AP
 | Version | Status |
 |---------|--------|
 | WordPress 5.0+ | Required |
-| WordPress 6.7 | Tested |
+| WordPress 7.0 | Tested |
 
 ## PHP Version
 
 | Version | Status |
 |---------|--------|
-| PHP 7.2+ | Required |
+| PHP 7.4+ | Required |
 | PHP 8.x | Compatible |

@@ -76,7 +76,7 @@ A dokumentáció elérhető [Magyar](hu/), [Čeština](../cs/), [Slovenčina](..
 ## Követelmények
 
 - WordPress 5.0 vagy újabb
-- PHP 7.2 vagy újabb
+- PHP 7.4 vagy újabb
 - WooCommerce 5.0+ (a teljes eseménykövetéshez)
 - Opcionális: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) az univerzális cookie-hozzájárulás támogatáshoz
 

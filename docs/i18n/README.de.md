@@ -73,7 +73,7 @@ Die Dokumentation ist auch verfügbar auf [Magyar](hu/), [Čeština](cs/), [Slov
 ## Anforderungen
 
 - WordPress 5.0 oder höher
-- PHP 7.2 oder höher
+- PHP 7.4 oder höher
 - WooCommerce 5.0+ (für vollständiges Event-Tracking)
 - Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) für universelle Cookie-Consent-Unterstützung
 

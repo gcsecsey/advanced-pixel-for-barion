@@ -11,7 +11,7 @@
 | Verze | Stav |
 |-------|------|
 | WooCommerce 5.0+ | Podporováno |
-| WooCommerce 9.6 | Testováno |
+| WooCommerce 11.0 | Testováno |
 
 ---
 
@@ -71,11 +71,11 @@ Plugin podporuje všechny pluginy pro souhlas s cookies, které implementují [W
 | Verze | Stav |
 |-------|------|
 | WordPress 5.0+ | Vyžadováno |
-| WordPress 6.7 | Testováno |
+| WordPress 7.0 | Testováno |
 
 ## Verze PHP
 
 | Verze | Stav |
 |-------|------|
-| PHP 7.2+ | Vyžadováno |
+| PHP 7.4+ | Vyžadováno |
 | PHP 8.x | Kompatibilní |

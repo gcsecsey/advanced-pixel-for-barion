@@ -11,7 +11,7 @@
 | Version | Status |
 |---------|--------|
 | WooCommerce 5.0+ | Unterstützt |
-| WooCommerce 9.6 | Getestet |
+| WooCommerce 11.0 | Getestet |
 
 ---
 
@@ -71,11 +71,11 @@ Das Plugin unterstützt alle Cookie-Consent-Plugins, die die [WP Consent API](ht
 | Version | Status |
 |---------|--------|
 | WordPress 5.0+ | Erforderlich |
-| WordPress 6.7 | Getestet |
+| WordPress 7.0 | Getestet |
 
 ## PHP-Version
 
 | Version | Status |
 |---------|--------|
-| PHP 7.2+ | Erforderlich |
+| PHP 7.4+ | Erforderlich |
 | PHP 8.x | Kompatibel |

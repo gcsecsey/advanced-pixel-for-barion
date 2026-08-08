@@ -75,7 +75,7 @@ Documentation is also available in [Magyar](docs/i18n/hu/), [Čeština](docs/i18
 ## Requirements
 
 - WordPress 5.0 or higher
-- PHP 7.2 or higher
+- PHP 7.4 or higher
 - WooCommerce 5.0+ (for full event tracking)
 - Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) for universal cookie consent support
 

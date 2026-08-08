@@ -11,7 +11,7 @@
 | Versiune | Status |
 |---------|--------|
 | WooCommerce 5.0+ | Suportat |
-| WooCommerce 9.6 | Testat |
+| WooCommerce 11.0 | Testat |
 
 ---
 
@@ -71,11 +71,11 @@ Plugin-ul suportă toate plugin-urile de consimțământ cookie care implementea
 | Versiune | Status |
 |---------|--------|
 | WordPress 5.0+ | Necesar |
-| WordPress 6.7 | Testat |
+| WordPress 7.0 | Testat |
 
 ## Versiune PHP
 
 | Versiune | Status |
 |---------|--------|
-| PHP 7.2+ | Necesar |
+| PHP 7.4+ | Necesar |
 | PHP 8.x | Compatibil |

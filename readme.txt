@@ -2,9 +2,9 @@
 Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
-Tested up to: 6.9
-Stable tag: 1.0.3
-Requires PHP: 7.2
+Tested up to: 7.0
+Stable tag: 1.0.4
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,7 +73,7 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 = Requirements =
 
 * WordPress 5.0 or higher
-* PHP 7.2 or higher
+* PHP 7.4 or higher
 * WooCommerce 5.0 or higher (for full event tracking)
 
 = Optional =
@@ -112,6 +112,11 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 1. Settings page — enter your Barion Pixel ID and configure tracking options.
 
 == Changelog ==
+
+= 1.0.4 =
+* Compatibility: tested against WordPress 7.0 and WooCommerce 11.0.
+* `Requires PHP` raised from 7.2 to 7.4. WordPress 7.0 dropped support for PHP 7.2 and 7.3, so 7.2 was no longer a version the plugin could run on.
+* No functional changes.
 
 = 1.0.3 =
 * Fix: emails containing `+` in the local part (e.g. `alice+tag@example.com`), or with TLDs longer than four letters (e.g. `.museum`, `.online`), were rejected by bp.js with `Format of e-mail address or hash is invalid`. The plugin now SHA-1 hashes the email client-side (via the Web Crypto API) before passing it to bp.js, which bypasses bp.js's restrictive internal email regex. The Barion Pixel API explicitly supports pre-computed SHA-1 hashes.

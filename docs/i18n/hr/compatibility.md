@@ -11,7 +11,7 @@
 | Verzija | Status |
 |---------|--------|
 | WooCommerce 5.0+ | Podržano |
-| WooCommerce 9.6 | Testirano |
+| WooCommerce 11.0 | Testirano |
 
 ---
 
@@ -71,11 +71,11 @@ Dodatak podržava sve dodatke za pristanak na kolačiće koji implementiraju [WP
 | Verzija | Status |
 |---------|--------|
 | WordPress 5.0+ | Obvezno |
-| WordPress 6.7 | Testirano |
+| WordPress 7.0 | Testirano |
 
 ## Verzija PHP-a
 
 | Verzija | Status |
 |---------|--------|
-| PHP 7.2+ | Obvezno |
+| PHP 7.4+ | Obvezno |
 | PHP 8.x | Kompatibilno |
