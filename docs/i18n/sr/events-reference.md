@@ -11,6 +11,8 @@ Dodatak podržava dva načina rada:
 - **Osnovni piksel** (uvek aktivan kada je Pixel ID konfigurisan): Učitava `bp.js` i automatski aktivira `pageView` na svakoj stranici. Koristi se za sprečavanje prevara.
 - **Potpuno praćenje** (opcionalno, uključuje se u administraciji): Dodaje praćenje događaja e-trgovine za marketinšku analitiku i niže provizije Bariona.
 
+Barionova sopstvena referenca za ove događaje: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) i [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (na engleskom).
+
 ### Pregled događaja
 
 | Događaj | Režim | bp() poziv | Okidač |
@@ -22,7 +24,7 @@ Dodatak podržava dva načina rada:
 | addToCart | Potpuni | `bp('track', 'addToCart', data)` | Radnja dodavanja u korpu |
 | initiateCheckout | Potpuni | `bp('track', 'initiateCheckout', data)` | Učitavanje stranice za završetak porudžbine |
 | purchase | Potpuni | `bp('track', 'purchase', data)` | Stranica zahvalnice |
-| setEncryptedEmail | Potpuni | `bp('identify', 'setEncryptedEmail', email)` | Stranica zahvalnice |
+| setEncryptedEmail | Potpuni | `bp('identity', 'setEncryptedEmail', hash)` | Stranica zahvalnice i unos e-pošte na naplati |
 
 ---
 
@@ -62,7 +64,7 @@ Pogledaj [Integracija saglasnosti za kolačiće](cookie-consent.md) za detalje.
 | unit | string | `'pcs'` |
 | unitPrice | float | Cena proizvoda |
 
-> **Napomena:** Barion API referenca navodi `totalItemPrice` kao obavezno za ovaj događaj, ali bp.js ga odbija u realnom vremenu sa porukom "Invalid key totalItemPrice in contentView event." Ovo polje je namerno izostavljeno.
+> **Napomena:** `totalItemPrice` nije svojstvo događaja contentView. bp.js ga odbija u realnom vremenu sa porukom "Invalid key totalItemPrice in contentView event", a ni API referenca ga ne navodi za ovaj događaj. Umesto toga je obavezan unutar stavki niza `contents`.
 
 ---
 
@@ -154,13 +156,15 @@ Pogledaj [Integracija saglasnosti za kolačiće](cookie-consent.md) za detalje.
 
 ### setEncryptedEmail
 
-**Okidač:** Stranica zahvalnice (hook `woocommerce_thankyou`)
+**Okidač:** Stranica zahvalnice (hook `woocommerce_thankyou`) i stranica naplate — kod prijavljenih korisnika jednom pri učitavanju, a zatim svaki put kada kupac unese drugu važeću adresu e-pošte za naplatu.
 
-**bp() poziv:** `bp('identify', 'setEncryptedEmail', email)`
+**bp() poziv:** `bp('identity', 'setEncryptedEmail', hash)`
 
-Adresa za naplatu se pretvara u mala slova pre slanja. Barionov `bp.js` automatski upravlja SHA1 heširanjem — dodatak šalje čistu adresu e-pošte, ne heš.
+Adresa se pretvara u mala slova i hešira algoritmom SHA-1 u pregledaču (Web Crypto API) pre nego što stigne do `bp.js`. Barion API prihvata unapred izračunat SHA-1 heš umesto obične adrese, a prethodno heširanje zaobilazi sopstveni regularni izraz za e-poštu u `bp.js`, koji odbija `+` u lokalnom delu i TLD duže od četiri slova. Vrednost koja je već 40-cifreni heksadecimalni heš prosleđuje se nepromenjena; ako Web Crypto API nije dostupan (kontekst bez HTTPS-a), šalje se obična adresa.
 
-Aktivira se samo kada porudžbina ima adresu e-pošte za naplatu.
+Vrednosti koje nisu ni važeća adresa e-pošte (prema [HTML5 specifikaciji](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) ni SHA-1 heš nikada se ne šalju, pa delimično kucanje na naplati ne stiže do `bp.js`.
+
+Na stranici zahvalnice aktivira se samo kada porudžbina ima adresu e-pošte za naplatu.
 
 ---
 
@@ -169,6 +173,6 @@ Aktivira se samo kada porudžbina ima adresu e-pošte za naplatu.
 | Događaj | Razlog |
 |---------|--------|
 | `customEvent` | Nije potreban za standardno praćenje e-trgovine |
-| `initiatePayment` | Barion dokumentacija kaže: implementiraj `purchase` ILI `initiatePayment` — mi koristimo `purchase` |
-| `setPhoneNumber` | Opcionalno; broj telefona nije pouzdano dostupan u svim tokovima WooCommerce |
+| `initiatePurchase` | Barionov spisak obaveznih događaja kaže: implementiraj `initiatePurchase` ILI `purchase` — mi koristimo `purchase` |
+| `setEncryptedPhone` | Opcionalno; broj telefona nije pouzdano dostupan u svim tokovima WooCommerce |
 | `search` | Opcionalno; nije deo obaveznog skupa događaja |

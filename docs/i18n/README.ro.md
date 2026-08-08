@@ -63,6 +63,17 @@ Documentație detaliată este disponibilă în dosarul [`ro/`](ro/):
 
 Documentația este disponibilă și în [Magyar](../i18n/hu/), [Čeština](../i18n/cs/), [Slovenčina](../i18n/sk/), [Deutsch](../i18n/de/), [Hrvatski](../i18n/hr/), [Română](../i18n/ro/), [Slovenščina](../i18n/sl/) și [Srpski](../i18n/sr/).
 
+### Documentația Barion
+
+Ghidurile proprii ale Barion pentru configurarea pixelului (în limba engleză). Opțiunea **Enable Full Pixel Tracking** din acest plugin corespunde pixelului Barion complet (Full):
+
+- [Getting started with the Barion Pixel](https://docs.barion.com/Getting_started_with_the_Barion_Pixel)
+- [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+- [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
+- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+
 ## Compatibilitate
 
 - **WooCommerce**: Necesar pentru urmărirea completă a evenimentelor (pixelul de bază funcționează și fără el)
@@ -82,6 +93,19 @@ Documentația este disponibilă și în [Magyar](../i18n/hu/), [Čeština](../i1
 GPL-2.0-or-later — vezi [LICENSE](../../LICENSE) pentru detalii.
 
 ## Jurnal de modificări
+
+### 1.0.3
+- Remediat: `setEncryptedEmail` era trimis de mai multe ori la o singură încărcare a paginii de finalizare a comenzii
+- Remediat: bp.js respingea adresele de e-mail cu `+` în partea locală sau cu un TLD mai lung de patru litere (`.museum`, `.online`), cu eroarea `Format of e-mail address or hash is invalid`. Plugin-ul calculează acum hash-ul SHA-1 al adresei în browser înainte de a o transmite către bp.js — API-ul Barion Pixel acceptă un hash precalculat în locul adresei simple
+- Remediat: valorile parțiale (de exemplu `x@y`) nu mai sunt trimise către bp.js
+- Remediat: apelul respectă documentația Barion — `bp('identity', 'setEncryptedEmail', ...)` (anterior `'identify'`)
+
+Versiunea 1.0.2 a fost înlocuită de 1.0.3 înainte de lansare; remedierile ei sunt listate mai sus.
+
+### 1.0.1
+- Remediat: niciun eveniment pixel nu era trimis — scriptul de evenimente era pus în coadă după ce `wp_print_footer_scripts` rulase deja
+- Remediat: detectarea automată a consimțământului pentru cookie-uri rulează acum după `DOMContentLoaded`, astfel încât vede și variabilele globale ale plugin-urilor care se încarcă târziu
+- Nou: `setEncryptedEmail` se trimite și pe pagina de finalizare a comenzii — la încărcare pentru utilizatorii autentificați și când clientul introduce o adresă de facturare validă
 
 ### 1.0.0
 - Lansare inițială

@@ -2,22 +2,22 @@
 
 ## bp.js Runtime Validation Quirks
 
-Barion's `bp.js` script performs client-side validation on event data. In some cases, the validation rules differ from the Barion API reference documentation. These quirks were discovered during staging testing.
+Barion's `bp.js` script performs client-side validation on event data. In some cases, the validation rules differ from the [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference). These quirks were discovered during staging testing.
 
 ### totalItemPrice: rejected for contentView, required for contents items
 
-- **contentView** (flat event): bp.js **rejects** `totalItemPrice` with the error `Invalid key totalItemPrice in contentView event`, even though the API reference lists it as a required field.
-- **initiateCheckout** and **purchase** `contents` items: bp.js **requires** `totalItemPrice` with the error `Mandatory key totalItemPrice is missing from contents event` if omitted.
+- **contentView** (flat event): bp.js **rejects** `totalItemPrice` with the error `Invalid key totalItemPrice in contentView event`. The API reference agrees — `totalItemPrice` is not one of the contentView properties.
+- **initiateCheckout** and **purchase** `contents` items: bp.js **requires** `totalItemPrice` with the error `Mandatory key totalItemPrice is missing from contents event` if omitted. The API reference also lists it as required for contents items.
 
 **Rule of thumb:** `totalItemPrice` is invalid for flat events but required inside `contents` array items.
 
 ### unit is required in contents items
 
-bp.js requires `unit` in the `contents` array items for `initiateCheckout` and `purchase`. Omitting it produces: `Mandatory key unit is missing from contents event`.
+bp.js requires `unit` in the `contents` array items for `initiateCheckout` and `purchase`, as does the API reference. Omitting it produces: `Mandatory key unit is missing from contents event`.
 
-### step is required for checkout events
+### step
 
-The `step` field is mandatory for `addToCart`, `initiateCheckout`, and `purchase`. The Barion documentation recommends using `1` for single-step checkouts.
+The plugin sends `step: 1` for `addToCart`, `initiateCheckout`, and `purchase`. The API reference lists `step` as required for `initiateCheckout` and `purchase`, and optional for `addToCart`. Barion documents `1` as the checkout initiation step; for `purchase` the reference asks for the highest step number you use — also `1` in a single-step checkout.
 
 ---
 
@@ -87,6 +87,7 @@ bp.js logs its own validation errors with a numeric prefix. Common ones:
 4. Check that `contents` array has correct items with `unit`, `unitPrice`, `totalItemPrice`
 5. Check that `revenue` is subtotal + tax (not including shipping)
 6. Check `step: 1` is present
+7. Type a billing email into the checkout form and verify `[Barion Pixel] setEncryptedEmail sent` appears once per distinct valid address — not on every keystroke
 
 ### Order completion (purchase + setEncryptedEmail)
 

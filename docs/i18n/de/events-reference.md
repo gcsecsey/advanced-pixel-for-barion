@@ -11,6 +11,8 @@ Das Plugin unterstützt zwei Betriebsmodi:
 - **Basis-Pixel** (immer aktiv, wenn eine Pixel-ID konfiguriert ist): Lädt `bp.js` und löst `pageView` automatisch auf jeder Seite aus. Wird zur Betrugsprävention verwendet.
 - **Vollständiges Tracking** (optional, Umschalten im Admin): Fügt E-Commerce-Event-Tracking für Marketing-Analysen und niedrigere Barion-Provisionsraten hinzu.
 
+Barions eigene Referenz zu diesen Events: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) und [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (auf Englisch).
+
 ### Event-Übersicht
 
 | Event | Modus | bp()-Aufruf | Auslöser |
@@ -22,7 +24,7 @@ Das Plugin unterstützt zwei Betriebsmodi:
 | addToCart | Vollständig | `bp('track', 'addToCart', data)` | In-den-Warenkorb-Aktion |
 | initiateCheckout | Vollständig | `bp('track', 'initiateCheckout', data)` | Kassenseite wird geladen |
 | purchase | Vollständig | `bp('track', 'purchase', data)` | Danke-Seite |
-| setEncryptedEmail | Vollständig | `bp('identify', 'setEncryptedEmail', email)` | Danke-Seite |
+| setEncryptedEmail | Vollständig | `bp('identity', 'setEncryptedEmail', hash)` | Danke-Seite und E-Mail-Eingabe an der Kasse |
 
 ---
 
@@ -62,7 +64,7 @@ Weitere Einzelheiten unter [Cookie-Consent-Integration](cookie-consent.md).
 | unit | string | `'pcs'` |
 | unitPrice | float | Produktpreis |
 
-> **Hinweis:** Die Barion-API-Referenz listet `totalItemPrice` als erforderlich für dieses Event auf, aber bp.js lehnt es zur Laufzeit mit „Invalid key totalItemPrice in contentView event" ab. Dieses Feld wird absichtlich weggelassen.
+> **Hinweis:** `totalItemPrice` ist keine contentView-Eigenschaft. bp.js lehnt es zur Laufzeit mit „Invalid key totalItemPrice in contentView event" ab, und die API-Referenz führt es für dieses Event ebenfalls nicht auf. Erforderlich ist es stattdessen innerhalb der `contents`-Array-Artikel.
 
 ---
 
@@ -154,13 +156,15 @@ Weitere Einzelheiten unter [Cookie-Consent-Integration](cookie-consent.md).
 
 ### setEncryptedEmail
 
-**Auslöser:** Danke-Seite (Hook `woocommerce_thankyou`)
+**Auslöser:** Danke-Seite (Hook `woocommerce_thankyou`) und die Kassenseite — bei angemeldeten Benutzern einmal beim Laden, danach jedes Mal, wenn der Kunde eine andere gültige Rechnungs-E-Mail-Adresse eingibt.
 
-**bp()-Aufruf:** `bp('identify', 'setEncryptedEmail', email)`
+**bp()-Aufruf:** `bp('identity', 'setEncryptedEmail', hash)`
 
-Die Rechnungs-E-Mail-Adresse wird vor dem Senden in Kleinbuchstaben umgewandelt. Barions `bp.js` übernimmt das SHA1-Hashing automatisch — das Plugin sendet die reine E-Mail-Adresse, keinen Hash.
+Die Adresse wird in Kleinbuchstaben umgewandelt und im Browser per SHA-1 gehasht (Web Crypto API), bevor sie `bp.js` erreicht. Die Barion-API akzeptiert einen vorberechneten SHA-1-Hash anstelle der Klartextadresse, und das Vorab-Hashing umgeht den eigenen E-Mail-Regex von `bp.js`, der `+` im lokalen Teil und TLDs mit mehr als vier Buchstaben ablehnt. Ein Wert, der bereits ein 40-stelliger Hex-Hash ist, wird unverändert durchgereicht; ist die Web Crypto API nicht verfügbar (Kontext ohne HTTPS), wird die Klartextadresse gesendet.
 
-Wird nur ausgelöst, wenn die Bestellung eine Rechnungs-E-Mail-Adresse hat.
+Werte, die weder eine gültige E-Mail-Adresse (gemäß [HTML5-Spezifikation](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) noch ein SHA-1-Hash sind, werden nie gesendet — Teileingaben an der Kasse erreichen `bp.js` also nicht.
+
+Auf der Danke-Seite wird nur ausgelöst, wenn die Bestellung eine Rechnungs-E-Mail-Adresse hat.
 
 ---
 
@@ -169,6 +173,6 @@ Wird nur ausgelöst, wenn die Bestellung eine Rechnungs-E-Mail-Adresse hat.
 | Event | Grund |
 |-------|-------|
 | `customEvent` | Nicht erforderlich für Standard-E-Commerce-Tracking |
-| `initiatePayment` | Barion-Dokumentation besagt: entweder `purchase` ODER `initiatePayment` implementieren — wir verwenden `purchase` |
-| `setPhoneNumber` | Optional; Telefonnummern sind nicht in allen WooCommerce-Abläufen zuverlässig verfügbar |
+| `initiatePurchase` | Barions Liste der Pflicht-Events besagt: entweder `initiatePurchase` ODER `purchase` implementieren — wir verwenden `purchase` |
+| `setEncryptedPhone` | Optional; Telefonnummern sind nicht in allen WooCommerce-Abläufen zuverlässig verfügbar |
 | `search` | Optional; nicht Teil des obligatorischen Event-Sets |

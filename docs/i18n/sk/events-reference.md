@@ -11,6 +11,8 @@ Plugin podporuje dva prevádzkové režimy:
 - **Základný pixel** (vždy aktívny, keď je nakonfigurované Pixel ID): Načíta `bp.js` a automaticky spustí `pageView` na každej stránke. Používa sa na prevenciu podvodov.
 - **Úplné sledovanie** (voliteľné, prepínač v administrácii): Pridáva sledovanie e-commerce udalostí pre marketingové analýzy a nižšie provízne sadzby Barion.
 
+Vlastná referenčná dokumentácia Barionu k týmto udalostiam: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) a [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (v angličtine).
+
 ### Súhrn udalostí
 
 | Udalosť | Režim | Volanie bp() | Spúšťač |
@@ -22,7 +24,7 @@ Plugin podporuje dva prevádzkové režimy:
 | addToCart | Úplný | `bp('track', 'addToCart', data)` | Akcia pridania do košíka |
 | initiateCheckout | Úplný | `bp('track', 'initiateCheckout', data)` | Načítanie stránky pokladne |
 | purchase | Úplný | `bp('track', 'purchase', data)` | Stránka ďakovania |
-| setEncryptedEmail | Úplný | `bp('identify', 'setEncryptedEmail', email)` | Stránka ďakovania |
+| setEncryptedEmail | Úplný | `bp('identity', 'setEncryptedEmail', hash)` | Stránka ďakovania a zadanie e-mailu v pokladni |
 
 ---
 
@@ -62,7 +64,7 @@ Podrobnosti nájdeš v [Integrácia súhlasu s cookies](cookie-consent.md).
 | unit | string | `'pcs'` |
 | unitPrice | float | Cena produktu |
 
-> **Poznámka:** Referencia Barion API uvádza `totalItemPrice` ako povinné pre túto udalosť, ale bp.js ho za behu odmietne s chybou „Invalid key totalItemPrice in contentView event." Toto pole je zámerne vynechané.
+> **Poznámka:** `totalItemPrice` nie je vlastnosťou udalosti contentView. bp.js ho za behu odmietne s chybou „Invalid key totalItemPrice in contentView event" a referencia API ho pre túto udalosť tiež neuvádza. Povinné je namiesto toho vo vnútri položiek poľa `contents`.
 
 ---
 
@@ -154,13 +156,15 @@ Podrobnosti nájdeš v [Integrácia súhlasu s cookies](cookie-consent.md).
 
 ### setEncryptedEmail
 
-**Spúšťač:** Stránka ďakovania (hook `woocommerce_thankyou`)
+**Spúšťač:** Stránka ďakovania (hook `woocommerce_thankyou`) a stránka pokladne — pri prihlásených používateľoch raz pri načítaní, potom vždy, keď zákazník zadá inú platnú fakturačnú e-mailovú adresu.
 
-**Volanie bp():** `bp('identify', 'setEncryptedEmail', email)`
+**Volanie bp():** `bp('identity', 'setEncryptedEmail', hash)`
 
-Fakturačný e-mail sa pred odoslaním prevedie na malé písmená. Barionov `bp.js` automaticky spracúva hashovanie SHA1 — plugin odošle obyčajnú e-mailovú adresu, nie hash.
+E-mail sa prevedie na malé písmená a v prehliadači zahashuje algoritmom SHA-1 (Web Crypto API), až potom sa dostane do `bp.js`. Barion API prijíma predpočítaný hash SHA-1 namiesto obyčajnej adresy a predbežné hashovanie obchádza vlastný e-mailový regulárny výraz `bp.js`, ktorý odmieta `+` v lokálnej časti a TLD dlhšie než štyri písmená. Hodnota, ktorá už je 40-znakovým hexadecimálnym hashom, sa odovzdáva bez zmeny; ak Web Crypto API nie je dostupné (prostredie bez HTTPS), odošle sa obyčajná adresa.
 
-Spustí sa iba vtedy, keď má objednávka fakturačnú e-mailovú adresu.
+Hodnoty, ktoré nie sú ani platnou e-mailovou adresou (podľa [špecifikácie HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)), ani hashom SHA-1, sa neodosielajú nikdy, takže čiastočne napísaný text v pokladni sa do `bp.js` nedostane.
+
+Na stránke ďakovania sa spustí iba vtedy, keď má objednávka fakturačnú e-mailovú adresu.
 
 ---
 
@@ -169,6 +173,6 @@ Spustí sa iba vtedy, keď má objednávka fakturačnú e-mailovú adresu.
 | Udalosť | Dôvod |
 |---------|-------|
 | `customEvent` | Nie je potrebná pre štandardné sledovanie e-commerce |
-| `initiatePayment` | Dokumentácia Barion hovorí, že treba implementovať `purchase` ALEBO `initiatePayment` — používame `purchase` |
-| `setPhoneNumber` | Voliteľné; telefónne číslo nie je spoľahlivo dostupné vo všetkých tokoch WooCommerce |
+| `initiatePurchase` | Zoznam povinných udalostí Barionu hovorí, že treba implementovať `initiatePurchase` ALEBO `purchase` — používame `purchase` |
+| `setEncryptedPhone` | Voliteľné; telefónne číslo nie je spoľahlivo dostupné vo všetkých tokoch WooCommerce |
 | `search` | Voliteľné; nie je súčasťou povinnej sady udalostí |

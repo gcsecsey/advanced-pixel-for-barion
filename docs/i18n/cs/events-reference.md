@@ -11,6 +11,8 @@ Plugin podporuje dva provozní režimy:
 - **Základní Pixel** (vždy aktivní, pokud je nakonfigurováno ID Pixelu): Načte `bp.js` a automaticky spustí `pageView` na každé stránce. Používá se pro prevenci podvodů.
 - **Kompletní sledování** (volitelné, přepínač ve správě): Přidává sledování e-commerce událostí pro marketingové analýzy a nižší provizní sazby Barion.
 
+Vlastní referenční dokumentace Barionu k těmto událostem: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) a [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (v angličtině).
+
 ### Souhrn událostí
 
 | Událost | Režim | Volání bp() | Spouštěč |
@@ -22,7 +24,7 @@ Plugin podporuje dva provozní režimy:
 | addToCart | Kompletní | `bp('track', 'addToCart', data)` | Akce přidání do košíku |
 | initiateCheckout | Kompletní | `bp('track', 'initiateCheckout', data)` | Načtení stránky pokladny |
 | purchase | Kompletní | `bp('track', 'purchase', data)` | Stránka s poděkováním |
-| setEncryptedEmail | Kompletní | `bp('identify', 'setEncryptedEmail', email)` | Stránka s poděkováním |
+| setEncryptedEmail | Kompletní | `bp('identity', 'setEncryptedEmail', hash)` | Stránka s poděkováním a zadání e-mailu v pokladně |
 
 ---
 
@@ -62,7 +64,7 @@ Viz [Integrace souhlasu s cookies](cookie-consent.md) pro podrobnosti.
 | unit | string | `'pcs'` |
 | unitPrice | float | Cena produktu |
 
-> **Poznámka:** Referenční dokumentace Barion API uvádí `totalItemPrice` jako povinné pole pro tuto událost, ale bp.js ho za běhu odmítne s chybou „Invalid key totalItemPrice in contentView event." Toto pole je záměrně vynecháno.
+> **Poznámka:** `totalItemPrice` není vlastností události contentView. bp.js ho za běhu odmítne s chybou „Invalid key totalItemPrice in contentView event" a referenční dokumentace API ho pro tuto událost také neuvádí. Povinné je místo toho uvnitř položek pole `contents`.
 
 ---
 
@@ -154,13 +156,15 @@ Viz [Integrace souhlasu s cookies](cookie-consent.md) pro podrobnosti.
 
 ### setEncryptedEmail
 
-**Spouštěč:** Stránka s poděkováním (hook `woocommerce_thankyou`)
+**Spouštěč:** Stránka s poděkováním (hook `woocommerce_thankyou`) a stránka pokladny — u přihlášených uživatelů jednou při načtení, poté pokaždé, když zákazník zadá jinou platnou fakturační e-mailovou adresu.
 
-**Volání bp():** `bp('identify', 'setEncryptedEmail', email)`
+**Volání bp():** `bp('identity', 'setEncryptedEmail', hash)`
 
-Fakturační e-mail je před odesláním převeden na malá písmena. `bp.js` od Barion zpracovává hashování SHA1 automaticky — plugin odesílá prostou e-mailovou adresu, nikoli hash.
+E-mail je převeden na malá písmena a v prohlížeči zahashován algoritmem SHA-1 (Web Crypto API), teprve pak se dostane do `bp.js`. Barion API přijímá předpočítaný hash SHA-1 místo prosté adresy a předběžné hashování obchází vlastní e-mailový regulární výraz `bp.js`, který odmítá `+` v lokální části a TLD delší než čtyři písmena. Hodnota, která už je 40znakovým hexadecimálním hashem, se předává beze změny; pokud Web Crypto API není k dispozici (prostředí bez HTTPS), odešle se prostá adresa.
 
-Spustí se pouze v případě, že objednávka obsahuje fakturační e-mailovou adresu.
+Hodnoty, které nejsou ani platnou e-mailovou adresou (podle [specifikace HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)), ani hashem SHA-1, se neodesílají nikdy, takže částečně napsaný text v pokladně se do `bp.js` nedostane.
+
+Na stránce s poděkováním se spustí pouze v případě, že objednávka obsahuje fakturační e-mailovou adresu.
 
 ---
 
@@ -169,6 +173,6 @@ Spustí se pouze v případě, že objednávka obsahuje fakturační e-mailovou 
 | Událost | Důvod |
 |---------|-------|
 | `customEvent` | Není potřeba pro standardní sledování e-commerce |
-| `initiatePayment` | Dokumentace Barion říká implementovat `purchase` NEBO `initiatePayment` — používáme `purchase` |
-| `setPhoneNumber` | Volitelné; telefonní číslo není spolehlivě dostupné ve všech tocích WooCommerce |
+| `initiatePurchase` | Seznam povinných událostí Barionu říká implementovat `initiatePurchase` NEBO `purchase` — používáme `purchase` |
+| `setEncryptedPhone` | Volitelné; telefonní číslo není spolehlivě dostupné ve všech tocích WooCommerce |
 | `search` | Volitelné; není součástí povinné sady událostí |

@@ -66,6 +66,17 @@ Részletes dokumentáció elérhető a [`hu/`](hu/) mappában:
 
 A dokumentáció elérhető [Magyar](hu/), [Čeština](../cs/), [Slovenčina](../sk/), [Deutsch](../de/), [Hrvatski](../hr/), [Română](../ro/), [Slovenščina](../sl/) és [Srpski](../sr/) nyelven is.
 
+### Barion dokumentáció
+
+A Barion saját útmutatói a pixel beállításához. A bővítmény **Teljes Pixel követés engedélyezése** beállítása a Barion Teljes (Full) Barion Pixeljének felel meg:
+
+- [Áttekintés a Barion Pixel működéséről](https://docs.barion.com/Attekintes-a-Barion-Pixel-mukodeserol)
+- [Az Alap (Base) Barion Pixel implementációja](https://docs.barion.com/Az-Alap-%28Base%29-Barion-Pixel-implementacioja)
+- [A Teljes (Full) Barion Pixel implementációja](https://docs.barion.com/A-Teljes-%28Full%29-Barion-Pixel-implementacioja)
+- [Az Alap és a Teljes Barion Pixel implementációja WooCommerce platformon](https://docs.barion.com/Az-Alap-%28Base%29-es-a-Teljes-%28Full%29-Barion-Pixel-implementacioja-Woocommerce-e-kereskedelmi-platformon)
+- [Barion Pixel API referencia](https://docs.barion.com/Barion-Pixel-API-referencia)
+- [Barion Pixel hozzájáruláskezelési követelmények](https://docs.barion.com/Barion-Pixel-hozzajarulaskezelesi_kovetelmenyek)
+
 ## Kompatibilitás
 
 - **WooCommerce**: A teljes eseménykövetéshez szükséges (az alap pixel nélküle is működik)
@@ -85,6 +96,19 @@ A dokumentáció elérhető [Magyar](hu/), [Čeština](../cs/), [Slovenčina](..
 GPL-2.0-or-later — részletekért lásd a [LICENSE](../../LICENSE) fájlt.
 
 ## Változásnapló
+
+### 1.0.3
+- Javítva: a `setEncryptedEmail` többször is elindult egyetlen pénztároldal-betöltés során
+- Javítva: a bp.js `Format of e-mail address or hash is invalid` hibával utasította el azokat az e-mail-címeket, amelyek `+` jelet tartalmaznak a helyi részben, vagy négy betűnél hosszabb TLD-vel rendelkeznek (`.museum`, `.online`). A bővítmény most SHA-1 kivonatot készít az e-mail-címről a böngészőben, mielőtt átadná a bp.js-nek — a Barion Pixel API a sima cím helyett elfogadja az előre kiszámított kivonatot
+- Javítva: a részleges beírás (például `x@y`) többé nem jut el a bp.js-hez
+- Javítva: a hívás a Barion dokumentációja szerint `bp('identity', 'setEncryptedEmail', ...)` (korábban `'identify'` volt)
+
+Az 1.0.2 verziót az 1.0.3 még a kiadás előtt felváltotta; javításai a fenti listában szerepelnek.
+
+### 1.0.1
+- Javítva: egyetlen pixel esemény sem lett elküldve — az események szkriptje azután került sorba, hogy a `wp_print_footer_scripts` már lefutott
+- Javítva: a cookie-hozzájárulás automatikus felismerése most a `DOMContentLoaded` után fut, így látja a későn betöltődő hozzájárulás-kezelő bővítmények globális változóit is
+- Új: a `setEncryptedEmail` a pénztároldalon is elindul — bejelentkezett felhasználóknál betöltéskor, illetve amikor a vásárló érvényes számlázási e-mail-címet ad meg
 
 ### 1.0.0
 - Első kiadás

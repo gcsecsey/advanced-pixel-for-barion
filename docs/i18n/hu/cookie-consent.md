@@ -12,6 +12,8 @@ Az alap pixel szkript mindig betöltődik a csalás megelőzése érdekében, de
 
 **Fontos:** A cookie bannernek mind elfogadási, mind elutasítási lehetőséget kell kínálnia. A "cookie fal" (csak elfogadás) 2020 óta nem felel meg a GDPR-nak, és a Barion visszautasítja.
 
+A Barion erre vonatkozó előírásai: [Barion Pixel hozzájáruláskezelési követelmények](https://docs.barion.com/Barion-Pixel-hozzajarulaskezelesi_kovetelmenyek).
+
 A bővítmény a hozzájárulás-integráció három szintjét támogatja, sorrendben ellenőrizve:
 
 1. **WP Consent API** (ajánlott) — univerzális, minden nagyobb cookie bővítménnyel működik

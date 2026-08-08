@@ -7,6 +7,8 @@ The plugin supports two operating modes:
 - **Base Pixel** (always active when Pixel ID is configured): Loads `bp.js` and fires `pageView` automatically on every page. Used for fraud prevention.
 - **Full Tracking** (optional, toggle in admin): Adds e-commerce event tracking for marketing analytics and lower Barion commission rates.
 
+Barion's own reference for these events: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) and [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel).
+
 ### Event summary
 
 | Event | Mode | bp() call | Trigger |
@@ -18,7 +20,7 @@ The plugin supports two operating modes:
 | addToCart | Full | `bp('track', 'addToCart', data)` | Add to cart action |
 | initiateCheckout | Full | `bp('track', 'initiateCheckout', data)` | Checkout page load |
 | purchase | Full | `bp('track', 'purchase', data)` | Thank-you page |
-| setEncryptedEmail | Full | `bp('identify', 'setEncryptedEmail', email)` | Thank-you page |
+| setEncryptedEmail | Full | `bp('identity', 'setEncryptedEmail', hash)` | Thank-you page, and email entry on checkout |
 
 ---
 
@@ -58,7 +60,7 @@ See [Cookie Consent Integration](cookie-consent.md) for details.
 | unit | string | `'pcs'` |
 | unitPrice | float | Product price |
 
-> **Note:** The Barion API reference lists `totalItemPrice` as required for this event, but bp.js rejects it at runtime with "Invalid key totalItemPrice in contentView event." This field is intentionally omitted.
+> **Note:** `totalItemPrice` is not a contentView property. bp.js rejects it at runtime with "Invalid key totalItemPrice in contentView event", and the API reference does not list it for this event either. It is required inside `contents` array items instead.
 
 ---
 
@@ -150,13 +152,15 @@ See [Cookie Consent Integration](cookie-consent.md) for details.
 
 ### setEncryptedEmail
 
-**Trigger:** Thank-you page (`woocommerce_thankyou` hook)
+**Trigger:** Thank-you page (`woocommerce_thankyou` hook), and on the checkout page — once on load for logged-in users, then whenever the customer enters a different valid billing email.
 
-**bp() call:** `bp('identify', 'setEncryptedEmail', email)`
+**bp() call:** `bp('identity', 'setEncryptedEmail', hash)`
 
-The billing email is lowercased before sending. Barion's `bp.js` handles SHA1 hashing automatically — the plugin sends the plain email address, not a hash.
+The email is lowercased and SHA-1 hashed in the browser (Web Crypto API) before it reaches `bp.js`. The Barion API accepts a pre-computed SHA-1 hash in place of a plain address, and pre-hashing sidesteps `bp.js`'s own email regex, which rejects `+` in the local part and TLDs longer than four letters. A value that is already a 40-character hex hash is passed through unchanged; if the Web Crypto API is unavailable (non-HTTPS context), the plain email is sent instead.
 
-Only fires when the order has a billing email address.
+Values that are neither a valid email (per the [HTML5 spec](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) nor a SHA-1 hash are never sent, so partial typing on checkout does not reach `bp.js`.
+
+On the thank-you page, only fires when the order has a billing email address.
 
 ---
 
@@ -165,6 +169,6 @@ Only fires when the order has a billing email address.
 | Event | Reason |
 |-------|--------|
 | `customEvent` | Not needed for standard e-commerce tracking |
-| `initiatePayment` | Barion docs say implement `purchase` OR `initiatePayment` — we use `purchase` |
-| `setPhoneNumber` | Optional; phone number is not reliably available in all WooCommerce flows |
+| `initiatePurchase` | Barion's mandatory event list says implement `initiatePurchase` OR `purchase` — we use `purchase` |
+| `setEncryptedPhone` | Optional; phone number is not reliably available in all WooCommerce flows |
 | `search` | Optional; not part of the mandatory event set |

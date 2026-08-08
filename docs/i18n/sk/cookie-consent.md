@@ -12,6 +12,8 @@ Základný pixelový skript sa načíta vždy kvôli prevencii podvodov, ale ži
 
 **Dôležité:** Tvoj banner na cookies musí ponúkať možnosť prijať aj odmietnuť. „Cookie wall" (iba prijatie) nie je v súlade s GDPR od roku 2020 a Barion ho odmietne.
 
+Vlastné pravidlá Barionu k tejto téme: [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements) (v angličtine).
+
 Plugin podporuje tri úrovne integrácie súhlasu, kontrolované v tomto poradí:
 
 1. **WP Consent API** (odporúčané) — univerzálne, funguje so všetkými hlavnými pluginmi na cookies

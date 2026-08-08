@@ -63,6 +63,17 @@ Detaljna dokumentacija je dostupna u fascikli [`sr/`](sr/):
 
 Dokumentacija je takođe dostupna na [Magyar](../hu/), [Čeština](../cs/), [Slovenčina](../sk/), [Deutsch](../de/), [Hrvatski](../hr/), [Română](../ro/), [Slovenščina](../sl/), i [Srpski](sr/).
 
+### Barionova dokumentacija
+
+Barionovi sopstveni vodiči za podešavanje piksela (na engleskom). Opcija **Enable Full Pixel Tracking** u ovom dodatku odgovara punom (Full) Barion Pixelu:
+
+- [Getting started with the Barion Pixel](https://docs.barion.com/Getting_started_with_the_Barion_Pixel)
+- [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+- [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
+- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+
 ## Kompatibilnost
 
 - **WooCommerce**: Potreban za potpuno praćenje događaja (osnovni piksel radi bez njega)
@@ -82,6 +93,19 @@ Dokumentacija je takođe dostupna na [Magyar](../hu/), [Čeština](../cs/), [Slo
 GPL-2.0-or-later — pogledaj [LICENSE](../../LICENSE) za detalje.
 
 ## Evidencija promena
+
+### 1.0.3
+- Ispravljeno: `setEncryptedEmail` slao se više puta tokom jednog učitavanja stranice naplate
+- Ispravljeno: bp.js je uz grešku `Format of e-mail address or hash is invalid` odbijao adrese e-pošte sa znakom `+` u lokalnom delu ili sa TLD dužim od četiri slova (`.museum`, `.online`). Dodatak sada adresu hešira algoritmom SHA-1 u pregledaču pre nego što je prosledi bp.js-u — Barion Pixel API prihvata unapred izračunat heš umesto obične adrese
+- Ispravljeno: delimičan unos (na primer `x@y`) više se ne prosleđuje bp.js-u
+- Ispravljeno: poziv je usklađen sa Barionovom dokumentacijom — `bp('identity', 'setEncryptedEmail', ...)` (ranije `'identify'`)
+
+Verziju 1.0.2 je pre izdanja zamenila 1.0.3; njene ispravke su navedene gore.
+
+### 1.0.1
+- Ispravljeno: nijedan događaj piksela nije se slao — skripta događaja stavljena je u red tek nakon što je `wp_print_footer_scripts` već izvršen
+- Ispravljeno: automatsko prepoznavanje saglasnosti za kolačiće sada se izvršava nakon `DOMContentLoaded`, pa vidi i globalne promenljive dodataka koji se učitavaju kasnije
+- Novo: `setEncryptedEmail` sada se šalje i na stranici naplate — kod prijavljenih korisnika pri učitavanju i kada kupac unese važeću adresu e-pošte za naplatu
 
 ### 1.0.0
 - Početno izdanje

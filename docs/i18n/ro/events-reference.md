@@ -11,6 +11,8 @@ Plugin-ul suportă două moduri de funcționare:
 - **Pixel de bază** (întotdeauna activ când ID Pixel este configurat): Încarcă `bp.js` și declanșează `pageView` automat pe fiecare pagină. Folosit pentru prevenirea fraudei.
 - **Urmărire completă** (opțional, comutare din administrare): Adaugă urmărirea evenimentelor de e-commerce pentru analize de marketing și rate mai mici de comision Barion.
 
+Referința proprie Barion pentru aceste evenimente: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) și [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (în limba engleză).
+
 ### Rezumat evenimente
 
 | Eveniment | Mod | Apel bp() | Declanșator |
@@ -22,7 +24,7 @@ Plugin-ul suportă două moduri de funcționare:
 | addToCart | Complet | `bp('track', 'addToCart', data)` | Acțiune de adăugare în coș |
 | initiateCheckout | Complet | `bp('track', 'initiateCheckout', data)` | Încărcarea paginii de finalizare |
 | purchase | Complet | `bp('track', 'purchase', data)` | Pagina de mulțumire |
-| setEncryptedEmail | Complet | `bp('identify', 'setEncryptedEmail', email)` | Pagina de mulțumire |
+| setEncryptedEmail | Complet | `bp('identity', 'setEncryptedEmail', hash)` | Pagina de mulțumire și introducerea e-mailului la finalizarea comenzii |
 
 ---
 
@@ -62,7 +64,7 @@ Vezi [Integrare consimțământ cookie](cookie-consent.md) pentru detalii.
 | unit | string | `'pcs'` |
 | unitPrice | float | Prețul produsului |
 
-> **Notă:** Referința API Barion listează `totalItemPrice` ca obligatoriu pentru acest eveniment, dar bp.js îl respinge la execuție cu „Invalid key totalItemPrice in contentView event." Acest câmp este omis intenționat.
+> **Notă:** `totalItemPrice` nu este o proprietate a evenimentului contentView. bp.js îl respinge la execuție cu „Invalid key totalItemPrice in contentView event", iar referința API nu îl listează nici ea pentru acest eveniment. Este obligatoriu în schimb în articolele array-ului `contents`.
 
 ---
 
@@ -154,13 +156,15 @@ Vezi [Integrare consimțământ cookie](cookie-consent.md) pentru detalii.
 
 ### setEncryptedEmail
 
-**Declanșator:** Pagina de mulțumire (hook `woocommerce_thankyou`)
+**Declanșator:** Pagina de mulțumire (hook `woocommerce_thankyou`) și pagina de finalizare a comenzii — o dată la încărcare pentru utilizatorii autentificați, apoi ori de câte ori clientul introduce o altă adresă de facturare validă.
 
-**Apel bp():** `bp('identify', 'setEncryptedEmail', email)`
+**Apel bp():** `bp('identity', 'setEncryptedEmail', hash)`
 
-Adresa de e-mail de facturare este convertită în litere mici înainte de trimitere. `bp.js` al Barion gestionează automat hashing-ul SHA1 — plugin-ul trimite adresa de e-mail simplă, nu un hash.
+Adresa este convertită în litere mici și transformată în hash SHA-1 în browser (Web Crypto API) înainte de a ajunge la `bp.js`. API-ul Barion acceptă un hash SHA-1 precalculat în locul adresei simple, iar calcularea prealabilă ocolește expresia regulată proprie a `bp.js`, care respinge `+` în partea locală și TLD-urile mai lungi de patru litere. O valoare care este deja un hash hexazecimal de 40 de caractere este transmisă neschimbată; dacă Web Crypto API nu este disponibil (context fără HTTPS), se trimite adresa simplă.
 
-Se declanșează doar când comanda are o adresă de e-mail de facturare.
+Valorile care nu sunt nici adrese de e-mail valide (conform [specificației HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)), nici hash-uri SHA-1 nu sunt trimise niciodată, deci textul parțial tastat la finalizarea comenzii nu ajunge la `bp.js`.
+
+Pe pagina de mulțumire se declanșează doar când comanda are o adresă de e-mail de facturare.
 
 ---
 
@@ -169,6 +173,6 @@ Se declanșează doar când comanda are o adresă de e-mail de facturare.
 | Eveniment | Motiv |
 |-------|--------|
 | `customEvent` | Nu este necesar pentru urmărirea standard a e-commerce |
-| `initiatePayment` | Documentele Barion spun să implementezi `purchase` SAU `initiatePayment` — folosim `purchase` |
-| `setPhoneNumber` | Opțional; numărul de telefon nu este disponibil în mod fiabil în toate fluxurile WooCommerce |
+| `initiatePurchase` | Lista de evenimente obligatorii a Barion spune să implementezi `initiatePurchase` SAU `purchase` — folosim `purchase` |
+| `setEncryptedPhone` | Opțional; numărul de telefon nu este disponibil în mod fiabil în toate fluxurile WooCommerce |
 | `search` | Opțional; nu face parte din setul obligatoriu de evenimente |

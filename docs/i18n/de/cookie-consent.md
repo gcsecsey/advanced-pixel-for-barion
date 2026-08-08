@@ -12,6 +12,8 @@ Das Basis-Pixel-Skript wird immer zur Betrugsprävention geladen, aber es werden
 
 **Wichtig:** Dein Cookie-Banner muss sowohl eine Zustimmungs- als auch eine Ablehnungsoption anbieten. Eine „Cookie-Mauer" (nur Zustimmung) ist seit 2020 nicht DSGVO-konform und wird von Barion abgelehnt.
 
+Barions eigene Vorgaben dazu: [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements) (auf Englisch).
+
 Das Plugin unterstützt drei Stufen der Consent-Integration, die der Reihe nach geprüft werden:
 
 1. **WP Consent API** (empfohlen) — universell, funktioniert mit allen wichtigen Cookie-Plugins

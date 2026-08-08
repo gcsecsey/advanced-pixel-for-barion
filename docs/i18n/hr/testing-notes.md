@@ -6,22 +6,22 @@
 
 ## Posebnosti validacije bp.js za vrijeme izvođenja
 
-Barionova skripta `bp.js` izvodi validaciju podataka događaja na strani klijenta. U nekim slučajevima, pravila validacije se razlikuju od Barion API referentne dokumentacije. Ove posebnosti su otkrivene tijekom testiranja na staging okruženju.
+Barionova skripta `bp.js` izvodi validaciju podataka događaja na strani klijenta. U nekim slučajevima, pravila validacije se razlikuju od [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference). Ove posebnosti su otkrivene tijekom testiranja na staging okruženju.
 
 ### totalItemPrice: odbijen za contentView, obvezan za stavke sadržaja
 
-- **contentView** (ravni događaj): bp.js **odbija** `totalItemPrice` s pogreškom `Invalid key totalItemPrice in contentView event`, iako API referenca navodi da je to obvezno polje.
-- **initiateCheckout** i **purchase** stavke `contents`: bp.js **zahtijeva** `totalItemPrice` s pogreškom `Mandatory key totalItemPrice is missing from contents event` ako se izostavi.
+- **contentView** (ravni događaj): bp.js **odbija** `totalItemPrice` s pogreškom `Invalid key totalItemPrice in contentView event`. API referenca se s tim slaže — `totalItemPrice` nije svojstvo događaja contentView.
+- **initiateCheckout** i **purchase** stavke `contents`: bp.js **zahtijeva** `totalItemPrice` s pogreškom `Mandatory key totalItemPrice is missing from contents event` ako se izostavi. API referenca ga za stavke contents također navodi kao obvezan.
 
 **Pravilo palca:** `totalItemPrice` nije valjano za ravne događaje, ali je obavezno unutar stavki niza `contents`.
 
 ### unit je obavezan u stavkama sadržaja
 
-bp.js zahtijeva `unit` u stavkama niza `contents` za `initiateCheckout` i `purchase`. Ako se izostavi, dobiva se: `Mandatory key unit is missing from contents event`.
+bp.js zahtijeva `unit` u stavkama niza `contents` za `initiateCheckout` i `purchase`, kao i API referenca. Ako se izostavi, dobiva se: `Mandatory key unit is missing from contents event`.
 
-### step je obavezan za događaje naplate
+### step
 
-Polje `step` je obvezno za `addToCart`, `initiateCheckout` i `purchase`. Barion dokumentacija preporučuje korištenje `1` za jednofazne blagajne.
+Dodatak šalje `step: 1` za `addToCart`, `initiateCheckout` i `purchase`. API referenca navodi `step` kao obvezan za `initiateCheckout` i `purchase`, a neobavezan za `addToCart`. Barion dokumentira `1` kao korak pokretanja naplate; za `purchase` referenca traži najveći broj koraka koji koristiš — kod jednofazne naplate također `1`.
 
 ---
 
@@ -91,6 +91,7 @@ bp.js bilježi vlastite pogreške validacije s numeričkim prefiksom. Uobičajen
 4. Provjeri ima li niz `contents` ispravne stavke s `unit`, `unitPrice`, `totalItemPrice`
 5. Provjeri je li `revenue` međuzbroj + porez (bez dostave)
 6. Provjeri je li prisutan `step: 1`
+7. Unesi adresu e-pošte za naplatu u obrazac naplate i provjeri pojavljuje li se `[Barion Pixel] setEncryptedEmail sent` jednom po različitoj valjanoj adresi — a ne pri svakom pritisku tipke
 
 ### Završetak narudžbe (purchase + setEncryptedEmail)
 
