@@ -49,6 +49,7 @@ class WC_Barion_Admin {
 
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
     }
 
     /**
@@ -153,6 +154,7 @@ class WC_Barion_Admin {
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             <?php settings_errors(); ?>
+            <?php $this->render_health_panel(); ?>
             <form method="post" action="options.php">
                 <?php
                 settings_fields('wc_barion_pixel_group');
@@ -230,6 +232,91 @@ class WC_Barion_Admin {
                    <?php checked($value, true); ?>>
             <?php esc_html_e('Enable debug mode (logs events to browser console)', 'advanced-pixel-for-barion'); ?>
         </label>
+        <?php
+    }
+
+    /**
+     * Load the panel and wizard assets on our settings page only.
+     *
+     * @param string $hook The current admin page hook.
+     * @return void
+     */
+    public function enqueue_admin_assets($hook) {
+        if ('settings_page_advanced-pixel-for-barion' !== $hook) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'wc-barion-admin',
+            WC_BARION_PIXEL_URL . 'assets/css/barion-admin.css',
+            array(),
+            WC_BARION_PIXEL_VERSION
+        );
+    }
+
+    /**
+     * Render the health panel above the settings form.
+     *
+     * @return void
+     */
+    public function render_health_panel() {
+        $facts   = WC_Barion_Health::gather_facts($this->options);
+        $checks  = WC_Barion_Health::evaluate($facts);
+        $overall = WC_Barion_Health::overall_status($checks);
+
+        $headline = array(
+            'ok'   => __('Barion Pixel is healthy', 'advanced-pixel-for-barion'),
+            'warn' => __('Barion Pixel needs attention', 'advanced-pixel-for-barion'),
+            'fail' => __('Action needed', 'advanced-pixel-for-barion'),
+        );
+
+        $icons = array('ok' => '&#10003;', 'warn' => '!', 'fail' => '&#10007;', 'info' => '&#8226;');
+
+        $collapsed = ('ok' === $overall) ? ' is-collapsed' : '';
+        ?>
+        <div class="apb-panel is-<?php echo esc_attr($overall); ?><?php echo esc_attr($collapsed); ?>" id="apb-panel">
+            <div class="apb-panel-head">
+                <div class="apb-status">
+                    <span class="apb-dot is-<?php echo esc_attr($overall); ?>"></span>
+                    <?php echo esc_html($headline[$overall]); ?>
+                </div>
+                <div>
+                    <button type="button" class="button-link" id="apb-toggle">
+                        <?php
+                        printf(
+                            /* translators: %d: number of health checks. */
+                            esc_html__('Show %d checks', 'advanced-pixel-for-barion'),
+                            count($checks)
+                        );
+                        ?>
+                    </button>
+                </div>
+            </div>
+            <div class="apb-rows">
+                <?php foreach ($checks as $check) : ?>
+                    <div class="apb-row" data-check="<?php echo esc_attr($check['id']); ?>">
+                        <span class="apb-ico is-<?php echo esc_attr($check['status']); ?>">
+                            <?php echo wp_kses_post($icons[$check['status']]); ?>
+                        </span>
+                        <span class="apb-body">
+                            <span class="apb-label"><?php echo esc_html($check['label']); ?></span>
+                            <?php if ('' !== $check['desc']) : ?>
+                                <div class="apb-desc"><?php echo esc_html($check['desc']); ?></div>
+                            <?php endif; ?>
+                        </span>
+                        <?php if (null !== $check['action']) : ?>
+                            <span class="apb-action">
+                                <button type="button"
+                                        class="button<?php echo ('fail' === $check['status']) ? ' button-primary' : ''; ?>"
+                                        data-apb-action="<?php echo esc_attr($check['action']['target']); ?>">
+                                    <?php echo esc_html($check['action']['label']); ?>
+                                </button>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
         <?php
     }
 
