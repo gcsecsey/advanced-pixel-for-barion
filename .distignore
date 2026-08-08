@@ -4,6 +4,7 @@
 .github
 .context
 .wordpress-org
+tools/
 docs/
 tests/
 README.md

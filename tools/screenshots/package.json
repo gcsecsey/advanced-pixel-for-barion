@@ -1,0 +1,13 @@
+{
+	"name": "advanced-pixel-for-barion-screenshots",
+	"private": true,
+	"type": "module",
+	"description": "Screenshot capture harness. Not part of the distributed plugin.",
+	"scripts": {
+		"check": "node capture.mjs --check",
+		"capture": "node capture.mjs"
+	},
+	"devDependencies": {
+		"playwright": "^1.62.1"
+	}
+}
