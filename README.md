@@ -100,6 +100,18 @@ GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
 
 ## Changelog
 
+### 1.0.6
+- Fixed: `initiateCheckout` and `setEncryptedEmail` never fired on the WooCommerce Checkout block, which has been the default for new stores since WooCommerce 8.3. The plugin only listened for the classic checkout's PHP hooks and its `#billing_email` field, and the block has neither. It now reads the Cart and Checkout blocks' data store; classic checkout behaviour is unchanged
+- Fixed: `addToCart` never fired on shop or category pages, on any store. The events script was only loaded on pages that already had an event queued, which no archive page does, so the add-to-cart listeners were never present where customers actually add to cart. This dates back to 1.0.1
+- Fixed: `addToCart` now also works with the block product buttons used by the Product Collection block. These run on the Interactivity API and fire neither the classic jQuery event nor the block data store, so cart contents are read from the WooCommerce Store API
+
+### 1.0.5
+- Fixed: the bundled Hungarian, Czech, Slovak, German, Croatian, Romanian, Slovenian and Serbian translations never loaded, so the settings screen stayed in English. WordPress only searches `wp-content/languages/plugins` unless a plugin registers its own directory, and the plugin never did. It now registers `languages/` on `init`
+
+### 1.0.4
+- Compatibility: tested against WordPress 7.0 and WooCommerce 11.0
+- Changed: `Requires PHP` raised from 7.2 to 7.4. WordPress 7.0 dropped support for PHP 7.2 and 7.3, so 7.2 was no longer a version the plugin could run on
+
 ### 1.0.3
 - Fixed: `setEncryptedEmail` fired several times on a single checkout page load
 - Fixed: bp.js rejected emails with `+` in the local part, or with a TLD longer than four letters (`.museum`, `.online`), with `Format of e-mail address or hash is invalid`. The plugin now SHA-1 hashes the email in the browser before passing it to bp.js — the Barion Pixel API accepts a pre-computed hash in place of a plain address
