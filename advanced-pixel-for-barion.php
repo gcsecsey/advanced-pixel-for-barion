@@ -27,6 +27,7 @@ define('WC_BARION_PIXEL_PATH', plugin_dir_path(__FILE__));
 define('WC_BARION_PIXEL_URL', plugin_dir_url(__FILE__));
 
 require_once WC_BARION_PIXEL_PATH . 'includes/class-wc-barion-pixel.php';
+require_once WC_BARION_PIXEL_PATH . 'includes/class-wc-barion-health.php';
 require_once WC_BARION_PIXEL_PATH . 'includes/class-wc-barion-admin.php';
 
 // Declare HPOS compatibility
