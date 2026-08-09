@@ -13,21 +13,39 @@
 | WooCommerce 5.0+ | Podprto |
 | WooCommerce 11.0 | Preizkušeno |
 
+### Bloka Cart in Checkout
+
+Podprta od 1.0.6. Bloka ne sprožita ne klasičnih hookov PHP ne selektorjev DOM, ki jih je vtičnik
+uporabljal prej, zato na blokovnih površinah bere podatke WooCommerce neposredno: košarico iz
+Store API za `addToCart` in podatkovno shrambo `wc/store/cart` za e-pošto na blagajni.
+
+**Znana omejitev.** Dogodek `purchase` teče prek `woocommerce_thankyou`, ki ga v blokovni predlogi
+Order Confirmation sproži blok „Dodatne informacije“. Če ta blok odstraniš iz predloge, sledenje
+nakupom tiho preneha. Pusti ga v predlogi.
+
 ---
 
-## Barion Payment Gateway (woocommerce-barion)
+## Drugi viri osnovnega piksla
 
-Vtičnik [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) avtorja szelpe je **samo procesor plačil** — dodaja Barion kot način plačila na WooCommerce blagajno. Ne implementira sledenja dogodkov Barion Pixel.
+Barion dokumentira več načinov, kako osnovni piksel pride na stran, in v eni trgovini se jih zlahka
+nabere več:
 
-**Sobivanje:** Oba vtičnika delujeta skupaj brez konfliktov. Vtičnik Advanced Pixel for Barion skrbi za sledenje; plačilni prehod skrbi za plačila.
+- [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) avtorja szelpe in drugi Barionovi plačilni vtičniki, ki imajo izbirno polje za Pixel ID
+- [oznaka v Google Tag Managerju](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
+- izsek, prilepljen v glavo teme
 
-**Prekrivanje ID piksla:** Plačilni prehod ima izbirno polje za ID piksla za nalaganje osnovnega piksla. Če imata oba vtičnika konfiguriran ID piksla:
+Vtičnik pred nalaganjem `bp.js` preveri `window.bp` in `window.BarionAnalyticsObject`. Če sta oba
+že tam, preskoči nalaganje skripte in pošlje samo lasten klic `init`, tako da se piksel nikoli ne
+naloži dvakrat. V načinu za odpravljanje napak to javi sporočilo
+`[Barion Pixel] bp.js already loaded by another plugin`.
 
-- Advanced Pixel for Barion zazna, ali je `bp.js` že naložen, in preskoči ponovno nalaganje skripta
-- Informacijsko skrbniško obvestilo predlaga konsolidacijo konfiguracije ID piksla na eno mesto
-- Oba vtičnika nadaljujeta pravilno delovanje ne glede na to
+**Priporočilo:** Pixel ID imej na enem mestu. Če uporabljaš tudi Barionov plačilni prehod, nastavi
+ID tukaj in njegovo polje pusti prazno; če osnovni piksel že nalagaš prek Google Tag Managerja, to
+oznako odstrani. Res se je treba izogniti dvema različnima Pixel ID-jema na eni strani — dvojno
+skripto vtičnik lahko prepreči, dvojne identitete ne.
 
-**Priporočilo:** Če uporabljate oba vtičnika, konfigurirajte ID piksla samo v nastavitvah Advanced Pixel for Barion in ga pustite praznega v nastavitvah plačilnega prehoda.
+Ko ima Pixel ID nastavljen tudi Barion Payment Gateway, stran z nastavitvami prikaže informativno
+obvestilo. Oba vtičnika tako ali tako delujeta naprej: tisti skrbi za plačila, ta za sledenje.
 
 ---
 

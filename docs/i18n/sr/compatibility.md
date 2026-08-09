@@ -13,21 +13,39 @@
 | WooCommerce 5.0+ | Podržano |
 | WooCommerce 11.0 | Testirano |
 
+### Blokovi Cart i Checkout
+
+Podržani od 1.0.6. Blokovi ne pokreću ni klasične PHP hookove ni DOM selektore koje je dodatak
+ranije koristio, pa na blokovskim površinama čita podatke WooCommerce-a direktno: korpu iz Store
+API-ja za `addToCart` i skladište podataka `wc/store/cart` za imejl na naplati.
+
+**Poznato ograničenje.** Događaj `purchase` ide preko `woocommerce_thankyou`, koji u blokovskom
+šablonu Order Confirmation pokreće blok „Dodatne informacije“. Ako taj blok ukloniš iz šablona,
+praćenje kupovina tiho prestaje. Ostavi ga u šablonu.
+
 ---
 
-## Barion Payment Gateway (woocommerce-barion)
+## Drugi izvori osnovnog piksela
 
-Dodatak [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) od szelpe je **isključivo procesor plaćanja** — dodaje Barion kao način plaćanja pri završetku porudžbine u WooCommerce-u. Ne implementira praćenje Barion Pixel događaja.
+Barion dokumentuje nekoliko načina da osnovni piksel dođe na stranicu, a u jednoj prodavnici lako
+se skupi više njih:
 
-**Koegzistencija:** Oba dodatka rade zajedno bez konflikta. Advanced Pixel for Barion dodatak upravlja praćenjem; platni prolaz upravlja plaćanjima.
+- [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) od szelpe i drugi Barionovi platni dodaci koji imaju opciono polje Pixel ID
+- [oznaka u Google Tag Manageru](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
+- isečak zalepljen u zaglavlje teme
 
-**Preklapanje Pixel ID-a:** Platni prolaz ima opcionalno polje za Pixel ID za učitavanje osnovnog piksela. Ako oba dodatka imaju konfigurisan Pixel ID:
+Dodatak pre učitavanja `bp.js` proverava `window.bp` i `window.BarionAnalyticsObject`. Ako su oba
+već tu, preskače učitavanje skripte i šalje samo sopstveni poziv `init`, pa se piksel nikad ne
+učita dvaput. U režimu za otklanjanje grešaka to javlja poruka
+`[Barion Pixel] bp.js already loaded by another plugin`.
 
-- Advanced Pixel for Barion otkriva da li je `bp.js` već učitan i preskače ponovno učitavanje skripte
-- Informativno obaveštenje u administraciji predlaže konsolidaciju konfiguracije Pixel ID-a na jedno mesto
-- Oba dodatka nastavljaju ispravno da funkcionišu bez obzira na to
+**Preporuka:** drži Pixel ID na jednom mestu. Ako koristiš i Barionov platni prolaz, postavi ID
+ovde i ostavi njegovo polje praznim; ako osnovni piksel već učitavaš preko Google Tag Managera,
+ukloni tu oznaku. Ono što zaista treba izbeći su dva različita Pixel ID-a na jednoj stranici —
+dvostruku skriptu dodatak može sprečiti, dvostruki identitet ne.
 
-**Preporuka:** Ako koristiš oba dodatka, konfigurišu Pixel ID samo u podešavanjima Advanced Pixel for Barion i ostavi ga praznog u podešavanjima platnog prolaza.
+Kada i Barion Payment Gateway ima podešen Pixel ID, stranica podešavanja prikazuje informativno
+obaveštenje. Oba dodatka svejedno nastavljaju da rade: onaj upravlja plaćanjima, ovaj praćenjem.
 
 ---
 

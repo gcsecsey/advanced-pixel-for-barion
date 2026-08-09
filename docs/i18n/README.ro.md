@@ -46,8 +46,12 @@ Accesează pagina de setări la **Setări > Barion Pixel** în panoul de adminis
 #### ID Pixel (Obligatoriu)
 Introdu ID-ul tău Barion Pixel (format: `BP-0000000000-00`). Pixelul de bază va fi încărcat pe toate paginile odată ce acesta este configurat.
 
+Găsești ID-ul în portofelul tău Barion, la **Merchant Management > Details**. Fiecare magazin are ID-ul lui, iar mediile sandbox și live emit ID-uri diferite. Un ID care începe cu `BPT` nu este un ID de Pixel și nu va funcționa.
+
 #### Activează urmărirea completă cu Pixel
 Activează/dezactivează urmărirea evenimentelor de e-commerce. Când este dezactivat, se încarcă doar Pixelul de bază (pageView pentru prevenirea fraudei).
+
+Barion cere o implementare completă a Pixelului și o bară de consimțământ conformă înainte ca un magazin să obțină condiții mai bune la Barion Smart Gateway sau acces la Barion Metrics. Acest plugin acoperă partea de implementare; aprobarea rămâne la Barion.
 
 #### Mod depanare
 Activează pentru a înregistra toate evenimentele Barion Pixel în consola browserului pentru testare.
@@ -61,7 +65,7 @@ Documentație detaliată este disponibilă în dosarul [`ro/`](ro/):
 - [Compatibilitate](ro/compatibility.md) — WooCommerce, Barion Payment Gateway, plugin-uri de cache
 - [Note de testare](ro/testing-notes.md) — Particularități bp.js, mod depanare, listă de verificare pentru testare
 
-Documentația este disponibilă și în [Magyar](../i18n/hu/), [Čeština](../i18n/cs/), [Slovenčina](../i18n/sk/), [Deutsch](../i18n/de/), [Hrvatski](../i18n/hr/), [Română](../i18n/ro/), [Slovenščina](../i18n/sl/) și [Srpski](../i18n/sr/).
+Documentația este disponibilă și în [Magyar](hu/), [Čeština](cs/), [Slovenčina](sk/), [Deutsch](de/), [Hrvatski](hr/), [Română](ro/), [Slovenščina](sl/) și [Srpski](sr/).
 
 ### Documentația Barion
 
@@ -71,8 +75,9 @@ Ghidurile proprii ale Barion pentru configurarea pixelului (în limba engleză).
 - [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
 - [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
 - [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
-- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference)
 - [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel)
 
 ## Compatibilitate
 
@@ -88,11 +93,27 @@ Ghidurile proprii ale Barion pentru configurarea pixelului (în limba engleză).
 - WooCommerce 5.0+ (pentru urmărirea completă a evenimentelor)
 - Opțional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) pentru suport universal de consimțământ cookie
 
+## Contribuții
+
+Rapoartele de erori, pull request-urile și traducerile sunt binevenite — vezi [ghidul de contribuție](ro/contributing.md).
+
 ## Licență
 
 GPL-2.0-or-later — vezi [LICENSE](../../LICENSE) pentru detalii.
 
 ## Jurnal de modificări
+
+### 1.0.6
+- Remediat: `initiateCheckout` și `setEncryptedEmail` nu se declanșau niciodată pe blocul Checkout din WooCommerce, care este implicit pentru magazinele noi începând cu WooCommerce 8.3. Plugin-ul asculta doar hook-urile PHP ale finalizării clasice și câmpul ei `#billing_email`, iar blocul nu are niciunul. Acum citește depozitul de date al blocurilor Cart și Checkout; comportamentul finalizării clasice rămâne neschimbat
+- Remediat: `addToCart` nu se declanșa niciodată pe paginile de magazin sau de categorie, în niciun magazin. Scriptul de evenimente se încărca doar pe paginile care aveau deja un eveniment în coadă, ceea ce nu se întâmplă niciodată pe paginile de arhivă, așa că ascultătorii pentru adăugarea în coș lipseau exact acolo unde clienții adaugă în coș. Eroarea datează din 1.0.1
+- Remediat: `addToCart` funcționează acum și cu butoanele de produs ale blocului Product Collection. Acestea rulează pe Interactivity API și nu declanșează nici evenimentul jQuery clasic, nici depozitul de date al blocurilor, așa că vom citi conținutul coșului din WooCommerce Store API
+
+### 1.0.5
+- Remediat: traducerile incluse (maghiară, cehă, slovacă, germană, croată, română, slovenă și sârbă) nu se încărcau niciodată, iar ecranul de setări rămânea în engleză. WordPress caută doar în `wp-content/languages/plugins` dacă plugin-ul nu își înregistrează propriul director, iar plugin-ul nu o făcea. Acum înregistrează `languages/` la `init`
+
+### 1.0.4
+- Compatibilitate: testat cu WordPress 7.0 și WooCommerce 11.0
+- Modificat: `Requires PHP` ridicat de la 7.2 la 7.4. WordPress 7.0 a renunțat la suportul pentru PHP 7.2 și 7.3, deci 7.2 nu mai era o versiune pe care plugin-ul putea rula
 
 ### 1.0.3
 - Remediat: `setEncryptedEmail` era trimis de mai multe ori la o singură încărcare a paginii de finalizare a comenzii

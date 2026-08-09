@@ -46,8 +46,12 @@ Přejděte na stránku nastavení v **Nastavení > Barion Pixel** ve správě Wo
 #### ID Pixelu (povinné)
 Zadejte své Barion Pixel ID (formát: `BP-0000000000-00`). Základní Pixel se načte na všech stránkách, jakmile je toto nastaveno.
 
+ID najdete v Barion peněžence v **Merchant Management > Details**. Každý obchod má vlastní ID a sandbox i ostré prostředí vydávají různá. ID začínající na `BPT` není Pixel ID a nebude fungovat.
+
 #### Povolit kompletní sledování Pixelem
 Přepínač pro zapnutí/vypnutí sledování e-commerce událostí. Pokud je vypnuto, načte se pouze základní Pixel (pageView pro prevenci podvodů).
+
+Barion vyžaduje kompletní implementaci Pixelu a vyhovující lištu souhlasu, než obchod získá výhodnější podmínky Barion Smart Gateway nebo přístup k Barion Metrics. Tento plugin pokrývá implementační část; schválení je na Barionu.
 
 #### Režim ladění
 Povolte, abyste zaznamenávali všechny události Barion Pixel do konzole prohlížeče pro testování.
@@ -61,7 +65,7 @@ Podrobná dokumentace je k dispozici ve složce [`cs/`](cs/):
 - [Kompatibilita](cs/compatibility.md) — WooCommerce, Barion Payment Gateway, pluginy pro ukládání do mezipaměti
 - [Poznámky k testování](cs/testing-notes.md) — Specifika bp.js, režim ladění, kontrolní seznam testování
 
-Dokumentace je také dostupná v jazycích [Magyar](../hu/), [Čeština](../cs/), [Slovenčina](../sk/), [Deutsch](../de/), [Hrvatski](../hr/), [Română](../ro/), [Slovenščina](../sl/) a [Srpski](../sr/).
+Dokumentace je také dostupná v jazycích [Magyar](hu/), [Čeština](cs/), [Slovenčina](sk/), [Deutsch](de/), [Hrvatski](hr/), [Română](ro/), [Slovenščina](sl/) a [Srpski](sr/).
 
 ### Dokumentace Barionu
 
@@ -71,8 +75,9 @@ Vlastní příručky Barionu k nastavení pixelu (v angličtině). Volba **Enabl
 - [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
 - [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
 - [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
-- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference)
 - [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel)
 
 ## Kompatibilita
 
@@ -88,11 +93,27 @@ Vlastní příručky Barionu k nastavení pixelu (v angličtině). Volba **Enabl
 - WooCommerce 5.0+ (pro kompletní sledování událostí)
 - Volitelné: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) pro univerzální podporu souhlasu s cookies
 
+## Přispívání
+
+Hlášení chyb, pull requesty i překlady jsou vítány — viz [pokyny pro přispěvatele](cs/contributing.md).
+
 ## Licence
 
 GPL-2.0-or-later — viz [LICENSE](../../LICENSE) pro podrobnosti.
 
 ## Historie změn
+
+### 1.0.6
+- Opraveno: `initiateCheckout` a `setEncryptedEmail` se nikdy neodeslaly na bloku Checkout ve WooCommerce, který je od WooCommerce 8.3 výchozí pro nové obchody. Plugin naslouchal pouze PHP hookům klasické pokladny a jejímu poli `#billing_email`, a blok nemá ani jedno. Nyní čte datové úložiště bloků Cart a Checkout; chování klasické pokladny se nemění
+- Opraveno: `addToCart` se nikdy neodeslal na stránkách obchodu ani kategorií, a to v žádném obchodě. Skript událostí se načítal jen na stránkách, kde už nějaká událost čekala ve frontě, což u výpisů nikdy neplatí, takže posluchače přidání do košíku chyběly právě tam, kde zákazníci do košíku přidávají. Chyba pochází z verze 1.0.1
+- Opraveno: `addToCart` nyní funguje i s blokovými tlačítky produktů, která používá blok Product Collection. Ta běží na Interactivity API a nespouštějí ani klasickou jQuery událost, ani datové úložiště bloků, takže se obsah košíku čte z WooCommerce Store API
+
+### 1.0.5
+- Opraveno: přibalené překlady (maďarský, český, slovenský, německý, chorvatský, rumunský, slovinský a srbský) se nikdy nenačetly, takže obrazovka nastavení zůstala v angličtině. WordPress prohledává pouze `wp-content/languages/plugins`, dokud plugin neregistruje vlastní adresář, což tento plugin nedělal. Nyní registruje `languages/` v akci `init`
+
+### 1.0.4
+- Kompatibilita: otestováno s WordPress 7.0 a WooCommerce 11.0
+- Změněno: `Requires PHP` zvýšeno ze 7.2 na 7.4. WordPress 7.0 ukončil podporu PHP 7.2 a 7.3, takže na 7.2 už plugin nemohl běžet
 
 ### 1.0.3
 - Opraveno: `setEncryptedEmail` se při jednom načtení stránky pokladny odeslal několikrát

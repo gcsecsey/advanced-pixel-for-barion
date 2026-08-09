@@ -4,39 +4,75 @@
 
 # Tesztelési megjegyzések és ismert sajátosságok
 
-## bp.js futásidejű validációs sajátosságok
+## Mielőtt arra jutnál, hogy a pixel hibás
 
-A Barion `bp.js` szkriptje kliensoldalú validációt végez az eseményadatokon. Bizonyos esetekben a validációs szabályok eltérnek a [Barion Pixel API referenciától](https://docs.barion.com/Barion-Pixel-API-referencia). Ezeket a sajátosságokat staging tesztelés során fedezték fel.
+### A „Testing message” nem hibaüzenet
 
-### totalItemPrice: contentView esetén elutasítva, contents elemekben szükséges
+Nyisd meg a konzolt egy olyan oldalon, ahol fut a pixel, és a bp.js vagy **„Testing message”**,
+vagy **„Sending message”** üzenetet ír ki. A Barion
+[dokumentálja a különbséget](https://docs.barion.com/Implementing_the_Base_Barion_Pixel): a
+frissen bekötött pixel még nincs feljogosítva felhasználói adatok küldésére, ezért a bp.js
+„Testing message” üzenetet ír, és csak az esemény típusát továbbítja. Amint a Barion
+jóváhagyja a pixelt, ez „Sending message” üzenetre vált.
 
-- **contentView** (sima esemény): A bp.js **elutasítja** a `totalItemPrice` mezőt a következő hibával: `Invalid key totalItemPrice in contentView event`. Az API referencia ezzel egyezik — a `totalItemPrice` nem contentView tulajdonság.
-- **initiateCheckout** és **purchase** `contents` elemek: A bp.js **megköveteli** a `totalItemPrice` mezőt, és ha hiányzik, a következő hibát adja: `Mandatory key totalItemPrice is missing from contents event`. Az API referencia is kötelezőként listázza a contents elemeknél.
+Ezen a bővítmény nem változtat. Ha az események helyesnek látszanak a konzolban, a Barion mégsem
+lát adatot, akkor a pixel nagy valószínűséggel még jóváhagyásra vár a Barion oldalán — a
+implementációt ember nézi át, ezért vedd fel velük a kapcsolatot, ha kész vagy.
 
-**Ökölszabály:** A `totalItemPrice` érvénytelen a sima eseményeknél, de kötelező a `contents` tömb elemein belül.
+### A Pixel azonosítónak a megfelelőnek kell lennie
 
-### unit kötelező a contents elemekben
+- A Barion tárcádban, a **Merchant Management > Details** oldalon találod. Minden boltnak, azaz minden POSKey-nek saját Pixel azonosítója van.
+- A formátum: `BP-` + tíz karakter + `-` + két számjegy. A `BPT` kezdetű azonosító nem Pixel azonosító, azzal nem fog működni.
+- A sandbox és az éles környezet **eltérő** Pixel azonosítót ad ki. Az éles azonosítóra állított teszt oldal beszennyezi a valós adatokat; a sandbox azonosítóra állított éles oldal pedig semmi hasznosat nem rögzít.
 
-A bp.js megköveteli a `unit` mezőt a `contents` tömb elemekben az `initiateCheckout` és `purchase` eseményeknél, ahogy az API referencia is. Ha hiányzik, a következő hibát produkálja: `Mandatory key unit is missing from contents event`.
+Ha eldobható boltot szeretnél teszteléshez, a Barion
+[Creating a shop](https://docs.barion.com/Creating_a_shop) oldala végigvezet a sandboxon, ahol a
+boltokat automatikusan jóváhagyják.
+
+---
+
+## A bp.js futásidejű ellenőrzési sajátosságai
+
+A bp.js a böngészőben ellenőrzi az eseményadatokat, és néhány ponton szigorúbb vagy engedékenyebb
+a szabálya, mint amit az
+[eseményreferencia](https://docs.barion.com/Barion-pixel-event-reference) sugall. Ezek teszt
+környezetben derültek ki.
+
+### totalItemPrice: contentView-nál tiltott, contents elemekben kötelező
+
+- **contentView** (egyszerű esemény): a bp.js **elutasítja** a `totalItemPrice` mezőt `Invalid key totalItemPrice in contentView event` hibával. A referencia egyetért — nem contentView tulajdonság.
+- **initiateCheckout** és **purchase** `contents` elemek: a bp.js **megköveteli**, elhagyása esetén `Mandatory key totalItemPrice is missing from contents event` hibát ad. A referencia itt is egyetért.
+
+Ökölszabály: a `totalItemPrice` az egyszerű eseményeknél érvénytelen, a `contents` elemeken belül
+kötelező.
+
+### A unit kötelező a contents elemekben
+
+Elhagyása esetén: `Mandatory key unit is missing from contents event`.
 
 ### step
 
-A bővítmény `step: 1` értéket küld az `addToCart`, `initiateCheckout` és `purchase` eseményeknél. Az API referencia a `step` mezőt az `initiateCheckout` és `purchase` eseményeknél kötelezőként, az `addToCart` eseménynél opcionálisként listázza. A Barion az `1` értéket a pénztár kezdő lépéseként dokumentálja; a `purchase` eseménynél a referencia a használt legnagyobb lépésszámot kéri — ez egyoldalas pénztárnál szintén `1`.
+A bővítmény `step: 1` értéket küld az `addToCart`, `initiateCheckout` és `purchase` eseményeknél.
+A Barion az `1` értéket dokumentálja a pénztár kezdő lépéseként, és a `purchase` eseménynél a
+használt legmagasabb lépésszámot kéri — egylépéses pénztárnál ez szintén `1`. Az `addToCart`
+eseménynél a `step` opcionális.
 
 ---
 
 ## Hibakeresési mód
 
-Engedélyezd a hibakeresési módot a **Beállítások > Barion Pixel** menüpontban, hogy az összes Barion Pixel esemény naplózódjon a böngésző konzolba.
+Kapcsold be a **Beállítások > Barion Pixel** oldalon, hogy minden esemény a böngészőkonzolba
+kerüljön.
 
-### Mit kell keresni
+### Mit keress
 
-Nyisd meg a böngésző konzolt (F12 > Konzol), és keresd a `[Barion Pixel]` előtaggal ellátott üzeneteket:
+Nyisd meg a konzolt (F12 > Konzol), és keresd a `[Barion Pixel]` üzeneteket:
 
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
-[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
+[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
 [Barion Pixel] Event: initiateCheckout { contents: [...], ... }
@@ -44,90 +80,103 @@ Nyisd meg a böngésző konzolt (F12 > Konzol), és keresd a `[Barion Pixel]` el
 [Barion Pixel] setEncryptedEmail sent
 ```
 
+A hozzájárulással kapcsolatos üzenetek teljes listája a
+[Cookie-hozzájárulás integrációban](cookie-consent.md) található.
+
 ### bp.js hibák
 
-A bp.js numerikus előtaggal naplózza saját validációs hibáit. Leggyakoribbak:
+A bp.js a saját ellenőrzési hibáit is naplózza. A gyakoriak:
 
 | Hiba | Jelentés | Megoldás |
 |------|----------|----------|
-| `Mandatory key X is missing from Y event` | Egy kötelező mező nem kerül elküldésre | Ellenőrizd az eseményadatokat |
-| `Invalid key X in Y event` | Egy olyan mező kerül elküldésre, amelyet a bp.js nem vár | Távolítsd el a mezőt |
+| `Mandatory key X is missing from Y event` | Egy kötelező mező nem megy el | Ellenőrizd az esemény adatait |
+| `Invalid key X in Y event` | Olyan mező megy el, amelyet a bp.js nem vár | Vedd ki a mezőt |
+| `Format of e-mail address or hash is invalid` | A bp.js elutasította a `setEncryptedEmail` értékét | Az 1.0.3 óta a bővítmény előre kivonatolja a címet, így ennek nem szabad előfordulnia |
 
 ---
 
 ## Tesztelési ellenőrzőlista
 
+Futtasd le klasszikus és blokkos boltban is — a kettő teljesen eltérő kódutat használ az
+`addToCart`, az `initiateCheckout` és a `setEncryptedEmail` eseményhez.
+
 ### Termékoldal (contentView)
 
-1. Navigálj bármely egyedi termékoldralra
-2. Nyisd meg a böngésző konzolt
-3. Ellenőrizd, hogy megjelenik-e a `[Barion Pixel] Event: contentView` üzenet
-4. Ellenőrizd, hogy nincsenek bp.js hibaüzenetek hiányzó/érvénytelen kulcsokról
-5. Ellenőrizd, hogy a mezők tartalmazzák: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice`
+1. Nyiss meg egy termékoldalt nyitott konzollal.
+2. Megjelenik a `[Barion Pixel] Event: contentView` üzenet.
+3. Nincs bp.js hiba hiányzó vagy érvénytelen kulcsról.
+4. Jelen lévő mezők: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice` — és nincs `totalItemPrice`.
 
 ### Kosárba helyezés (addToCart)
 
-**A bolt/archív oldalról (AJAX):**
+**Bolt- vagy archívumoldal, klasszikus AJAX gomb:**
 
-1. Navigálj a bolt oldalára
-2. Nyisd meg a böngésző konzolt
-3. Kattints "Kosárba" bármely termékre
-4. Ellenőrizd, hogy megjelenik-e a `[Barion Pixel] Event: addToCart` üzenet
-5. Ellenőrizd, hogy a mezők tartalmazzák a `totalItemPrice` és `step: 1` értékeket
+1. Kattints a „Kosárba” gombra a bolt oldalán.
+2. Megjelenik a `[Barion Pixel] Event: addToCart` üzenet `totalItemPrice` és `step: 1` értékkel.
 
-**Egyedi termékoldalról (űrlap beküldés):**
+**Termékoldal, űrlapbeküldés:**
 
-1. Navigálj egy egyedi termékoldalra
-2. Nyisd meg a böngésző konzolt
-3. Kattints "Kosárba"
-4. Ellenőrizd, hogy a `[Barion Pixel] Event: addToCart` aktiválódik mielőtt az oldal navigál
-5. Változó termékek esetén: először válassz egy változatot, és ellenőrizd, hogy a változat ára kerül felhasználásra
+1. Kattints a „Kosárba” gombra, és ellenőrizd, hogy az esemény az oldal elhagyása előtt elindul.
+2. Változó terméknél: előbb válassz variációt, majd ellenőrizd, hogy a variáció ára ment el.
 
-### Pénztár oldal (initiateCheckout)
+**Blokkfelületek (Product Collection gombok, Cart blokk):**
 
-1. Helyezz elemeket a kosárba, és navigálj a pénztárhoz
-2. Nyisd meg a böngésző konzolt
-3. Ellenőrizd, hogy megjelenik-e a `[Barion Pixel] Event: initiateCheckout` üzenet
-4. Ellenőrizd, hogy a `contents` tömb helyes elemeket tartalmaz `unit`, `unitPrice`, `totalItemPrice` mezőkkel
-5. Ellenőrizd, hogy a `revenue` értéke részösszeg + adó (szállítás nélkül)
-6. Ellenőrizd a `step: 1` jelenlétét
-7. Írj be egy számlázási e-mail-címet a pénztár űrlapjába, és ellenőrizd, hogy a `[Barion Pixel] setEncryptedEmail sent` üzenet érvényes címenként egyszer jelenik meg — nem minden leütésnél
+1. Betöltéskor megjelenik a `[Barion Pixel] Block surfaces detected …` üzenet.
+2. Adj hozzá terméket egy Product Collection blokkból — egy `addToCart` indul el a helyes mennyiséggel.
+3. Módosítsd a mennyiséget a Cart blokkban — nem indul `addToCart`.
+4. Nem tizedes pénznemű boltban, például HUF esetén ellenőrizd, hogy a `unitPrice` a valódi ár, nem annak a századrésze.
 
-### Rendelés teljesítése (purchase + setEncryptedEmail)
+### Pénztároldal (initiateCheckout)
 
-1. Teljesíts egy teszt rendelést (egyszerű teszteléshez használd a "Banki átutalás" fizetési módot)
-2. A köszönő oldalon nyisd meg a böngésző konzolt
-3. Ellenőrizd, hogy megjelenik-e a `[Barion Pixel] Event: purchase` üzenet, ahol a `revenue` egyezik a rendelés végösszegével
-4. Ellenőrizd, hogy megjelenik-e a `[Barion Pixel] setEncryptedEmail sent` üzenet
-5. Frissítsd a köszönő oldalt — ellenőrizd, hogy a `purchase` esemény NEM aktiválódik újra (duplikáció megelőzés)
-6. Ellenőrizd, hogy a `contents` elemek tartalmazzák a `unit`, `totalItemPrice` mezőket
+1. Tegyél termékeket a kosárba, és nyisd meg a pénztárt.
+2. Megjelenik a `[Barion Pixel] Event: initiateCheckout` üzenet.
+3. A `contents` elemek mindegyike tartalmaz `unit`, `unitPrice` és `totalItemPrice` mezőt.
+4. A `revenue` a nettó összeg + adó, szállítás nélkül.
+5. A `step: 1` jelen van.
+6. Írj be egy számlázási e-mail-címet. A `setEncryptedEmail sent` üzenet érvényes címenként egyszer jelenik meg — nem minden leütésre, és részleges bevitelnél, például `x@y` esetén sem.
+7. Ismételd meg a Checkout blokkon, ahol az e-mail-cím a blokk adattárából jön, nem a `#billing_email` mezőből.
+
+### Rendelés lezárása (purchase + setEncryptedEmail)
+
+1. Adj le tesztrendelést — az „Átutalás” a legegyszerűbb fizetési mód ehhez.
+2. Megjelenik a `[Barion Pixel] Event: purchase` üzenet, a `revenue` egyezik a rendelés végösszegével.
+3. Megjelenik a `setEncryptedEmail sent` üzenet.
+4. Töltsd újra a visszaigazoló oldalt — a `purchase` **nem** indul el újra.
+5. A `contents` elemek tartalmaznak `unit` és `totalItemPrice` mezőt.
 
 ### Hozzájárulás integráció
 
-1. Töröld az összes cookie-t
-2. Navigálj bármely oldalra
-3. Ellenőrizd, hogy megjelenik-e a `[Barion Pixel] Base pixel initialized` üzenet (az alap pixel mindig betöltődik)
-4. Fogadd el a cookie-kat a cookie banneren keresztül
-5. Ellenőrizd, hogy megjelenik-e a `[Barion Pixel] Consent granted` üzenet
-6. Töltsd újra az oldalt — ellenőrizd, hogy a hozzájárulás automatikusan megadásra kerül az oldal betöltésekor (visszatérő látogató)
+1. Töröld az összes cookie-t.
+2. Tölts be egy oldalt. Megjelenik a `[Barion Pixel] Base pixel initialized` üzenet — az alap pixel szándékosan minden hozzájárulási döntés előtt betöltődik.
+3. Fogadd el a cookie-kat a sávban. Megjelenik a `Consent granted (grantConsent)` üzenet.
+4. Töltsd újra — a hozzájárulás sáv nélkül, betöltéskor újra megadódik.
+5. Vond vissza a hozzájárulást, és ellenőrizd, hogy megjelenik a `Consent rejected (rejectConsent)` üzenet.
 
 ---
 
 ## Gyakori problémák
 
-### Nem aktiválódnak az események
+### Nem indulnak el az események
 
-- **Ellenőrizd a Pixel azonosítót**: Győződj meg róla, hogy érvényes Pixel azonosító van beállítva a Beállítások > Barion Pixel menüpontban
-- **Ellenőrizd a teljes követést**: Az eseményekhez szükséges a "Teljes Pixel követés engedélyezése" bejelölése
-- **Ellenőrizd a WooCommerce-t**: A teljes követéshez aktív WooCommerce szükséges
-- **Ellenőrizd a konzol hibákat**: Keresd a JavaScript hibákat, amelyek megakadályozhatják a bp.js betöltődését
+- **Pixel azonosító**: érvényes azonosítót kell menteni a Beállítások > Barion Pixel oldalon.
+- **Teljes követés**: az e-kereskedelmi eseményekhez be kell jelölni a „Teljes Pixel követés engedélyezése” opciót.
+- **WooCommerce**: a teljes követéshez aktív WooCommerce kell.
+- **Konzolhibák**: egy független JavaScript hiba is megakadályozhatja a bp.js betöltését.
 
 ### Dupla pixel betöltés
 
-Ha látod a `[Barion Pixel] bp.js already loaded by another plugin` üzenetet, egy másik bővítmény (valószínűleg a Barion Payment Gateway) már betöltötte a bp.js fájlt. Ez ártalmatlan — a bővítmény kihagyja az újratöltést, és továbbra is inicializál a Pixel azonosítóddal.
+A `[Barion Pixel] bp.js already loaded by another plugin` azt jelenti, hogy valami más — a Barion
+Payment Gateway, egy Google Tag Manager tag, egy sablonba illesztett kódrészlet — megelőzte.
+Ez ártalmatlan: a bővítmény kihagyja a szkript betöltését, és a te Pixel azonosítóddal
+inicializál. Lásd a [Kompatibilitást](compatibility.md).
 
 ### Nem adódik meg a hozzájárulás
 
-- **WP Consent API**: Győződj meg róla, hogy a WP Consent API bővítmény telepítve van, és a cookie bővítményed támogatja azt
-- **Cookie Law Info**: Győződj meg róla, hogy a bővítmény aktív, és a `CLI` globális objektum elérhető
-- **Manuális**: Hívd meg a `window.wcBarionGrantConsent()` függvényt a hozzájárulás kezelőd visszahívásából
+- **WP Consent API**: a WP Consent API bővítménynek telepítve kell lennie, és a cookie-bővítményednek támogatnia kell.
+- **Cookie Law Info**: a bővítménynek aktívnak kell lennie, és a `CLI` globálisnak elérhetőnek.
+- **Kézi**: hívd a `window.wcBarionGrantConsent()` függvényt a hozzájárulás-kezelőd visszahívásából.
+
+### A purchase fizetetlen rendelésnél is elindul
+
+Várt viselkedés, lásd a [purchase](events-reference.md#purchase) szakaszt. A bővítmény a
+visszaigazoló oldalt követi, amelyet az offline fizetési módok a pénz beérkezése előtt érnek el.

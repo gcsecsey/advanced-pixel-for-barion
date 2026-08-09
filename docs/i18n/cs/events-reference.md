@@ -4,45 +4,81 @@
 
 # Přehled událostí Barion Pixel
 
+Závazným zdrojem toho, co která událost znamená a jaké vlastnosti přijímá, jsou vlastní stránky
+Barionu:
+
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference) — každá událost, každá vlastnost a to, které jsou povinné
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) — samotné události
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel) — odpovědi na sporné případy
+
+Tato stránka popisuje pouze to, co posílá **tento plugin** a kdy.
+
 ## Přehled
 
-Plugin podporuje dva provozní režimy:
+Plugin má dva provozní režimy:
 
-- **Základní Pixel** (vždy aktivní, pokud je nakonfigurováno ID Pixelu): Načte `bp.js` a automaticky spustí `pageView` na každé stránce. Používá se pro prevenci podvodů.
-- **Kompletní sledování** (volitelné, přepínač ve správě): Přidává sledování e-commerce událostí pro marketingové analýzy a nižší provizní sazby Barion.
-
-Vlastní referenční dokumentace Barionu k těmto událostem: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) a [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (v angličtině).
+- **Základní Pixel** (aktivní, jakmile je nastaveno ID Pixelu): načte `bp.js` a automaticky odešle událost `pageView`. Barion jej vyžaduje kvůli prevenci podvodů a je podmínkou pro používání Barion Smart Gateway jako takové.
+- **Kompletní sledování** (volitelné, přepínač ve správě): přidává e-commerce události. Barion Metrics je potřebuje a kompletní implementace Pixelu spolu s vyhovující lištou souhlasu je to, co obchodu otevírá výhodnější podmínky Smart Gateway.
 
 ### Souhrn událostí
 
 | Událost | Režim | Volání bp() | Spouštěč |
 |---------|-------|-------------|----------|
-| pageView | Základní | Automatické (bp.js) | Každé načtení stránky |
-| grantConsent | Základní | `bp('consent', 'grantConsent')` | Přijetí souhlasu s cookies |
-| rejectConsent | Základní | `bp('consent', 'rejectConsent')` | Odmítnutí souhlasu s cookies |
-| contentView | Kompletní | `bp('track', 'contentView', data)` | Stránka jednotlivého produktu |
-| addToCart | Kompletní | `bp('track', 'addToCart', data)` | Akce přidání do košíku |
+| pageView | Základní | Automaticky (bp.js) | Každé načtení stránky |
+| grantConsent | Základní | `bp('consent', 'grantConsent')` | Marketingový souhlas udělen |
+| rejectConsent | Základní | `bp('consent', 'rejectConsent')` | Marketingový souhlas odmítnut |
+| contentView | Kompletní | `bp('track', 'contentView', data)` | Stránka produktu |
+| addToCart | Kompletní | `bp('track', 'addToCart', data)` | Přidání do košíku |
 | initiateCheckout | Kompletní | `bp('track', 'initiateCheckout', data)` | Načtení stránky pokladny |
-| purchase | Kompletní | `bp('track', 'purchase', data)` | Stránka s poděkováním |
-| setEncryptedEmail | Kompletní | `bp('identity', 'setEncryptedEmail', hash)` | Stránka s poděkováním a zadání e-mailu v pokladně |
+| purchase | Kompletní | `bp('track', 'purchase', data)` | Stránka potvrzení objednávky |
+| setEncryptedEmail | Kompletní | `bp('identity', 'setEncryptedEmail', hash)` | Stránka potvrzení objednávky a zadání e-mailu v pokladně |
 
 ---
 
-## Události základního pixelu
+## Pole položky
+
+`contentView` i každý prvek pole `contents` používají stejnou strukturu:
+
+| Pole | Typ | Hodnota |
+|------|-----|---------|
+| contentType | string | `'Product'` |
+| currency | string | Měna obchodu, u `purchase` měna objednávky |
+| id | string | ID produktu |
+| name | string | Zobrazovaný název produktu |
+| quantity | int | Viz konkrétní událost |
+| unit | string | `'pcs'` |
+| unitPrice | float | Viz konkrétní událost |
+| totalItemPrice | float | `unitPrice * quantity` |
+
+Dvě výjimky z této tabulky:
+
+- **`contentView` neposílá `totalItemPrice`.** bp.js jej odmítá s chybou `Invalid key totalItemPrice in contentView event` a reference Barionu jej mezi vlastnostmi contentView také neuvádí. Uvnitř prvků `contents` je naopak povinné — viz [Poznámky k testování](testing-notes.md).
+- **`quantity` je u `contentView` vždy `1`**, protože zákazník si prohlíží jeden produkt.
+
+Plugin neposílá žádné volitelné vlastnosti obsahu (`brand`, `category`, `description`, `ean`,
+`imageUrl`, `variant`) ani vlastnost `list`. V referenci Barionu jsou všechny volitelné.
+
+**Variabilní produkty.** `contentView` a `addToCart` ze stránky produktu hlásí nadřazený produkt,
+protože o něm ta stránka je. Řádky košíku a objednávky hlásí zvolenou variantu, protože tu dává
+WooCommerce do košíku. Barion požaduje, aby položka měla ve všech událostech stejný název i
+identifikátor, takže v obchodě postaveném na variantách se týž produkt může k Barionu dostat pod
+dvěma identitami.
+
+---
+
+## Události základního Pixelu
 
 ### pageView
 
-Spustí se automaticky při načtení `bp.js`. Není potřeba žádná konfigurace nad rámec nastavení ID Pixelu.
+Odešle se automaticky, jakmile se načte `bp.js`. Kromě ID Pixelu není co nastavovat.
 
-### grantConsent
+### grantConsent / rejectConsent
 
-Spustí se, když uživatel přijme marketingové cookies. Zpracováváno automaticky přes WP Consent API nebo Cookie Law Info, nebo ručně přes `window.wcBarionGrantConsent()`.
+Odesílají se, když zákazník přijme nebo odmítne marketingové cookies. Barion uvádí obě jako
+povinné. Řeší se automaticky přes WP Consent API nebo Cookie Law Info, případně ručně přes
+`window.wcBarionGrantConsent()` / `window.wcBarionRejectConsent()`.
 
-### rejectConsent
-
-Spustí se, když uživatel odmítne marketingové cookies. Zpracováváno automaticky přes WP Consent API nebo Cookie Law Info, nebo ručně přes `window.wcBarionRejectConsent()`. Obě události `grantConsent` i `rejectConsent` jsou povinné dle požadavků Barion.
-
-Viz [Integrace souhlasu s cookies](cookie-consent.md) pro podrobnosti.
+Viz [Integrace souhlasu s cookies](cookie-consent.md).
 
 ---
 
@@ -50,129 +86,109 @@ Viz [Integrace souhlasu s cookies](cookie-consent.md) pro podrobnosti.
 
 ### contentView
 
-**Spouštěč:** Stránka jednotlivého produktu (hook `woocommerce_after_single_product`)
+**Spouštěč:** stránka produktu, hook `woocommerce_after_single_product`.
 
-**Odesílaná pole:**
-
-| Pole | Typ | Hodnota |
-|------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Měna obchodu WooCommerce (např. `'HUF'`) |
-| id | string | ID produktu |
-| name | string | Zobrazovaný název produktu |
-| quantity | int | `1` (vždy — prohlíží se jeden produkt) |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena produktu |
-
-> **Poznámka:** `totalItemPrice` není vlastností události contentView. bp.js ho za běhu odmítne s chybou „Invalid key totalItemPrice in contentView event" a referenční dokumentace API ho pro tuto událost také neuvádí. Povinné je místo toho uvnitř položek pole `contents`.
+`unitPrice` je aktuální cena produktu. U variabilního produktu je to cena, kterou WooCommerce
+zobrazuje před výběrem varianty.
 
 ---
 
 ### addToCart
 
-**Spouštěč:** JavaScript na straně klienta (spouští se okamžitě při akci přidání do košíku)
+**Spouštěč:** samotné přidání do košíku. Všechny cesty jsou na straně klienta, aby událost
+přežila ukládání stránek do mezipaměti. Cesty jsou tři a záleží na tom, jak obchod vykresluje
+svá tlačítka:
 
-**Implementace:** Dvě cesty, obě zpracovávané na straně klienta, aby fungovaly s ukládáním stránek do mezipaměti:
+1. **Klasické AJAX přidání do košíku** (stránky obchodu a výpisů). Naslouchá jQuery události `added_to_cart` z WooCommerce a čte atributy tlačítka `data-product_id`, `data-product_name`, `data-product_price` a `data-quantity`.
+2. **Klasická stránka produktu.** Zachytí odeslání `form.cart`. Data produktu jsou vložena v patičce; u variabilního produktu se `display_price` zvolené varianty čte z jQuery dat `product_variations` WooCommerce.
+3. **Blokové plochy** (tlačítka bloku Product Collection, blok Cart). Ty běží na Interactivity API a neodesílají ani jQuery událost, ani použitelná data, takže plugin porovná košík ze [Store API](https://developer.woocommerce.com/docs/apis/store-api/) s posledním známým stavem a nahlásí rozdíl. Změna množství v bloku Cart událost `wc-blocks_added_to_cart` nespouští, takže se automaticky nezapočítá.
 
-1. **AJAX přidání do košíku** (stránky obchodu/archivů): Naslouchá WooCommerce jQuery události `added_to_cart`. Čte data produktu z datových atributů `<button>` (`data-product_id`, `data-product_name`, `data-product_price`, `data-quantity`).
+**Pole události:** výše uvedená pole položky plus `step: 1`.
 
-2. **Odeslání formuláře na stránce jednotlivého produktu**: Zachytí odeslání `form.cart`. Data produktu jsou vložena jako JSON v zápatí. Pro variabilní produkty čte `display_price` vybrané varianty z dat WooCommerce jQuery `product_variations`.
-
-**Odesílaná pole:**
-
-| Pole | Typ | Hodnota |
-|------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Měna obchodu |
-| id | string | ID produktu |
-| name | string | Název produktu |
-| quantity | int | Přidané množství |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena za kus |
-| totalItemPrice | float | `unitPrice * quantity` |
-| step | int | `1` |
+`quantity` je to, co zákazník skutečně přidal. `unitPrice` pochází podle cesty z dat tlačítka, ze
+zvolené varianty nebo z položky Store API.
 
 ---
 
 ### initiateCheckout
 
-**Spouštěč:** Načtení stránky pokladny (hook `woocommerce_before_checkout_form`)
-
-**Odesílaná pole:**
+**Spouštěč:** načtení stránky pokladny. Rozpoznává se přes `is_checkout()` s vyloučením koncového
+bodu `order-received` — nikoli přes `woocommerce_before_checkout_form`, protože ten blok Checkout
+nikdy nespustí.
 
 | Pole | Typ | Hodnota |
 |------|-----|---------|
-| contents | array | Pole položek košíku (viz níže) |
+| contents | array | Jedna položka na řádek košíku |
 | currency | string | Měna obchodu |
-| revenue | float | Mezisoučet košíku + daň (doprava vyloučena — nemusí být ještě vypočítána) |
+| revenue | float | Mezisoučet košíku + daň |
 | step | int | `1` |
 
-**Pole položky obsahu:**
-
-| Pole | Typ | Hodnota |
-|------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Měna obchodu |
-| id | string | ID produktu |
-| name | string | Název produktu |
-| quantity | int | Množství položky |
-| unit | string | `'pcs'` |
-| unitPrice | float | Jednotková cena |
-| totalItemPrice | float | `unitPrice * quantity` |
+Doprava je z `revenue` záměrně vynechána: na začátku pokladny si zákazník obvykle ještě nevybral
+způsob dopravy, takže WooCommerce nemá co přidat.
 
 ---
 
 ### purchase
 
-**Spouštěč:** Stránka s poděkováním (hook `woocommerce_thankyou`)
-
-**Ochrana proti duplicitám:** Používá post meta `_wc_barion_tracked` k zabránění opětovnému spuštění při obnovení stránky.
-
-**Odesílaná pole:**
+**Spouštěč:** stránka potvrzení objednávky, hook `woocommerce_thankyou`.
 
 | Pole | Typ | Hodnota |
 |------|-----|---------|
-| contents | array | Pole položek objednávky (viz níže) |
+| contents | array | Jedna položka na řádek objednávky |
 | currency | string | Měna objednávky |
-| revenue | float | Celková částka objednávky (zahrnuje dopravu, daň, slevy) |
+| revenue | float | Celková částka objednávky včetně dopravy, daně a slev |
 | step | int | `1` |
 
-**Pole položky obsahu:**
+`unitPrice` je zde `(item_total + item_tax) / quantity`, takže odráží kupony i další slevy. Proto
+nejsou tržby z `purchase` a `initiateCheckout` porovnatelné řádek po řádku.
 
-| Pole | Typ | Hodnota |
-|------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Měna objednávky |
-| id | string | ID produktu |
-| name | string | Název položky |
-| quantity | int | Množství položky |
-| unit | string | `'pcs'` |
-| unitPrice | float | `(item_total + item_tax) / quantity` (zohledňuje slevy) |
-| totalItemPrice | float | `unitPrice * quantity` |
+**Prevence duplicit:** objednávka dostane meta příznak `_wc_barion_tracked`, takže opětovné
+načtení stránky potvrzení neodešle druhou událost `purchase`.
 
-**Poznámka k revenue:** Událost `purchase` používá celkovou částku objednávky (včetně dopravy), zatímco `initiateCheckout` používá pouze mezisoučet + daň (doprava nemusí být na začátku pokladny ještě vypočítána).
+**Známá odchylka.** Barion očekává `purchase` tehdy, když platba skutečně proběhla, a `purchase`
+s `step: -1`, když selhala. Plugin odesílá `purchase` se `step: 1` pokaždé, když zákazník dorazí
+na stránku potvrzení objednávky — u offline metod, jako je bankovní převod nebo dobírka, tedy ve
+chvíli, kdy je objednávka ještě nezaplacená. Hodnotu `step: -1` neodesílá nikdy.
 
 ---
 
 ### setEncryptedEmail
 
-**Spouštěč:** Stránka s poděkováním (hook `woocommerce_thankyou`) a stránka pokladny — u přihlášených uživatelů jednou při načtení, poté pokaždé, když zákazník zadá jinou platnou fakturační e-mailovou adresu.
-
 **Volání bp():** `bp('identity', 'setEncryptedEmail', hash)`
 
-E-mail je převeden na malá písmena a v prohlížeči zahashován algoritmem SHA-1 (Web Crypto API), teprve pak se dostane do `bp.js`. Barion API přijímá předpočítaný hash SHA-1 místo prosté adresy a předběžné hashování obchází vlastní e-mailový regulární výraz `bp.js`, který odmítá `+` v lokální části a TLD delší než čtyři písmena. Hodnota, která už je 40znakovým hexadecimálním hashem, se předává beze změny; pokud Web Crypto API není k dispozici (prostředí bez HTTPS), odešle se prostá adresa.
+**Spouštěče:**
 
-Hodnoty, které nejsou ani platnou e-mailovou adresou (podle [specifikace HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)), ani hashem SHA-1, se neodesílají nikdy, takže částečně napsaný text v pokladně se do `bp.js` nedostane.
+- Stránka potvrzení objednávky, pokud má objednávka fakturační e-mail.
+- Stránka pokladny, jednou při načtení u přihlášených zákazníků.
+- Stránka pokladny, kdykoli zákazník zadá jiný platný fakturační e-mail — z pole `#billing_email` u klasické pokladny nebo z datového úložiště bloků Cart a Checkout u blokové pokladny.
 
-Na stránce s poděkováním se spustí pouze v případě, že objednávka obsahuje fakturační e-mailovou adresu.
+Adresa se převede na malá písmena a v prohlížeči zahashuje algoritmem SHA-1 (Web Crypto API), než
+se dostane do `bp.js`. Barion místo prosté adresy přijímá předpočítaný SHA-1 hash a předběžné
+hashování obchází vlastní e-mailový regulární výraz bp.js, který odmítá `+` v lokální části a TLD
+delší než čtyři písmena. Hodnota, která už je 40znakovým hexadecimálním hashem, projde beze změny.
+Pokud Web Crypto API není k dispozici — mimo HTTPS —, odešle se prostá adresa.
+
+Hodnoty, které nejsou ani platným e-mailem (podle
+[specifikace HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)), ani
+SHA-1 hashem, se neodesílají nikdy, takže částečné psaní v pokladně se do `bp.js` nedostane.
+Opakovaná hodnota nic neudělá.
 
 ---
 
-## Neimplementované události
+## Události, které plugin neposílá
 
-| Událost | Důvod |
-|---------|-------|
-| `customEvent` | Není potřeba pro standardní sledování e-commerce |
-| `initiatePurchase` | Seznam povinných událostí Barionu říká implementovat `initiatePurchase` NEBO `purchase` — používáme `purchase` |
-| `setEncryptedPhone` | Volitelné; telefonní číslo není spolehlivě dostupné ve všech tocích WooCommerce |
-| `search` | Volitelné; není součástí povinné sady událostí |
+Reference událostí Barionu je uvádí mezi **povinnými** obsluhami událostí. FAQ dodává, že událost,
+které ve vašem obchodě neodpovídá žádný uživatelský záměr, není potřeba implementovat — to
+pokrývá některé z nich, ale ne všechny.
+
+| Událost | Proč ne |
+|---------|---------|
+| `initiatePurchase` | Zde nadbytečná. Barion požaduje `initiatePurchase` *nebo* `purchase`; plugin posílá `purchase` |
+| `setEncryptedPhone` | Fakturační telefon je ve WooCommerce volitelný a v mnoha obchodech chybí |
+| `search`, `categorySelection`, `addPaymentInfo`, `removeFromCart` | Pro typický obchod na WooCommerce použitelné, ale zatím neimplementované |
+
+Doporučené obsluhy — `customizeProduct`, `setUserProperties`, `signUp`, `clickPromo`,
+`clickProduct`, `clickProductDetail`, `error` — a `customEvent` také implementované nejsou.
+
+Pokud váš obchod některou z nich potřebuje, základní pixel ponechává `bp()` na objektu `window`,
+takže `bp('track', 'search', { ... })` funguje i z vaší vlastní šablony nebo pluginu.

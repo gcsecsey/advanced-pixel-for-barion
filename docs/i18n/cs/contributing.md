@@ -1,0 +1,73 @@
+> 🌐 Toto je automatický překlad. Opravy od komunity jsou vítány!
+>
+> [English version](../../../CONTRIBUTING.md)
+
+# Přispívání
+
+Vývoj probíhá zde na GitHubu. Plugin je publikován také na
+[WordPress.org](https://wordpress.org/plugins/advanced-pixel-for-barion/), ale ta kopie je jen
+zrcadlo označeného vydání — issues a pull requesty prosím zakládejte v tomto repozitáři.
+
+Příspěvky jsou vítány, nejužitečnější jsou překlady a okrajové případy ve WooCommerce. Sám mohu
+testovat jen omezenou sadu šablon, platebních bran a pluginů pro souhlas, takže hlášení z praxe
+mají velkou cenu.
+
+## Hlášení chyby
+
+Založte [issue na GitHubu](https://github.com/gcsecsey/advanced-pixel-for-barion/issues). Uveďte
+prosím:
+
+- verze WordPressu, WooCommerce, PHP a pluginu
+- který plugin pro souhlas s cookies používáte, pokud nějaký
+- událost, která se chová špatně (`pageView`, `contentView`, `addToCart`, `initiateCheckout`,
+  `purchase`, `setEncryptedEmail`)
+- výstup konzole prohlížeče se zapnutým **režimem ladění** (Nastavení → Barion Pixel). Plugin
+  své zprávy uvozuje předponou `[Barion Pixel]`.
+
+Nevkládejte do issue své skutečné Pixel ID ani e-mailovou adresu zákazníka.
+
+## Pull requesty
+
+1. Vycházejte z větve `main`.
+2. Držte změnu úzce zaměřenou. Jedna oprava nebo jedna funkce na pull request.
+3. Dodržujte stávající styl kódu: kódovací standardy WordPressu, escapování veškerého výstupu,
+   sanitizace veškerého vstupu a předpona `wc_barion_pixel_` u nových globálních symbolů.
+4. Popište, jak jste změnu otestovali. `docs/testing-notes.md` uvádí zvláštnosti bp.js, na kterých
+   je snadné se spálit.
+5. Nezvyšujte číslo verze a neupravujte changelog — vydání se označují zvlášť.
+
+## Překlady
+
+Plugin dodává vlastní překlady v adresáři [`languages/`](../../../languages/). Přidání nebo oprava
+jazyka:
+
+1. Zkopírujte `languages/advanced-pixel-for-barion.pot` na
+   `languages/advanced-pixel-for-barion-<locale>.po` (například `hu_HU`, `de_DE`, `hr`).
+2. Přeložte řetězce. Poedit nebo jakýkoli PO editor postačí.
+3. Vygenerujte binární soubory a commitněte `.po` i `.mo`:
+
+   ```sh
+   composer i18n:mo
+   ```
+
+Pokud jste změnili překládaný řetězec ve zdrojovém PHP kódu, vygenerujte nejprve šablonu příkazem
+`composer i18n:build`.
+
+## Testování změny
+
+Nejrychlejší cesta je [WordPress Playground](https://playground.wordpress.net/). Repozitář obsahuje
+blueprint, který nastartuje WooCommerce obchod s ukázkovými produkty, demo lištou souhlasu a už
+zapnutým režimem ladění:
+
+```sh
+npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
+```
+
+Blueprint instaluje vydanou verzi z WordPress.org. Chcete-li testovat svou pracovní kopii, nahraďte
+krok `installPlugin` lokálním připojením, nebo plugin nainstalujte do libovolného webu WordPress a
+zapněte režim ladění.
+
+## Licence
+
+Přispěním souhlasíte s tím, že vaše práce bude licencována pod GPL-2.0-or-later, tedy stejnou
+licencí jako plugin.

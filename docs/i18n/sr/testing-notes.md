@@ -4,39 +4,71 @@
 
 # Beleške o testiranju i poznate specifičnosti
 
-## Specifičnosti validacije bp.js u realnom vremenu
+## Pre nego što zaključiš da piksel ne radi
 
-Barionova skripta `bp.js` vrši validaciju podataka događaja na strani klijenta. U nekim slučajevima, pravila validacije se razlikuju od [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference). Ove specifičnosti su otkrivene tokom testiranja na staging okruženju.
+### „Testing message“ nije greška
 
-### totalItemPrice: odbijen za contentView, obavezan za stavke u contents
+Otvori konzolu na stranici sa pikselom i bp.js će javiti ili **„Testing message“** ili
+**„Sending message“**. Barion
+[dokumentuje razliku](https://docs.barion.com/Implementing_the_Base_Barion_Pixel): sveže postavljen
+piksel još nije ovlašćen da šalje korisničke podatke, pa bp.js piše „Testing message“ i prenosi
+samo vrstu događaja. Kada Barion ovlasti piksel, to prelazi u „Sending message“.
 
-- **contentView** (flat događaj): bp.js **odbija** `totalItemPrice` sa greškom `Invalid key totalItemPrice in contentView event`. API referenca se s tim slaže — `totalItemPrice` nije svojstvo događaja contentView.
-- Stavke u **initiateCheckout** i **purchase** nizovima `contents`: bp.js **zahteva** `totalItemPrice` sa greškom `Mandatory key totalItemPrice is missing from contents event` ako se izostavi. API referenca ga za stavke contents takođe navodi kao obavezan.
+Dodatak na to ne utiče. Ako tvoji događaji u konzoli izgledaju ispravno, a Barion ne vidi podatke,
+piksel najverovatnije još čeka odobrenje na Barionovoj strani — implementaciju pregleda čovek, pa
+im se javi kada tvoja bude gotova.
 
-**Pravilo palca:** `totalItemPrice` nije validno za flat događaje, ali je obavezno unutar stavki niza `contents`.
+### Pixel ID mora biti onaj pravi
 
-### unit je obavezan u stavkama contents
+- Nalazi se u tvom Barion novčaniku pod **Merchant Management > Details**. Svaka prodavnica, dakle svaki POSKey, ima svoj Pixel ID.
+- Format je `BP-` + deset znakova + `-` + dve cifre. ID koji počinje sa `BPT` nije Pixel ID i neće raditi.
+- Sandbox i produkcija izdaju **različite** Pixel ID-ove. Test sajt sa produkcionim ID-om zagađuje stvarne podatke; produkcioni sajt sa sandbox ID-om ne beleži ništa korisno.
 
-bp.js zahteva `unit` u stavkama niza `contents` za `initiateCheckout` i `purchase`, kao i API referenca. Izostavljanje proizvodi: `Mandatory key unit is missing from contents event`.
+Ako želiš prodavnicu za jednokratnu upotrebu, Barionova stranica
+[Creating a shop](https://docs.barion.com/Creating_a_shop) vodi te kroz sandbox, gde se prodavnice
+odobravaju automatski.
+
+---
+
+## Specifičnosti provere u bp.js tokom izvršavanja
+
+bp.js proverava podatke događaja u pregledaču, a na nekoliko mesta su njegova pravila stroža ili
+blaža nego što [referenca događaja](https://docs.barion.com/Barion-pixel-event-reference)
+sugeriše. Ovo je otkriveno tokom testiranja na staging okruženju.
+
+### totalItemPrice: odbijen kod contentViewa, obavezan u elementima contents
+
+- **contentView** (ravan događaj): bp.js **odbija** `totalItemPrice` uz `Invalid key totalItemPrice in contentView event`. Referenca se slaže — nije svojstvo contentViewa.
+- Elementi `contents` događaja **initiateCheckout** i **purchase**: bp.js ga **zahteva**, inače javlja `Mandatory key totalItemPrice is missing from contents event`. I ovde se referenca slaže.
+
+Pravilo palca: `totalItemPrice` je nevažeći na ravnim događajima i obavezan unutar elemenata
+`contents`.
+
+### unit je obavezan u elementima contents
+
+Ako ga izostaviš, dobijaš `Mandatory key unit is missing from contents event`.
 
 ### step
 
-Dodatak šalje `step: 1` za `addToCart`, `initiateCheckout` i `purchase`. API referenca navodi `step` kao obavezan za `initiateCheckout` i `purchase`, a opcionalan za `addToCart`. Barion dokumentuje `1` kao korak pokretanja naplate; za `purchase` referenca traži najveći broj koraka koji koristiš — kod jednostepene naplate takođe `1`.
+Dodatak šalje `step: 1` za `addToCart`, `initiateCheckout` i `purchase`. Barion dokumentuje `1` kao
+korak početka naplate, a kod `purchase` traži najviši broj koraka koji koristiš — kod jednokoračne
+naplate takođe `1`. Za `addToCart` je `step` opcion.
 
 ---
 
 ## Režim za otklanjanje grešaka
 
-Omogući režim za otklanjanje grešaka u **Podešavanja > Barion Pixel** da se svi Barion Pixel događaji beležu u konzolu pregledača.
+Uključi ga u **Podešavanja > Barion Pixel** da se svaki događaj upiše u konzolu pregledača.
 
 ### Šta tražiti
 
-Otvori konzolu pregledača (F12 > Konzola) i traži poruke sa prefiksom `[Barion Pixel]`:
+Otvori konzolu (F12 > Konzola) i traži poruke `[Barion Pixel]`:
 
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
-[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
+[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
 [Barion Pixel] Event: initiateCheckout { contents: [...], ... }
@@ -44,90 +76,103 @@ Otvori konzolu pregledača (F12 > Konzola) i traži poruke sa prefiksom `[Barion
 [Barion Pixel] setEncryptedEmail sent
 ```
 
+Potpun spisak poruka o saglasnosti nalazi se u
+[Integraciji saglasnosti za kolačiće](cookie-consent.md).
+
 ### Greške bp.js
 
-bp.js beleži sopstvene greške validacije sa numeričkim prefiksom. Česte greške:
+bp.js upisuje i sopstvene greške provere. Uobičajene:
 
 | Greška | Značenje | Rešenje |
-|--------|---------|---------|
+|--------|----------|---------|
 | `Mandatory key X is missing from Y event` | Obavezno polje se ne šalje | Proveri podatke događaja |
 | `Invalid key X in Y event` | Šalje se polje koje bp.js ne očekuje | Ukloni polje |
+| `Format of e-mail address or hash is invalid` | bp.js je odbio vrednost prosleđenu u `setEncryptedEmail` | Od 1.0.3 dodatak adresu unapred hešira, pa ovo više ne bi trebalo da se pojavljuje |
 
 ---
 
 ## Lista za proveru testiranja
 
+Prođi je i u klasičnoj i u blokovskoj prodavnici — za `addToCart`, `initiateCheckout` i
+`setEncryptedEmail` koriste sasvim različite puteve koda.
+
 ### Stranica proizvoda (contentView)
 
-1. Idi na bilo koju stranicu pojedinačnog proizvoda
-2. Otvori konzolu pregledača
-3. Proveri da se pojavljuje `[Barion Pixel] Event: contentView`
-4. Proveri da nema bp.js poruka o grešci zbog nedostajućih/nevalidnih polja
-5. Proveri da polja uključuju: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice`
+1. Otvori stranicu proizvoda sa otvorenom konzolom.
+2. Pojavi se `[Barion Pixel] Event: contentView`.
+3. Nema grešaka bp.js o nedostajućim ili nevažećim ključevima.
+4. Prisutna polja: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice` — i nema `totalItemPrice`.
 
 ### Dodavanje u korpu (addToCart)
 
-**Sa stranice prodavnice/arhive (AJAX):**
+**Stranica prodavnice ili arhive, klasično AJAX dugme:**
 
-1. Idi na stranicu prodavnice
-2. Otvori konzolu pregledača
-3. Klikni "Dodaj u korpu" na bilo kom proizvodu
-4. Proveri da se pojavljuje `[Barion Pixel] Event: addToCart`
-5. Proveri da polja uključuju `totalItemPrice` i `step: 1`
+1. Na stranici prodavnice klikni „Dodaj u korpu“.
+2. Pojavi se `[Barion Pixel] Event: addToCart`, sa `totalItemPrice` i `step: 1`.
 
-**Sa stranice pojedinačnog proizvoda (slanje forme):**
+**Stranica proizvoda, slanje forme:**
 
-1. Idi na stranicu pojedinačnog proizvoda
-2. Otvori konzolu pregledača
-3. Klikni "Dodaj u korpu"
-4. Proveri da se `[Barion Pixel] Event: addToCart` aktivira pre nego što stranica pređe na drugu
-5. Za varijabilne proizvode: najpre odaberi varijaciju i proveri da se koristi cena te varijacije
+1. Klikni „Dodaj u korpu“ i proveri da se događaj šalje pre nego što stranica ode dalje.
+2. Kod varijabilnog proizvoda: prvo izaberi varijaciju, pa proveri da li je upotrebljena njena cena.
 
-### Stranica za završetak porudžbine (initiateCheckout)
+**Blokovske površine (dugmići Product Collection, blok Cart):**
 
-1. Dodaj stavke u korpu i idi na stranicu za završetak porudžbine
-2. Otvori konzolu pregledača
-3. Proveri da se pojavljuje `[Barion Pixel] Event: initiateCheckout`
-4. Proveri da niz `contents` ima ispravne stavke sa `unit`, `unitPrice`, `totalItemPrice`
-5. Proveri da je `revenue` međuzbir + porez (bez dostave)
-6. Proveri da je prisutno `step: 1`
-7. Unesi adresu e-pošte za naplatu u obrazac naplate i proveri da li se `[Barion Pixel] setEncryptedEmail sent` pojavljuje jednom po različitoj važećoj adresi — a ne pri svakom pritisku tastera
+1. Pri učitavanju se pojavi `[Barion Pixel] Block surfaces detected …`.
+2. Dodaj proizvod iz bloka Product Collection — šalje se jedan `addToCart` sa ispravnom količinom.
+3. Promeni količinu u bloku Cart — nijedan `addToCart` se ne šalje.
+4. U prodavnici sa nedecimalnom valutom proveri da li je `unitPrice` stvarna cena, a ne njen stoti deo.
+
+### Stranica naplate (initiateCheckout)
+
+1. Stavi artikle u korpu i otvori naplatu.
+2. Pojavi se `[Barion Pixel] Event: initiateCheckout`.
+3. Svaki element `contents` nosi `unit`, `unitPrice` i `totalItemPrice`.
+4. `revenue` je međuzbir + porez, bez dostave.
+5. `step: 1` je prisutan.
+6. Upiši imejl adresu za naplatu. `setEncryptedEmail sent` pojavljuje se jednom po važećoj adresi — ne pri svakom pritisku tastera i ne kod delimičnog unosa poput `x@y`.
+7. Ponovi na bloku Checkout, gde imejl dolazi iz skladišta podataka bloka, a ne iz `#billing_email`.
 
 ### Završetak porudžbine (purchase + setEncryptedEmail)
 
-1. Završi testnu porudžbinu (koristi metod plaćanja "Bankovna transfer" radi jednostavnog testiranja)
-2. Na stranici zahvalnice, otvori konzolu pregledača
-3. Proveri da se pojavljuje `[Barion Pixel] Event: purchase` sa `revenue` koji odgovara ukupnom iznosu porudžbine
-4. Proveri da se pojavljuje `[Barion Pixel] setEncryptedEmail sent`
-5. Osveži stranicu zahvalnice — proveri da se `purchase` NE aktivira ponovo (sprečavanje duplikata)
-6. Proveri da stavke u `contents` uključuju `unit`, `totalItemPrice`
+1. Dovrši test porudžbinu — „Bankovni prenos“ je za to najjednostavniji način plaćanja.
+2. Pojavi se `[Barion Pixel] Event: purchase`, a `revenue` odgovara ukupnom iznosu porudžbine.
+3. Pojavi se `setEncryptedEmail sent`.
+4. Ponovo učitaj stranicu potvrde — `purchase` se **ne** šalje ponovo.
+5. Elementi `contents` sadrže `unit` i `totalItemPrice`.
 
 ### Integracija saglasnosti
 
-1. Obriši sve kolačiće
-2. Idi na bilo koju stranicu
-3. Proveri da se pojavljuje `[Barion Pixel] Base pixel initialized` (osnovni piksel se uvek učitava)
-4. Prihvati kolačiće putem svog banera za kolačiće
-5. Proveri da se pojavljuje `[Barion Pixel] Consent granted`
-6. Ponovo učitaj stranicu — proveri da je saglasnost automatski odobrena pri učitavanju (povratni posetilac)
+1. Obriši sve kolačiće.
+2. Učitaj bilo koju stranicu. Pojavi se `[Barion Pixel] Base pixel initialized` — osnovni piksel se namerno učitava pre bilo kakve odluke o saglasnosti.
+3. Prihvati kolačiće u svojoj traci. Pojavi se `Consent granted (grantConsent)`.
+4. Ponovo učitaj — saglasnost se pri učitavanju daje ponovo, bez trake.
+5. Povuci saglasnost i proveri da li se pojavljuje `Consent rejected (rejectConsent)`.
 
 ---
 
 ## Česti problemi
 
-### Događaji se ne aktiviraju
+### Događaji se ne šalju
 
-- **Proveri Pixel ID**: Osigurai da je validan Pixel ID konfigurisan u Podešavanja > Barion Pixel
-- **Proveri potpuno praćenje**: Događaji zahtevaju da je označeno "Omogući potpuno praćenje piksela"
-- **Proveri WooCommerce**: Potpuno praćenje zahteva da je WooCommerce aktivan
-- **Proveri greške u konzoli**: Traži JavaScript greške koje bi mogle sprečiti učitavanje bp.js
+- **Pixel ID**: u Podešavanja > Barion Pixel mora biti sačuvan važeći ID.
+- **Potpuno praćenje**: događaji e-trgovine traže označeno „Omogući potpuno praćenje piksela“.
+- **WooCommerce**: potpuno praćenje traži aktivan WooCommerce.
+- **Greške u konzoli**: i nepovezana JavaScript greška može sprečiti učitavanje bp.js.
 
 ### Dvostruko učitavanje piksela
 
-Ako vidiš `[Barion Pixel] bp.js already loaded by another plugin`, drugi dodatak (verovatno Barion Payment Gateway) je već učitao bp.js. Ovo je bezopasno — dodatak preskače ponovno učitavanje i i dalje se inicijalizuje sa tvojim Pixel ID-om.
+`[Barion Pixel] bp.js already loaded by another plugin` znači da je nešto drugo stiglo prvo —
+Barion Payment Gateway, oznaka u Google Tag Manageru, isečak u temi. To je bezopasno: dodatak
+preskače učitavanje skripte i svejedno se inicijalizuje sa tvojim Pixel ID-om. Vidi
+[Kompatibilnost](compatibility.md).
 
-### Saglasnost se ne odobrava
+### Saglasnost se ne daje
 
-- **WP Consent API**: Osiguraj da je instaliran WP Consent API dodatak i da ga tvoj dodatak za kolačiće podržava
-- **Cookie Law Info**: Osiguraj da je dodatak aktivan i da je `CLI` global dostupan
-- **Ručno**: Pozovi `window.wcBarionGrantConsent()` iz povratnog poziva svog menadžera saglasnosti
+- **WP Consent API**: dodatak WP Consent API mora biti instaliran i tvoj dodatak za kolačiće mora ga podržavati.
+- **Cookie Law Info**: dodatak mora biti aktivan i globalni `CLI` dostupan.
+- **Ručno**: pozovi `window.wcBarionGrantConsent()` iz callbacka svog upravljača saglasnošću.
+
+### purchase se šalje za neplaćenu porudžbinu
+
+Očekivano, i dokumentovano pod [purchase](events-reference.md#purchase). Dodatak prati stranicu
+potvrde porudžbine, do koje oflajn načini plaćanja dolaze pre nego što novac stigne.

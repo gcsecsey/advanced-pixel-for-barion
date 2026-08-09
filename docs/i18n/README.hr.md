@@ -46,8 +46,12 @@ Pristupi stranici postavki na **Postavke > Barion Pixel** u WordPress administra
 #### Pixel ID (Obvezno)
 Unesi svoj Barion Pixel ID (format: `BP-0000000000-00`). Osnovni Pixel učitat će se na svim stranicama kada ovo postaviš.
 
+ID pronađi u svojem Barion novčaniku pod **Merchant Management > Details**. Svaka trgovina ima svoj, a sandbox i produkcijsko okruženje izdaju različite. ID koji počinje s `BPT` nije Pixel ID i neće raditi.
+
 #### Omogući potpuno praćenje Pixelom
 Uključi/isključi praćenje e-trgovinskih događaja. Kada je isključeno, učitava se samo Osnovni Pixel (pageView za sprječavanje prijevare).
+
+Barion traži potpunu implementaciju Pixela i usklađenu traku za pristanak prije nego trgovina ostvari povoljnije uvjete za Barion Smart Gateway ili pristup Barion Metricsu. Ovaj dodatak pokriva implementaciju; odobrenje daje Barion.
 
 #### Način rada za otklanjanje pogrešaka
 Omogući za bilježenje svih Barion Pixel događaja u konzolu preglednika radi testiranja.
@@ -61,7 +65,7 @@ Detaljna dokumentacija dostupna je u mapi [`hr/`](hr/):
 - [Kompatibilnost](hr/compatibility.md) — WooCommerce, Barion Payment Gateway, dodaci za predmemoriranje
 - [Napomene za testiranje](hr/testing-notes.md) — Posebnosti bp.js, način otklanjanja pogrešaka, kontrolni popis testiranja
 
-Dokumentacija je također dostupna na [Magyar](../hu/), [Čeština](../cs/), [Slovenčina](../sk/), [Deutsch](../de/), [Hrvatski](hr/), [Română](../ro/), [Slovenščina](../sl/) i [Srpski](../sr/).
+Dokumentacija je također dostupna na [Magyar](hu/), [Čeština](cs/), [Slovenčina](sk/), [Deutsch](de/), [Hrvatski](hr/), [Română](ro/), [Slovenščina](sl/) i [Srpski](sr/).
 
 ### Barionova dokumentacija
 
@@ -71,8 +75,9 @@ Barionovi vlastiti vodiči za postavljanje Pixela (na engleskom). Opcija **Enabl
 - [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
 - [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
 - [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
-- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference)
 - [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel)
 
 ## Kompatibilnost
 
@@ -88,11 +93,27 @@ Barionovi vlastiti vodiči za postavljanje Pixela (na engleskom). Opcija **Enabl
 - WooCommerce 5.0+ (za potpuno praćenje događaja)
 - Neobavezno: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) za univerzalnu podršku pristanka na kolačiće
 
+## Doprinosi
+
+Prijave grešaka, pull requestovi i prijevodi su dobrodošli — pogledaj [vodič za doprinose](hr/contributing.md).
+
 ## Licenca
 
 GPL-2.0-or-later — pogledaj [LICENSE](../../LICENSE) za detalje.
 
 ## Dnevnik promjena
+
+### 1.0.6
+- Ispravljeno: `initiateCheckout` i `setEncryptedEmail` nikada se nisu slali na WooCommerce bloku Checkout, koji je od WooCommercea 8.3 zadan za nove trgovine. Dodatak je slušao samo PHP hookove klasične naplate i njezino polje `#billing_email`, a blok nema ni jedno ni drugo. Sada čita spremište podataka blokova Cart i Checkout; ponašanje klasične naplate ostaje isto
+- Ispravljeno: `addToCart` nikada se nije slao na stranicama trgovine ni kategorija, ni u jednoj trgovini. Skripta događaja učitavala se samo na stranicama na kojima je već čekao neki događaj, što na arhivskim stranicama nikada nije slučaj, pa osluškivači dodavanja u košaricu nisu bili prisutni upravo ondje gdje kupci dodaju u košaricu. Greška potječe iz verzije 1.0.1
+- Ispravljeno: `addToCart` sada radi i s blokovskim gumbima proizvoda koje koristi blok Product Collection. Oni rade na Interactivity API-ju i ne pokreću ni klasični jQuery događaj ni spremište podataka blokova, pa se sadržaj košarice čita iz WooCommerce Store API-ja
+
+### 1.0.5
+- Ispravljeno: priloženi prijevodi (mađarski, češki, slovački, njemački, hrvatski, rumunjski, slovenski i srpski) nikada se nisu učitali, pa je zaslon postavki ostao na engleskom. WordPress pretražuje samo `wp-content/languages/plugins` dok dodatak ne registrira vlastitu mapu, a dodatak to nikada nije radio. Sada registrira `languages/` na `init`
+
+### 1.0.4
+- Kompatibilnost: testirano s WordPressom 7.0 i WooCommerceom 11.0
+- Promijenjeno: `Requires PHP` podignut sa 7.2 na 7.4. WordPress 7.0 ukinuo je podršku za PHP 7.2 i 7.3, pa 7.2 više nije bila verzija na kojoj dodatak može raditi
 
 ### 1.0.3
 - Ispravljeno: `setEncryptedEmail` slao se više puta tijekom jednog učitavanja stranice naplate

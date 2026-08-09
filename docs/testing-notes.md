@@ -1,38 +1,74 @@
 # Testing Notes & Known Quirks
 
-## bp.js Runtime Validation Quirks
+## Before you conclude the pixel is broken
 
-Barion's `bp.js` script performs client-side validation on event data. In some cases, the validation rules differ from the [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference). These quirks were discovered during staging testing.
+### "Testing message" is not an error
 
-### totalItemPrice: rejected for contentView, required for contents items
+Open the console on a page with the pixel and bp.js will report either
+**"Testing message"** or **"Sending message"**. Barion
+[documents the difference](https://docs.barion.com/Implementing_the_Base_Barion_Pixel):
+a freshly implemented pixel is not yet authorized to send user data, so bp.js
+logs "Testing message" and transmits only the event type. It switches to "Sending
+message" once Barion authorizes the pixel.
 
-- **contentView** (flat event): bp.js **rejects** `totalItemPrice` with the error `Invalid key totalItemPrice in contentView event`. The API reference agrees — `totalItemPrice` is not one of the contentView properties.
-- **initiateCheckout** and **purchase** `contents` items: bp.js **requires** `totalItemPrice` with the error `Mandatory key totalItemPrice is missing from contents event` if omitted. The API reference also lists it as required for contents items.
+Nothing in the plugin changes this. If your events look correct in the console but
+Barion sees no data, the pixel most likely still needs authorizing on Barion's
+side — a person at Barion reviews the implementation, so contact them once yours
+is complete.
 
-**Rule of thumb:** `totalItemPrice` is invalid for flat events but required inside `contents` array items.
+### The Pixel ID has to be the right one
 
-### unit is required in contents items
+- Find it in your Barion wallet under **Merchant Management > Details**. Every shop, meaning every POSKey, has its own Pixel ID.
+- The format is `BP-` + ten characters + `-` + two digits. An ID that starts with `BPT` is not a Pixel ID and will not work.
+- Sandbox and live have **different** Pixel IDs. A staging site pointed at a live ID pollutes real data; a live site pointed at a sandbox ID records nothing useful.
 
-bp.js requires `unit` in the `contents` array items for `initiateCheckout` and `purchase`, as does the API reference. Omitting it produces: `Mandatory key unit is missing from contents event`.
-
-### step
-
-The plugin sends `step: 1` for `addToCart`, `initiateCheckout`, and `purchase`. The API reference lists `step` as required for `initiateCheckout` and `purchase`, and optional for `addToCart`. Barion documents `1` as the checkout initiation step; for `purchase` the reference asks for the highest step number you use — also `1` in a single-step checkout.
+If you want a throwaway shop to test against, Barion's
+[Creating a shop](https://docs.barion.com/Creating_a_shop) walks through the
+sandbox, where shops are approved automatically.
 
 ---
 
-## Debug Mode
+## bp.js runtime validation quirks
 
-Enable debug mode in **Settings > Barion Pixel** to log all Barion Pixel events to the browser console.
+bp.js validates event data in the browser, and in a few places its rules are
+stricter or looser than the
+[event reference](https://docs.barion.com/Barion-pixel-event-reference) suggests.
+These were found during staging testing.
+
+### totalItemPrice: rejected for contentView, required in contents items
+
+- **contentView** (a flat event): bp.js **rejects** `totalItemPrice` with `Invalid key totalItemPrice in contentView event`. The reference agrees — it is not a contentView property.
+- **initiateCheckout** and **purchase** `contents` items: bp.js **requires** it, with `Mandatory key totalItemPrice is missing from contents event` if omitted. The reference agrees here too.
+
+Rule of thumb: `totalItemPrice` is invalid on flat events and required inside
+`contents` items.
+
+### unit is required in contents items
+
+Omitting it produces `Mandatory key unit is missing from contents event`.
+
+### step
+
+The plugin sends `step: 1` for `addToCart`, `initiateCheckout` and `purchase`.
+Barion documents `1` as the checkout initiation step, and asks for the highest
+step number you use on `purchase` — also `1` in a single-step checkout. `step` is
+optional for `addToCart`.
+
+---
+
+## Debug mode
+
+Enable it in **Settings > Barion Pixel** to log every event to the browser console.
 
 ### What to look for
 
-Open the browser console (F12 > Console) and look for `[Barion Pixel]` prefixed messages:
+Open the console (F12 > Console) and look for `[Barion Pixel]` messages:
 
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
-[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
+[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
 [Barion Pixel] Event: initiateCheckout { contents: [...], ... }
@@ -40,90 +76,104 @@ Open the browser console (F12 > Console) and look for `[Barion Pixel]` prefixed 
 [Barion Pixel] setEncryptedEmail sent
 ```
 
+The consent messages are listed in full in
+[Cookie Consent Integration](cookie-consent.md).
+
 ### bp.js errors
 
-bp.js logs its own validation errors with a numeric prefix. Common ones:
+bp.js logs its own validation errors. The common ones:
 
 | Error | Meaning | Fix |
 |-------|---------|-----|
 | `Mandatory key X is missing from Y event` | A required field is not being sent | Check the event data |
-| `Invalid key X in Y event` | A field is being sent that bp.js doesn't expect | Remove the field |
+| `Invalid key X in Y event` | A field is being sent that bp.js does not expect | Remove the field |
+| `Format of e-mail address or hash is invalid` | bp.js rejected the value passed to `setEncryptedEmail` | Since 1.0.3 the plugin pre-hashes the address, so this should no longer appear |
 
 ---
 
-## Testing Checklist
+## Testing checklist
+
+Run this on both a classic store and a block store — the two use entirely
+different code paths for `addToCart`, `initiateCheckout` and `setEncryptedEmail`.
 
 ### Product page (contentView)
 
-1. Navigate to any single product page
-2. Open browser console
-3. Verify `[Barion Pixel] Event: contentView` appears
-4. Verify no bp.js error messages about missing/invalid keys
-5. Check that fields include: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice`
+1. Open any single product page with the console open.
+2. `[Barion Pixel] Event: contentView` appears.
+3. No bp.js errors about missing or invalid keys.
+4. Fields present: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice` — and no `totalItemPrice`.
 
 ### Add to cart (addToCart)
 
-**From shop/archive page (AJAX):**
+**Shop or archive page, classic AJAX button:**
 
-1. Navigate to the shop page
-2. Open browser console
-3. Click "Add to cart" on any product
-4. Verify `[Barion Pixel] Event: addToCart` appears
-5. Check fields include `totalItemPrice` and `step: 1`
+1. Click "Add to cart" on the shop page.
+2. `[Barion Pixel] Event: addToCart` appears, with `totalItemPrice` and `step: 1`.
 
-**From single product page (form submit):**
+**Single product page, form submit:**
 
-1. Navigate to a single product page
-2. Open browser console
-3. Click "Add to cart"
-4. Verify `[Barion Pixel] Event: addToCart` fires before the page navigates
-5. For variable products: select a variation first and verify the variation's price is used
+1. Click "Add to cart" and check the event fires before the page navigates.
+2. For a variable product: select a variation first, then verify the variation's price was used.
+
+**Block surfaces (Product Collection buttons, Cart block):**
+
+1. `[Barion Pixel] Block surfaces detected …` appears on load.
+2. Add a product from a Product Collection block — one `addToCart` fires with the right quantity.
+3. Change a quantity in the Cart block — no `addToCart` fires.
+4. On a store with a non-decimal currency such as HUF, check `unitPrice` is the real price and not a hundredth of it.
 
 ### Checkout page (initiateCheckout)
 
-1. Add items to cart and navigate to checkout
-2. Open browser console
-3. Verify `[Barion Pixel] Event: initiateCheckout` appears
-4. Check that `contents` array has correct items with `unit`, `unitPrice`, `totalItemPrice`
-5. Check that `revenue` is subtotal + tax (not including shipping)
-6. Check `step: 1` is present
-7. Type a billing email into the checkout form and verify `[Barion Pixel] setEncryptedEmail sent` appears once per distinct valid address — not on every keystroke
+1. Add items to the cart and open checkout.
+2. `[Barion Pixel] Event: initiateCheckout` appears.
+3. `contents` items each carry `unit`, `unitPrice` and `totalItemPrice`.
+4. `revenue` is subtotal + tax, without shipping.
+5. `step: 1` is present.
+6. Type a billing email. `setEncryptedEmail sent` appears once per distinct valid address — not on every keystroke, and not for partial input such as `x@y`.
+7. Repeat on the Checkout block, where the email comes from the block data store rather than `#billing_email`.
 
 ### Order completion (purchase + setEncryptedEmail)
 
-1. Complete a test order (use "Bank transfer" payment method for easy testing)
-2. On the thank-you page, open browser console
-3. Verify `[Barion Pixel] Event: purchase` appears with `revenue` matching the order total
-4. Verify `[Barion Pixel] setEncryptedEmail sent` appears
-5. Refresh the thank-you page — verify `purchase` does NOT fire again (duplicate prevention)
-6. Check that `contents` items include `unit`, `totalItemPrice`
+1. Complete a test order — "Bank transfer" is the easiest payment method for this.
+2. `[Barion Pixel] Event: purchase` appears, with `revenue` matching the order total.
+3. `setEncryptedEmail sent` appears.
+4. Reload the order received page — `purchase` does **not** fire again.
+5. `contents` items include `unit` and `totalItemPrice`.
 
 ### Consent integration
 
-1. Clear all cookies
-2. Navigate to any page
-3. Verify `[Barion Pixel] Base pixel initialized` appears (base pixel always loads)
-4. Accept cookies via your cookie banner
-5. Verify `[Barion Pixel] Consent granted` appears
-6. Reload the page — verify consent is auto-granted on load (returning visitor)
+1. Clear all cookies.
+2. Load any page. `[Barion Pixel] Base pixel initialized` appears — the base pixel loads before any consent decision, by design.
+3. Accept cookies in your banner. `Consent granted (grantConsent)` appears.
+4. Reload — consent is granted again on load, without the banner.
+5. Withdraw consent and check `Consent rejected (rejectConsent)` appears.
 
 ---
 
-## Common Issues
+## Common issues
 
 ### Events not firing
 
-- **Check Pixel ID**: Ensure a valid Pixel ID is configured in Settings > Barion Pixel
-- **Check full tracking**: Events require "Enable Full Pixel Tracking" to be checked
-- **Check WooCommerce**: Full tracking requires WooCommerce to be active
-- **Check console errors**: Look for JavaScript errors that might prevent bp.js from loading
+- **Pixel ID**: a valid ID has to be saved in Settings > Barion Pixel.
+- **Full tracking**: e-commerce events need "Enable Full Pixel Tracking" checked.
+- **WooCommerce**: full tracking needs WooCommerce active.
+- **Console errors**: an unrelated JavaScript error can stop bp.js from loading.
 
 ### Double pixel loading
 
-If you see `[Barion Pixel] bp.js already loaded by another plugin`, another plugin (likely the Barion Payment Gateway) has already loaded bp.js. This is harmless — the plugin skips re-loading and still initializes with your Pixel ID.
+`[Barion Pixel] bp.js already loaded by another plugin` means something else — the
+Barion Payment Gateway, a Google Tag Manager tag, a theme snippet — got there
+first. This is harmless: the plugin skips the script load and still initializes
+with your Pixel ID. See [Compatibility](compatibility.md).
 
 ### Consent not granting
 
-- **WP Consent API**: Ensure the WP Consent API plugin is installed and your cookie plugin supports it
-- **Cookie Law Info**: Ensure the plugin is active and the `CLI` global is available
-- **Manual**: Call `window.wcBarionGrantConsent()` from your consent manager's callback
+- **WP Consent API**: the WP Consent API plugin has to be installed, and your cookie plugin has to support it.
+- **Cookie Law Info**: the plugin has to be active and the `CLI` global available.
+- **Manual**: call `window.wcBarionGrantConsent()` from your consent manager's callback.
+
+### purchase fires on an unpaid order
+
+Expected, and documented under
+[purchase](events-reference.md#purchase). The plugin tracks the order received
+page, which offline payment methods reach before the money arrives.

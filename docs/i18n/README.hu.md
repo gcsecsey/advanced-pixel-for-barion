@@ -47,9 +47,13 @@ A beállítások oldalt a WordPress adminisztrációs felületen a **Beállítá
 
 Add meg a Barion Pixel azonosítódat (formátum: `BP-0000000000-00`). Az Alap Pixel minden oldalon betöltődik, amint ez be van állítva.
 
+Az azonosítót a Barion tárcádban, a **Merchant Management > Details** oldalon találod. Minden boltnak saját azonosítója van, és a sandbox, illetve az éles környezet külön azonosítót ad ki. A `BPT` kezdetű azonosító nem Pixel azonosító, azzal nem fog működni.
+
 #### Teljes Pixel követés engedélyezése
 
 Kapcsold be/ki az e-kereskedelmi eseménykövetést. Kikapcsolt állapotban csak az Alap Pixel töltődik be (pageView a csalás megelőzéséhez).
+
+A Barion teljes Pixel implementációt és megfelelő hozzájárulási sávot vár el ahhoz, hogy egy bolt kedvezőbb Barion Smart Gateway feltételeket vagy Barion Metrics hozzáférést kapjon. Ez a bővítmény az implementációt fedi le; a jóváhagyás a Barion döntése.
 
 #### Hibakeresési mód
 
@@ -64,7 +68,7 @@ Részletes dokumentáció elérhető a [`hu/`](hu/) mappában:
 - [Kompatibilitás](hu/compatibility.md) — WooCommerce, Barion Payment Gateway, gyorsítótárazó bővítmények
 - [Tesztelési megjegyzések](hu/testing-notes.md) — bp.js sajátosságok, hibakeresési mód, tesztelési ellenőrzőlista
 
-A dokumentáció elérhető [Magyar](hu/), [Čeština](../cs/), [Slovenčina](../sk/), [Deutsch](../de/), [Hrvatski](../hr/), [Română](../ro/), [Slovenščina](../sl/) és [Srpski](../sr/) nyelven is.
+A dokumentáció elérhető [Magyar](hu/), [Čeština](cs/), [Slovenčina](sk/), [Deutsch](de/), [Hrvatski](hr/), [Română](ro/), [Slovenščina](sl/) és [Srpski](sr/) nyelven is.
 
 ### Barion dokumentáció
 
@@ -76,6 +80,7 @@ A Barion saját útmutatói a pixel beállításához. A bővítmény **Teljes P
 - [Az Alap és a Teljes Barion Pixel implementációja WooCommerce platformon](https://docs.barion.com/Az-Alap-%28Base%29-es-a-Teljes-%28Full%29-Barion-Pixel-implementacioja-Woocommerce-e-kereskedelmi-platformon)
 - [Barion Pixel API referencia](https://docs.barion.com/Barion-Pixel-API-referencia)
 - [Barion Pixel hozzájáruláskezelési követelmények](https://docs.barion.com/Barion-Pixel-hozzajarulaskezelesi_kovetelmenyek)
+- [Barion Pixel GYIK](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel) (angolul)
 
 ## Kompatibilitás
 
@@ -91,11 +96,27 @@ A Barion saját útmutatói a pixel beállításához. A bővítmény **Teljes P
 - WooCommerce 5.0+ (a teljes eseménykövetéshez)
 - Opcionális: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) az univerzális cookie-hozzájárulás támogatáshoz
 
+## Közreműködés
+
+Hibajelentéseket, pull requesteket és fordításokat szívesen fogadunk — lásd a [közreműködési útmutatót](hu/contributing.md).
+
 ## Licenc
 
 GPL-2.0-or-later — részletekért lásd a [LICENSE](../../LICENSE) fájlt.
 
 ## Változásnapló
+
+### 1.0.6
+- Javítva: az `initiateCheckout` és a `setEncryptedEmail` soha nem indult el a WooCommerce Checkout blokkon, amely a WooCommerce 8.3 óta az új boltok alapértelmezése. A bővítmény csak a klasszikus pénztár PHP hookjaira és a `#billing_email` mezőjére figyelt, a blokknak viszont egyik sincs. Mostantól a Cart és a Checkout blokk adattárát olvassa; a klasszikus pénztár működése változatlan
+- Javítva: az `addToCart` soha nem indult el a bolt- és kategóriaoldalakon, egyetlen boltban sem. Az eseményszkript csak azokon az oldalakon töltődött be, ahol már várakozott esemény a sorban — archívumoldalon ez soha nem teljesül —, így a kosárba helyezést figyelő kód épp ott hiányzott, ahol a vásárlók ténylegesen kosárba tesznek. A hiba az 1.0.1 óta állt fenn
+- Javítva: az `addToCart` mostantól a Product Collection blokk termékgombjaival is működik. Ezek az Interactivity API-n futnak, és sem a klasszikus jQuery eseményt, sem a blokk adattárát nem indítják el, ezért a kosár tartalmát a WooCommerce Store API-ból olvassa a bővítmény
+
+### 1.0.5
+- Javítva: a csomagolt magyar, cseh, szlovák, német, horvát, román, szlovén és szerb fordítások soha nem töltődtek be, így a beállítási képernyő angol maradt. A WordPress csak a `wp-content/languages/plugins` mappában keres, hacsak a bővítmény nem regisztrálja a sajátját — ez eddig kimaradt. Mostantól az `init` eseményben regisztrálja a `languages/` mappát
+
+### 1.0.4
+- Kompatibilitás: tesztelve WordPress 7.0 és WooCommerce 11.0 alatt
+- Változás: a `Requires PHP` 7.2-ről 7.4-re emelve. A WordPress 7.0 megszüntette a PHP 7.2 és 7.3 támogatását, így a 7.2 már nem olyan verzió, amelyen a bővítmény futhat
 
 ### 1.0.3
 - Javítva: a `setEncryptedEmail` többször is elindult egyetlen pénztároldal-betöltés során

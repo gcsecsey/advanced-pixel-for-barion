@@ -1,5 +1,17 @@
 # Contributing
 
+<p align="center">
+  <strong>English</strong> |
+  <a href="docs/i18n/hu/contributing.md">Magyar</a> |
+  <a href="docs/i18n/cs/contributing.md">Čeština</a> |
+  <a href="docs/i18n/sk/contributing.md">Slovenčina</a> |
+  <a href="docs/i18n/de/contributing.md">Deutsch</a> |
+  <a href="docs/i18n/hr/contributing.md">Hrvatski</a> |
+  <a href="docs/i18n/ro/contributing.md">Română</a> |
+  <a href="docs/i18n/sl/contributing.md">Slovenščina</a> |
+  <a href="docs/i18n/sr/contributing.md">Srpski</a>
+</p>
+
 Development happens here on GitHub. The plugin is also published on
 [WordPress.org](https://wordpress.org/plugins/advanced-pixel-for-barion/), but that copy is only a
 mirror of a tagged release — please open issues and pull requests against this repository.

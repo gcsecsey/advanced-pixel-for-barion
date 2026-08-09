@@ -48,8 +48,12 @@ Access the settings page at **Settings > Barion Pixel** in WordPress admin.
 #### Pixel ID (Required)
 Enter your Barion Pixel ID (format: `BP-0000000000-00`). The Base Pixel will be loaded on all pages once this is set.
 
+Find the ID in your Barion wallet under **Merchant Management > Details**. Each shop has its own, and the sandbox and live environments issue different ones. An ID beginning with `BPT` is not a Pixel ID and will not work.
+
 #### Enable Full Pixel Tracking
 Toggle to enable/disable e-commerce event tracking. When disabled, only the Base Pixel loads (pageView for fraud prevention).
+
+Barion asks for a Full Pixel implementation plus a compliant consent banner before a shop qualifies for better Barion Smart Gateway terms or for Barion Metrics. Installing this plugin covers the implementation side; the approval is Barion's to give.
 
 #### Debug Mode
 Enable to log all Barion Pixel events to the browser console for testing.
@@ -73,8 +77,9 @@ Barion's own guides for setting up the pixel. The plugin's **Enable Full Pixel T
 - [Implementing the Base Barion Pixel](https://docs.barion.com/Implementing_the_Base_Barion_Pixel)
 - [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
 - [Implementing the Base and Full pixel in WooCommerce webshops](https://docs.barion.com/Implementing-the-barion-base-and-full-pixel-in-woocommerce-webshops)
-- [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference)
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference)
 - [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements)
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel)
 
 ## Compatibility
 

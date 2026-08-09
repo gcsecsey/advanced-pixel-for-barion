@@ -4,27 +4,66 @@
 
 # Barion Pixel Events-Referenz
 
-## Übersicht
+Maßgeblich dafür, was ein Event bedeutet und welche Eigenschaften es akzeptiert, sind Barions
+eigene Seiten:
 
-Das Plugin unterstützt zwei Betriebsmodi:
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference) — jedes Event, jede Eigenschaft und welche davon erforderlich sind
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) — die Events selbst
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel) — Antworten auf die kniffligen Fälle
 
-- **Basis-Pixel** (immer aktiv, wenn eine Pixel-ID konfiguriert ist): Lädt `bp.js` und löst `pageView` automatisch auf jeder Seite aus. Wird zur Betrugsprävention verwendet.
-- **Vollständiges Tracking** (optional, Umschalten im Admin): Fügt E-Commerce-Event-Tracking für Marketing-Analysen und niedrigere Barion-Provisionsraten hinzu.
+Diese Seite beschreibt nur, was **dieses Plugin** sendet und wann.
 
-Barions eigene Referenz zu diesen Events: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) und [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (auf Englisch).
+## Überblick
+
+Das Plugin hat zwei Betriebsmodi:
+
+- **Basis-Pixel** (aktiv, sobald eine Pixel-ID gesetzt ist): lädt `bp.js` und löst `pageView` automatisch aus. Barion verlangt es zur Betrugsprävention, und es ist Voraussetzung für die Nutzung des Barion Smart Gateway überhaupt.
+- **Vollständiges Tracking** (optional, im Admin umschaltbar): ergänzt die E-Commerce-Events. Barion Metrics benötigt sie, und eine vollständige Pixel-Implementierung zusammen mit einem regelkonformen Consent-Banner ist es, was einen Shop für bessere Smart-Gateway-Konditionen qualifiziert.
 
 ### Event-Übersicht
 
 | Event | Modus | bp()-Aufruf | Auslöser |
 |-------|-------|-------------|----------|
 | pageView | Basis | Automatisch (bp.js) | Jeder Seitenaufruf |
-| grantConsent | Basis | `bp('consent', 'grantConsent')` | Cookie-Einwilligung akzeptiert |
-| rejectConsent | Basis | `bp('consent', 'rejectConsent')` | Cookie-Einwilligung abgelehnt |
-| contentView | Vollständig | `bp('track', 'contentView', data)` | Einzelne Produktseite |
-| addToCart | Vollständig | `bp('track', 'addToCart', data)` | In-den-Warenkorb-Aktion |
-| initiateCheckout | Vollständig | `bp('track', 'initiateCheckout', data)` | Kassenseite wird geladen |
-| purchase | Vollständig | `bp('track', 'purchase', data)` | Danke-Seite |
-| setEncryptedEmail | Vollständig | `bp('identity', 'setEncryptedEmail', hash)` | Danke-Seite und E-Mail-Eingabe an der Kasse |
+| grantConsent | Basis | `bp('consent', 'grantConsent')` | Marketing-Einwilligung erteilt |
+| rejectConsent | Basis | `bp('consent', 'rejectConsent')` | Marketing-Einwilligung abgelehnt |
+| contentView | Voll | `bp('track', 'contentView', data)` | Produktseite |
+| addToCart | Voll | `bp('track', 'addToCart', data)` | In-den-Warenkorb-Aktion |
+| initiateCheckout | Voll | `bp('track', 'initiateCheckout', data)` | Aufruf der Kassenseite |
+| purchase | Voll | `bp('track', 'purchase', data)` | Bestellbestätigungsseite |
+| setEncryptedEmail | Voll | `bp('identity', 'setEncryptedEmail', hash)` | Bestellbestätigungsseite und E-Mail-Eingabe an der Kasse |
+
+---
+
+## Artikelfelder
+
+`contentView` und jeder Eintrag eines `contents`-Arrays verwenden dieselbe Struktur:
+
+| Feld | Typ | Wert |
+|------|-----|------|
+| contentType | string | `'Product'` |
+| currency | string | Shop-Währung, bei `purchase` die Bestellwährung |
+| id | string | Produkt-ID |
+| name | string | Angezeigter Produktname |
+| quantity | int | Siehe das jeweilige Event |
+| unit | string | `'pcs'` |
+| unitPrice | float | Siehe das jeweilige Event |
+| totalItemPrice | float | `unitPrice * quantity` |
+
+Zwei Ausnahmen zu dieser Tabelle:
+
+- **`contentView` sendet kein `totalItemPrice`.** bp.js lehnt es mit `Invalid key totalItemPrice in contentView event` ab, und Barions Referenz führt es ebenfalls nicht als contentView-Eigenschaft. Innerhalb von `contents`-Einträgen ist es dagegen erforderlich — siehe [Testhinweise](testing-notes.md).
+- **`quantity` ist bei `contentView` immer `1`**, weil der Kunde ein einzelnes Produkt betrachtet.
+
+Das Plugin sendet keine optionalen Content-Eigenschaften (`brand`, `category`, `description`,
+`ean`, `imageUrl`, `variant`) und keine `list`-Eigenschaft. In Barions Referenz sind sie alle
+optional.
+
+**Variable Produkte.** `contentView` und das `addToCart` der Produktseite melden das
+Elternprodukt, denn darum geht es auf der Seite. Warenkorb- und Bestellzeilen melden die gewählte
+Variante, denn die legt WooCommerce in den Warenkorb. Barion verlangt, dass ein Artikel über alle
+Events hinweg gleich benannt und identifiziert wird — in einem Shop, der stark auf Varianten
+setzt, kann dasselbe Produkt Barion also unter zwei Identitäten erreichen.
 
 ---
 
@@ -32,147 +71,130 @@ Barions eigene Referenz zu diesen Events: [Barion Pixel API reference](https://d
 
 ### pageView
 
-Wird automatisch ausgelöst, wenn `bp.js` geladen wird. Keine Konfiguration erforderlich außer der Angabe der Pixel-ID.
+Wird automatisch ausgelöst, sobald `bp.js` geladen ist. Außer der Pixel-ID ist nichts zu
+konfigurieren.
 
-### grantConsent
+### grantConsent / rejectConsent
 
-Wird ausgelöst, wenn der Nutzer Marketing-Cookies akzeptiert. Wird automatisch über die WP Consent API oder Cookie Law Info verarbeitet oder manuell über `window.wcBarionGrantConsent()`.
+Werden ausgelöst, wenn der Kunde Marketing-Cookies akzeptiert oder ablehnt. Barion führt beide
+als erforderlich. Sie laufen automatisch über die WP Consent API oder Cookie Law Info, oder
+manuell über `window.wcBarionGrantConsent()` / `window.wcBarionRejectConsent()`.
 
-### rejectConsent
-
-Wird ausgelöst, wenn der Nutzer Marketing-Cookies ablehnt. Wird automatisch über die WP Consent API oder Cookie Law Info verarbeitet oder manuell über `window.wcBarionRejectConsent()`. Sowohl `grantConsent` als auch `rejectConsent` sind gemäß den Barion-Anforderungen obligatorisch.
-
-Weitere Einzelheiten unter [Cookie-Consent-Integration](cookie-consent.md).
+Siehe [Cookie-Consent-Integration](cookie-consent.md).
 
 ---
 
-## Events für vollständiges Tracking
+## Events des vollständigen Trackings
 
 ### contentView
 
-**Auslöser:** Einzelne Produktseite (Hook `woocommerce_after_single_product`)
+**Auslöser:** Produktseite, am Hook `woocommerce_after_single_product`.
 
-**Gesendete Felder:**
-
-| Feld | Typ | Wert |
-|------|-----|------|
-| contentType | string | `'Product'` |
-| currency | string | WooCommerce-Shop-Währung (z. B. `'HUF'`) |
-| id | string | Produkt-ID |
-| name | string | Anzeigename des Produkts |
-| quantity | int | `1` (immer — es wird ein Produkt angesehen) |
-| unit | string | `'pcs'` |
-| unitPrice | float | Produktpreis |
-
-> **Hinweis:** `totalItemPrice` ist keine contentView-Eigenschaft. bp.js lehnt es zur Laufzeit mit „Invalid key totalItemPrice in contentView event" ab, und die API-Referenz führt es für dieses Event ebenfalls nicht auf. Erforderlich ist es stattdessen innerhalb der `contents`-Array-Artikel.
+`unitPrice` ist der aktuelle Produktpreis. Bei einem variablen Produkt ist das der Preis, den
+WooCommerce vor der Auswahl einer Variante anzeigt.
 
 ---
 
 ### addToCart
 
-**Auslöser:** Clientseitiges JavaScript (wird unmittelbar bei der In-den-Warenkorb-Aktion ausgelöst)
+**Auslöser:** die In-den-Warenkorb-Aktion selbst. Alle Wege sind clientseitig, damit das Event
+Seiten-Caching übersteht. Es gibt drei, und welcher greift, hängt davon ab, wie der Shop seine
+Buttons rendert:
 
-**Implementierung:** Zwei Pfade, beide clientseitig verarbeitet, um mit Seiten-Caching zu funktionieren:
+1. **Klassisches AJAX-In-den-Warenkorb** (Shop- und Archivseiten). Horcht auf WooCommerces jQuery-Event `added_to_cart` und liest die Button-Attribute `data-product_id`, `data-product_name`, `data-product_price` und `data-quantity`.
+2. **Klassische Produktseite.** Fängt den Submit von `form.cart` ab. Die Produktdaten stecken im Footer; bei einem variablen Produkt wird der `display_price` der gewählten Variante aus WooCommerces jQuery-Daten `product_variations` gelesen.
+3. **Block-Oberflächen** (Product-Collection-Buttons, Cart-Block). Diese laufen über die Interactivity API und liefern weder das jQuery-Event noch brauchbare Daten, deshalb vergleicht das Plugin den Warenkorb der [Store API](https://developer.woocommerce.com/docs/apis/store-api/) mit dem zuletzt bekannten Stand und meldet die Differenz. Mengenänderungen im Cart-Block lösen `wc-blocks_added_to_cart` nicht aus und bleiben damit automatisch außen vor.
 
-1. **AJAX-In-den-Warenkorb** (Shop-/Archivseiten): Lauscht auf das WooCommerce-jQuery-Event `added_to_cart`. Liest Produktdaten aus den `<button>`-Datenattributen (`data-product_id`, `data-product_name`, `data-product_price`, `data-quantity`).
+**Event-Felder:** die Artikelfelder von oben, plus `step: 1`.
 
-2. **Formularabsenden auf der Einzelproduktseite**: Fängt das Absenden von `form.cart` ab. Produktdaten sind als JSON im Footer eingebettet. Bei variablen Produkten wird der `display_price` der ausgewählten Variante aus den WooCommerce-jQuery-`product_variations`-Daten ausgelesen.
-
-**Gesendete Felder:**
-
-| Feld | Typ | Wert |
-|------|-----|------|
-| contentType | string | `'Product'` |
-| currency | string | Shop-Währung |
-| id | string | Produkt-ID |
-| name | string | Produktname |
-| quantity | int | Hinzugefügte Menge |
-| unit | string | `'pcs'` |
-| unitPrice | float | Preis pro Einheit |
-| totalItemPrice | float | `unitPrice * quantity` |
-| step | int | `1` |
+`quantity` ist das, was der Kunde tatsächlich hinzugefügt hat. `unitPrice` stammt je nach Weg aus
+den Button-Daten, der gewählten Variante oder dem Store-API-Artikel.
 
 ---
 
 ### initiateCheckout
 
-**Auslöser:** Kassenseite wird geladen (Hook `woocommerce_before_checkout_form`)
-
-**Gesendete Felder:**
+**Auslöser:** Aufruf der Kassenseite. Erkannt über `is_checkout()` unter Ausschluss des Endpunkts
+`order-received` — nicht über `woocommerce_before_checkout_form`, denn diesen Hook löst der
+Checkout-Block nie aus.
 
 | Feld | Typ | Wert |
 |------|-----|------|
-| contents | array | Array von Warenkorb-Artikeln (siehe unten) |
+| contents | array | Ein Eintrag pro Warenkorbzeile |
 | currency | string | Shop-Währung |
-| revenue | float | Warenkorb-Zwischensumme + Steuer (Versand ausgeschlossen — möglicherweise noch nicht berechnet) |
+| revenue | float | Zwischensumme + Steuer |
 | step | int | `1` |
 
-**Felder der contents-Artikel:**
-
-| Feld | Typ | Wert |
-|------|-----|------|
-| contentType | string | `'Product'` |
-| currency | string | Shop-Währung |
-| id | string | Produkt-ID |
-| name | string | Produktname |
-| quantity | int | Artikelmenge |
-| unit | string | `'pcs'` |
-| unitPrice | float | Stückpreis |
-| totalItemPrice | float | `unitPrice * quantity` |
+Der Versand bleibt bewusst außerhalb von `revenue`: zu Beginn der Kasse hat der Kunde meist noch
+keine Versandart gewählt, WooCommerce hat also nichts hinzuzufügen.
 
 ---
 
 ### purchase
 
-**Auslöser:** Danke-Seite (Hook `woocommerce_thankyou`)
-
-**Duplikatverhinderung:** Verwendet `_wc_barion_tracked` Post-Meta, um das erneute Auslösen beim Neuladen der Seite zu verhindern.
-
-**Gesendete Felder:**
+**Auslöser:** die Bestellbestätigungsseite, am Hook `woocommerce_thankyou`.
 
 | Feld | Typ | Wert |
 |------|-----|------|
-| contents | array | Array von Bestellartikeln (siehe unten) |
+| contents | array | Ein Eintrag pro Bestellzeile |
 | currency | string | Bestellwährung |
-| revenue | float | Bestellsumme (inkl. Versand, Steuer, Rabatte) |
+| revenue | float | Bestellsumme inklusive Versand, Steuern und Rabatten |
 | step | int | `1` |
 
-**Felder der contents-Artikel:**
+`unitPrice` ist hier `(item_total + item_tax) / quantity` und bildet damit Gutscheine und andere
+Rabatte ab. Deshalb sind die Umsätze von `purchase` und `initiateCheckout` nicht Zeile für Zeile
+vergleichbar.
 
-| Feld | Typ | Wert |
-|------|-----|------|
-| contentType | string | `'Product'` |
-| currency | string | Bestellwährung |
-| id | string | Produkt-ID |
-| name | string | Artikelname |
-| quantity | int | Artikelmenge |
-| unit | string | `'pcs'` |
-| unitPrice | float | `(item_total + item_tax) / quantity` (spiegelt Rabatte wider) |
-| totalItemPrice | float | `unitPrice * quantity` |
+**Duplikatschutz:** die Bestellung erhält das Meta-Feld `_wc_barion_tracked`, sodass ein Neuladen
+der Bestellbestätigungsseite kein zweites `purchase` sendet.
 
-**Hinweis zu revenue:** Das `purchase`-Event verwendet die vollständige Bestellsumme (inkl. Versand), während `initiateCheckout` nur Zwischensumme + Steuer verwendet (Versand ist zum Kassenbeginn möglicherweise noch nicht berechnet).
+**Bekannte Abweichung.** Barion erwartet `purchase`, wenn die Zahlung tatsächlich erfolgreich
+war, und `purchase` mit `step: -1`, wenn sie fehlgeschlagen ist. Das Plugin sendet `purchase` mit
+`step: 1`, sobald der Kunde die Bestellbestätigungsseite erreicht — bei Offline-Zahlarten wie
+Überweisung oder Nachnahme also, während die Bestellung noch unbezahlt ist. `step: -1` sendet es
+nie.
 
 ---
 
 ### setEncryptedEmail
 
-**Auslöser:** Danke-Seite (Hook `woocommerce_thankyou`) und die Kassenseite — bei angemeldeten Benutzern einmal beim Laden, danach jedes Mal, wenn der Kunde eine andere gültige Rechnungs-E-Mail-Adresse eingibt.
-
 **bp()-Aufruf:** `bp('identity', 'setEncryptedEmail', hash)`
 
-Die Adresse wird in Kleinbuchstaben umgewandelt und im Browser per SHA-1 gehasht (Web Crypto API), bevor sie `bp.js` erreicht. Die Barion-API akzeptiert einen vorberechneten SHA-1-Hash anstelle der Klartextadresse, und das Vorab-Hashing umgeht den eigenen E-Mail-Regex von `bp.js`, der `+` im lokalen Teil und TLDs mit mehr als vier Buchstaben ablehnt. Ein Wert, der bereits ein 40-stelliger Hex-Hash ist, wird unverändert durchgereicht; ist die Web Crypto API nicht verfügbar (Kontext ohne HTTPS), wird die Klartextadresse gesendet.
+**Auslöser:**
 
-Werte, die weder eine gültige E-Mail-Adresse (gemäß [HTML5-Spezifikation](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) noch ein SHA-1-Hash sind, werden nie gesendet — Teileingaben an der Kasse erreichen `bp.js` also nicht.
+- Bestellbestätigungsseite, wenn die Bestellung eine Rechnungs-E-Mail hat.
+- Kassenseite, einmal beim Laden für angemeldete Kunden.
+- Kassenseite, sobald der Kunde eine andere gültige Rechnungs-E-Mail eingibt — aus dem Feld `#billing_email` bei der klassischen Kasse, oder aus dem Datenspeicher der Cart- und Checkout-Blöcke beim Block-Checkout.
 
-Auf der Danke-Seite wird nur ausgelöst, wenn die Bestellung eine Rechnungs-E-Mail-Adresse hat.
+Die Adresse wird kleingeschrieben und im Browser per SHA-1 gehasht (Web Crypto API), bevor sie
+`bp.js` erreicht. Barion akzeptiert einen vorberechneten SHA-1-Hash anstelle der Klartextadresse,
+und das Vorab-Hashing umgeht bp.js' eigene E-Mail-Regex, die `+` im lokalen Teil und TLDs mit mehr
+als vier Buchstaben ablehnt. Ein Wert, der bereits ein 40-stelliger Hex-Hash ist, wird unverändert
+durchgereicht. Ist die Web Crypto API nicht verfügbar — etwa in einem Nicht-HTTPS-Kontext —, wird
+stattdessen die Klartextadresse gesendet.
+
+Werte, die weder eine gültige E-Mail-Adresse (gemäß
+[HTML5-Spezifikation](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address))
+noch ein SHA-1-Hash sind, werden nie gesendet; teilweise Eingaben an der Kasse erreichen `bp.js`
+also nicht. Wiederholte Werte sind wirkungslos.
 
 ---
 
-## Nicht implementierte Events
+## Events, die das Plugin nicht sendet
 
-| Event | Grund |
-|-------|-------|
-| `customEvent` | Nicht erforderlich für Standard-E-Commerce-Tracking |
-| `initiatePurchase` | Barions Liste der Pflicht-Events besagt: entweder `initiatePurchase` ODER `purchase` implementieren — wir verwenden `purchase` |
-| `setEncryptedPhone` | Optional; Telefonnummern sind nicht in allen WooCommerce-Abläufen zuverlässig verfügbar |
-| `search` | Optional; nicht Teil des obligatorischen Event-Sets |
+Barions Event-Referenz führt diese unter den **erforderlichen** Event-Handlern. Die FAQ ergänzt,
+dass ein Event, dem in deinem Shop keine Nutzerabsicht entspricht, nicht implementiert werden
+muss — das deckt einige davon ab, aber nicht alle.
+
+| Event | Warum nicht |
+|-------|-------------|
+| `initiatePurchase` | Hier überflüssig. Barion verlangt `initiatePurchase` *oder* `purchase`; das Plugin sendet `purchase` |
+| `setEncryptedPhone` | Die Rechnungstelefonnummer ist in WooCommerce optional und in vielen Shops nicht vorhanden |
+| `search`, `categorySelection`, `addPaymentInfo`, `removeFromCart` | In einem typischen WooCommerce-Shop anwendbar, aber noch nicht implementiert |
+
+Die empfohlenen Handler — `customizeProduct`, `setUserProperties`, `signUp`, `clickPromo`,
+`clickProduct`, `clickProductDetail`, `error` — und `customEvent` sind ebenfalls nicht
+implementiert.
+
+Wenn dein Shop eines davon braucht: das Basis-Pixel legt `bp()` auf `window` ab, sodass
+`bp('track', 'search', { ... })` aus deinem eigenen Theme- oder Plugin-Code funktioniert.

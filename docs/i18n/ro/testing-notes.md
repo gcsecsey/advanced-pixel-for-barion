@@ -4,39 +4,75 @@
 
 # Note de testare și particularități cunoscute
 
-## Particularități de validare la execuție bp.js
+## Înainte să tragi concluzia că pixelul e stricat
 
-Scriptul `bp.js` al Barion efectuează validarea pe partea clientului a datelor evenimentelor. În unele cazuri, regulile de validare diferă de [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference). Aceste particularități au fost descoperite în timpul testării pe mediul de staging.
+### „Testing message” nu este o eroare
 
-### totalItemPrice: respins pentru contentView, obligatoriu pentru articolele din contents
+Deschide consola pe o pagină cu pixelul și bp.js va raporta fie **„Testing message”**, fie
+**„Sending message”**. Barion
+[documentează diferența](https://docs.barion.com/Implementing_the_Base_Barion_Pixel): un pixel
+proaspăt implementat nu este încă autorizat să trimită date despre utilizatori, deci bp.js scrie
+„Testing message” și transmite doar tipul evenimentului. Când Barion autorizează pixelul, mesajul
+devine „Sending message”.
 
-- **contentView** (eveniment simplu): bp.js **respinge** `totalItemPrice` cu eroarea `Invalid key totalItemPrice in contentView event`. Referința API este de acord — `totalItemPrice` nu este o proprietate a evenimentului contentView.
-- Articolele `contents` ale **initiateCheckout** și **purchase**: bp.js **necesită** `totalItemPrice` cu eroarea `Mandatory key totalItemPrice is missing from contents event` dacă este omis. Referința API îl listează și ea ca obligatoriu pentru articolele contents.
+Plugin-ul nu schimbă asta. Dacă evenimentele tale arată corect în consolă, dar Barion nu vede date,
+cel mai probabil pixelul încă așteaptă autorizarea de partea Barion — implementarea este verificată
+de un om, deci contactează-i când a ta este gata.
 
-**Regulă generală:** `totalItemPrice` este invalid pentru evenimentele simple, dar obligatoriu în articolele array-ului `contents`.
+### ID-ul Pixel trebuie să fie cel potrivit
 
-### unit este obligatoriu în articolele din contents
+- Îl găsești în portofelul tău Barion, la **Merchant Management > Details**. Fiecare magazin, adică fiecare POSKey, are propriul ID Pixel.
+- Formatul este `BP-` + zece caractere + `-` + două cifre. Un ID care începe cu `BPT` nu este un ID Pixel și nu va funcționa.
+- Sandbox și live emit ID-uri Pixel **diferite**. Un site de test cu ID de producție poluează datele reale; un site de producție cu ID de sandbox nu înregistrează nimic util.
 
-bp.js necesită `unit` în articolele array-ului `contents` pentru `initiateCheckout` și `purchase`, la fel ca referința API. Omiterea lui produce: `Mandatory key unit is missing from contents event`.
-
-### step
-
-Plugin-ul trimite `step: 1` pentru `addToCart`, `initiateCheckout` și `purchase`. Referința API listează `step` ca obligatoriu pentru `initiateCheckout` și `purchase` și ca opțional pentru `addToCart`. Barion documentează `1` ca pas de inițiere a comenzii; pentru `purchase` referința cere cel mai mare număr de pas folosit — tot `1` la un checkout cu un singur pas.
+Dacă vrei un magazin de unică folosință pentru teste, pagina Barion
+[Creating a shop](https://docs.barion.com/Creating_a_shop) te ghidează prin sandbox, unde
+magazinele sunt aprobate automat.
 
 ---
 
-## Mod depanare
+## Particularități ale validării bp.js în execuție
 
-Activează modul de depanare în **Setări > Barion Pixel** pentru a înregistra toate evenimentele Barion Pixel în consola browserului.
+bp.js validează datele evenimentelor în browser, iar în câteva locuri regulile lui sunt mai stricte
+sau mai permisive decât sugerează
+[referința de evenimente](https://docs.barion.com/Barion-pixel-event-reference). Acestea au ieșit
+la iveală în timpul testării pe staging.
+
+### totalItemPrice: respins la contentView, obligatoriu în elementele contents
+
+- **contentView** (eveniment simplu): bp.js **respinge** `totalItemPrice` cu `Invalid key totalItemPrice in contentView event`. Referința este de acord — nu este o proprietate contentView.
+- Elementele `contents` ale evenimentelor **initiateCheckout** și **purchase**: bp.js îl **cere**, altfel raportează `Mandatory key totalItemPrice is missing from contents event`. Și aici referința este de acord.
+
+Regulă practică: `totalItemPrice` este invalid pe evenimentele simple și obligatoriu în interiorul
+elementelor `contents`.
+
+### unit este obligatoriu în elementele contents
+
+Dacă îl omiți, apare `Mandatory key unit is missing from contents event`.
+
+### step
+
+Plugin-ul trimite `step: 1` pentru `addToCart`, `initiateCheckout` și `purchase`. Barion
+documentează `1` ca pas de început al finalizării și cere la `purchase` cel mai mare număr de pas
+pe care îl folosești — tot `1` într-o finalizare cu un singur pas. Pentru `addToCart`, `step` este
+opțional.
+
+---
+
+## Modul depanare
+
+Activează-l în **Setări > Barion Pixel** pentru a înregistra fiecare eveniment în consola
+browserului.
 
 ### Ce să urmărești
 
-Deschide consola browserului (F12 > Consolă) și caută mesajele prefixate cu `[Barion Pixel]`:
+Deschide consola (F12 > Consolă) și caută mesajele `[Barion Pixel]`:
 
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
-[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxxxx-xx
+[Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
 [Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
 [Barion Pixel] Event: initiateCheckout { contents: [...], ... }
@@ -44,90 +80,103 @@ Deschide consola browserului (F12 > Consolă) și caută mesajele prefixate cu `
 [Barion Pixel] setEncryptedEmail sent
 ```
 
+Lista completă a mesajelor legate de consimțământ se află în
+[Integrarea consimțământului pentru cookie-uri](cookie-consent.md).
+
 ### Erori bp.js
 
-bp.js înregistrează propriile erori de validare cu un prefix numeric. Cele mai comune:
+bp.js își înregistrează și propriile erori de validare. Cele obișnuite:
 
-| Eroare | Semnificație | Remediere |
-|-------|---------|-----|
+| Eroare | Semnificație | Rezolvare |
+|--------|--------------|-----------|
 | `Mandatory key X is missing from Y event` | Un câmp obligatoriu nu este trimis | Verifică datele evenimentului |
-| `Invalid key X in Y event` | Un câmp este trimis pe care bp.js nu îl așteaptă | Elimină câmpul |
+| `Invalid key X in Y event` | Se trimite un câmp pe care bp.js nu îl așteaptă | Elimină câmpul |
+| `Format of e-mail address or hash is invalid` | bp.js a respins valoarea trimisă către `setEncryptedEmail` | Din 1.0.3 plugin-ul hash-uiește adresa în prealabil, deci nu ar mai trebui să apară |
 
 ---
 
 ## Listă de verificare pentru testare
 
-### Pagina produsului (contentView)
+Parcurge-o atât într-un magazin clasic, cât și într-unul cu blocuri — cele două folosesc căi de cod
+complet diferite pentru `addToCart`, `initiateCheckout` și `setEncryptedEmail`.
 
-1. Navighează la orice pagină de produs individual
-2. Deschide consola browserului
-3. Verifică că apare `[Barion Pixel] Event: contentView`
-4. Verifică că nu există mesaje de eroare bp.js despre chei lipsă/invalide
-5. Verifică că câmpurile includ: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice`
+### Pagina de produs (contentView)
+
+1. Deschide o pagină de produs cu consola deschisă.
+2. Apare `[Barion Pixel] Event: contentView`.
+3. Nicio eroare bp.js despre chei lipsă sau invalide.
+4. Câmpuri prezente: `contentType`, `currency`, `id`, `name`, `quantity`, `unit`, `unitPrice` — și niciun `totalItemPrice`.
 
 ### Adăugare în coș (addToCart)
 
-**De pe pagina de magazin/arhivă (AJAX):**
+**Pagina de magazin sau de arhivă, buton AJAX clasic:**
 
-1. Navighează la pagina de magazin
-2. Deschide consola browserului
-3. Apasă „Adaugă în coș" pe orice produs
-4. Verifică că apare `[Barion Pixel] Event: addToCart`
-5. Verifică că câmpurile includ `totalItemPrice` și `step: 1`
+1. Pe pagina magazinului, apasă „Adaugă în coș”.
+2. Apare `[Barion Pixel] Event: addToCart`, cu `totalItemPrice` și `step: 1`.
 
-**De pe pagina unui singur produs (submit formular):**
+**Pagina de produs, trimiterea formularului:**
 
-1. Navighează la o pagină de produs individual
-2. Deschide consola browserului
-3. Apasă „Adaugă în coș"
-4. Verifică că `[Barion Pixel] Event: addToCart` se declanșează înainte ca pagina să navigheze
-5. Pentru produse variabile: selectează mai întâi o variație și verifică că se folosește prețul variației
+1. Apasă „Adaugă în coș” și verifică dacă evenimentul se trimite înainte ca pagina să navigheze.
+2. La un produs variabil: alege întâi o variație, apoi verifică dacă s-a folosit prețul ei.
 
-### Pagina de finalizare a comenzii (initiateCheckout)
+**Suprafețe cu blocuri (butoane Product Collection, blocul Cart):**
 
-1. Adaugă articole în coș și navighează la finalizarea comenzii
-2. Deschide consola browserului
-3. Verifică că apare `[Barion Pixel] Event: initiateCheckout`
-4. Verifică că array-ul `contents` conține articolele corecte cu `unit`, `unitPrice`, `totalItemPrice`
-5. Verifică că `revenue` este subtotal + taxe (fără transport)
-6. Verifică că `step: 1` este prezent
-7. Introdu o adresă de e-mail de facturare în formularul de finalizare a comenzii și verifică dacă `[Barion Pixel] setEncryptedEmail sent` apare o singură dată pentru fiecare adresă validă distinctă — nu la fiecare tastă apăsată
+1. La încărcare apare `[Barion Pixel] Block surfaces detected …`.
+2. Adaugă un produs dintr-un bloc Product Collection — se trimite un `addToCart` cu cantitatea corectă.
+3. Modifică o cantitate în blocul Cart — nu se trimite niciun `addToCart`.
+4. Într-un magazin cu monedă fără zecimale, precum HUF, verifică dacă `unitPrice` este prețul real și nu a suta parte din el.
+
+### Pagina de finalizare (initiateCheckout)
+
+1. Pune articole în coș și deschide finalizarea comenzii.
+2. Apare `[Barion Pixel] Event: initiateCheckout`.
+3. Fiecare element `contents` are `unit`, `unitPrice` și `totalItemPrice`.
+4. `revenue` este subtotal + taxa, fără livrare.
+5. `step: 1` este prezent.
+6. Introdu un e-mail de facturare. `setEncryptedEmail sent` apare o dată pentru fiecare adresă validă — nu la fiecare tastă și nu pentru intrări parțiale precum `x@y`.
+7. Repetă pe blocul Checkout, unde e-mailul vine din depozitul de date al blocului, nu din `#billing_email`.
 
 ### Finalizarea comenzii (purchase + setEncryptedEmail)
 
-1. Completează o comandă de test (folosește metoda de plată „Transfer bancar" pentru testare ușoară)
-2. Pe pagina de mulțumire, deschide consola browserului
-3. Verifică că apare `[Barion Pixel] Event: purchase` cu `revenue` corespunzând totalului comenzii
-4. Verifică că apare `[Barion Pixel] setEncryptedEmail sent`
-5. Reîncarcă pagina de mulțumire — verifică că `purchase` NU se mai declanșează (prevenirea dublurilor)
-6. Verifică că articolele din `contents` includ `unit`, `totalItemPrice`
+1. Finalizează o comandă de test — „Transfer bancar” este cea mai simplă metodă de plată pentru asta.
+2. Apare `[Barion Pixel] Event: purchase`, iar `revenue` corespunde totalului comenzii.
+3. Apare `setEncryptedEmail sent`.
+4. Reîncarcă pagina de confirmare — `purchase` **nu** se mai trimite o dată.
+5. Elementele `contents` conțin `unit` și `totalItemPrice`.
 
-### Integrare consimțământ
+### Integrarea consimțământului
 
-1. Șterge toate cookie-urile
-2. Navighează la orice pagină
-3. Verifică că apare `[Barion Pixel] Base pixel initialized` (pixelul de bază se încarcă întotdeauna)
-4. Acceptă cookie-urile prin bannerul tău de cookie-uri
-5. Verifică că apare `[Barion Pixel] Consent granted`
-6. Reîncarcă pagina — verifică că consimțământul este acordat automat la încărcare (vizitator care revine)
+1. Șterge toate cookie-urile.
+2. Încarcă orice pagină. Apare `[Barion Pixel] Base pixel initialized` — pixelul de bază se încarcă intenționat înainte de orice decizie de consimțământ.
+3. Acceptă cookie-urile în bara ta. Apare `Consent granted (grantConsent)`.
+4. Reîncarcă — consimțământul se acordă din nou la încărcare, fără bară.
+5. Retrage consimțământul și verifică dacă apare `Consent rejected (rejectConsent)`.
 
 ---
 
 ## Probleme frecvente
 
-### Evenimentele nu se declanșează
+### Evenimentele nu se trimit
 
-- **Verifică ID Pixel**: Asigură-te că un ID Pixel valid este configurat în Setări > Barion Pixel
-- **Verifică urmărirea completă**: Evenimentele necesită ca „Activează urmărirea completă cu Pixel" să fie bifat
-- **Verifică WooCommerce**: Urmărirea completă necesită ca WooCommerce să fie activ
-- **Verifică erorile din consolă**: Caută erori JavaScript care ar putea împiedica încărcarea bp.js
+- **ID Pixel**: în Setări > Barion Pixel trebuie salvat un ID valid.
+- **Urmărire completă**: evenimentele de e-commerce cer bifarea „Activează urmărirea completă cu Pixel”.
+- **WooCommerce**: urmărirea completă cere WooCommerce activ.
+- **Erori în consolă**: și o eroare JavaScript fără legătură poate împiedica încărcarea bp.js.
 
-### Dubla încărcare a pixelului
+### Încărcare dublă a pixelului
 
-Dacă vezi `[Barion Pixel] bp.js already loaded by another plugin`, un alt plugin (probabil Barion Payment Gateway) a încărcat deja bp.js. Acest lucru este inofensiv — plugin-ul omite reîncărcarea și se inițializează totuși cu ID-ul tău Pixel.
+`[Barion Pixel] bp.js already loaded by another plugin` înseamnă că altceva a ajuns primul — Barion
+Payment Gateway, un tag Google Tag Manager, un fragment din temă. Este inofensiv: plugin-ul omite
+încărcarea scriptului și se inițializează oricum cu ID-ul tău Pixel. Vezi
+[Compatibilitate](compatibility.md).
 
 ### Consimțământul nu se acordă
 
-- **WP Consent API**: Asigură-te că plugin-ul WP Consent API este instalat și că plugin-ul tău de cookie îl suportă
-- **Cookie Law Info**: Asigură-te că plugin-ul este activ și că obiectul global `CLI` este disponibil
-- **Manual**: Apelează `window.wcBarionGrantConsent()` din callback-ul managerului tău de consimțământ
+- **WP Consent API**: plugin-ul WP Consent API trebuie instalat, iar plugin-ul tău de cookie-uri trebuie să îl suporte.
+- **Cookie Law Info**: plugin-ul trebuie să fie activ și globalul `CLI` disponibil.
+- **Manual**: apelează `window.wcBarionGrantConsent()` din callback-ul managerului tău de consimțământ.
+
+### purchase se trimite pentru o comandă neplătită
+
+Este de așteptat și documentat la [purchase](events-reference.md#purchase). Plugin-ul urmărește
+pagina de confirmare a comenzii, la care metodele de plată offline ajung înainte să sosească banii.

@@ -4,27 +4,65 @@
 
 # Referenca dogodkov Barion Pixel
 
+Za to, kaj posamezen dogodek pomeni in katere lastnosti sprejema, so merodajne Barionove lastne
+strani:
+
+- [Barion Pixel event reference](https://docs.barion.com/Barion-pixel-event-reference) — vsak dogodek, vsaka lastnost in katere so obvezne
+- [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) — dogodki sami
+- [Barion Pixel FAQ](https://docs.barion.com/Frequently_Asked_Questions_about_the_Barion_Pixel) — odgovori na zagatne primere
+
+Ta stran opisuje samo to, kaj pošilja **ta vtičnik** in kdaj.
+
 ## Pregled
 
-Vtičnik podpira dva načina delovanja:
+Vtičnik ima dva načina delovanja:
 
-- **Osnovni piksel** (vedno aktiven, ko je konfiguriran ID piksla): Naloži `bp.js` in samodejno sproži `pageView` na vsaki strani. Uporablja se za preprečevanje goljufij.
-- **Popolno sledenje** (izbirno, preklop v skrbniškem vmesniku): Dodaja sledenje dogodkov e-trgovine za tržno analitiko in nižje provizije Barion.
-
-Barionova lastna referenca za te dogodke: [Barion Pixel API reference](https://docs.barion.com/Barion_Pixel_API_reference) in [Implementing the Full Barion Pixel](https://docs.barion.com/Implementing_the_Full_Barion_Pixel) (v angleščini).
+- **Osnovni piksel** (aktiven, takoj ko je nastavljen Pixel ID): naloži `bp.js` in samodejno pošlje `pageView`. Barion ga zahteva za preprečevanje goljufij in je pogoj za uporabo Barion Smart Gateway kot takega.
+- **Popolno sledenje** (izbirno, stikalo v skrbniškem vmesniku): doda dogodke e-trgovine. Barion Metrics jih potrebuje, popolna implementacija piksla skupaj s skladno pasico za soglasje pa je tisto, kar trgovini odpre ugodnejše pogoje Smart Gateway.
 
 ### Povzetek dogodkov
 
 | Dogodek | Način | Klic bp() | Sprožilec |
 |---------|-------|-----------|-----------|
 | pageView | Osnovni | Samodejno (bp.js) | Vsako nalaganje strani |
-| grantConsent | Osnovni | `bp('consent', 'grantConsent')` | Soglasje s piškotki sprejeto |
-| rejectConsent | Osnovni | `bp('consent', 'rejectConsent')` | Soglasje s piškotki zavrnjeno |
-| contentView | Polni | `bp('track', 'contentView', data)` | Stran posameznega izdelka |
-| addToCart | Polni | `bp('track', 'addToCart', data)` | Akcija dodajanja v košarico |
-| initiateCheckout | Polni | `bp('track', 'initiateCheckout', data)` | Nalaganje strani blagajne |
-| purchase | Polni | `bp('track', 'purchase', data)` | Stran zahvale |
-| setEncryptedEmail | Polni | `bp('identity', 'setEncryptedEmail', hash)` | Stran zahvale in vnos e-pošte na blagajni |
+| grantConsent | Osnovni | `bp('consent', 'grantConsent')` | Trženjsko soglasje sprejeto |
+| rejectConsent | Osnovni | `bp('consent', 'rejectConsent')` | Trženjsko soglasje zavrnjeno |
+| contentView | Popolni | `bp('track', 'contentView', data)` | Stran izdelka |
+| addToCart | Popolni | `bp('track', 'addToCart', data)` | Dodajanje v košarico |
+| initiateCheckout | Popolni | `bp('track', 'initiateCheckout', data)` | Nalaganje strani blagajne |
+| purchase | Popolni | `bp('track', 'purchase', data)` | Stran potrditve naročila |
+| setEncryptedEmail | Popolni | `bp('identity', 'setEncryptedEmail', hash)` | Stran potrditve naročila in vnos e-pošte na blagajni |
+
+---
+
+## Polja postavke
+
+`contentView` in vsak element polja `contents` uporabljata isto obliko:
+
+| Polje | Tip | Vrednost |
+|-------|-----|----------|
+| contentType | string | `'Product'` |
+| currency | string | Valuta trgovine, pri `purchase` valuta naročila |
+| id | string | ID izdelka |
+| name | string | Prikazano ime izdelka |
+| quantity | int | Glej posamezen dogodek |
+| unit | string | `'pcs'` |
+| unitPrice | float | Glej posamezen dogodek |
+| totalItemPrice | float | `unitPrice * quantity` |
+
+Dve izjemi od te tabele:
+
+- **`contentView` ne pošlje `totalItemPrice`.** bp.js ga zavrne z `Invalid key totalItemPrice in contentView event`, tudi Barionova referenca ga ne navaja med lastnostmi contentView. Znotraj elementov `contents` pa je obvezen — glej [Opombe za testiranje](testing-notes.md).
+- **`quantity` je pri `contentView` vedno `1`**, ker kupec gleda en izdelek.
+
+Vtičnik ne pošilja nobene izbirne lastnosti vsebine (`brand`, `category`, `description`, `ean`,
+`imageUrl`, `variant`) niti lastnosti `list`. V Barionovi referenci so vse izbirne.
+
+**Spremenljivi izdelki.** `contentView` in `addToCart` s strani izdelka javljata nadrejeni izdelek,
+saj stran govori o njem. Vrstice košarice in naročila javljajo izbrano različico, saj to
+WooCommerce da v košarico. Barion zahteva, da ima postavka v vseh dogodkih enako ime in
+identifikator, zato lahko v trgovini, zgrajeni na različicah, isti izdelek pride do Bariona pod
+dvema identitetama.
 
 ---
 
@@ -32,17 +70,15 @@ Barionova lastna referenca za te dogodke: [Barion Pixel API reference](https://d
 
 ### pageView
 
-Sproži se samodejno, ko se naloži `bp.js`. Ni potrebna nobena konfiguracija razen nastavitve ID piksla.
+Pošlje se samodejno, takoj ko se `bp.js` naloži. Razen Pixel ID-ja ni kaj nastavljati.
 
-### grantConsent
+### grantConsent / rejectConsent
 
-Sproži se, ko uporabnik sprejme tržne piškotke. Obravnavano samodejno prek WP Consent API ali Cookie Law Info ali ročno prek `window.wcBarionGrantConsent()`.
+Pošljeta se, ko kupec sprejme ali zavrne trženjske piškotke. Barion oba navaja kot obvezna.
+Samodejno se rešujeta prek WP Consent API ali Cookie Law Info, ročno pa prek
+`window.wcBarionGrantConsent()` / `window.wcBarionRejectConsent()`.
 
-### rejectConsent
-
-Sproži se, ko uporabnik zavrne tržne piškotke. Obravnavano samodejno prek WP Consent API ali Cookie Law Info ali ročno prek `window.wcBarionRejectConsent()`. Oba `grantConsent` in `rejectConsent` sta obvezna po zahtevah Barion.
-
-Glejte [Integracija soglasja s piškotki](cookie-consent.md) za podrobnosti.
+Glej [Integracijo soglasja s piškotki](cookie-consent.md).
 
 ---
 
@@ -50,129 +86,109 @@ Glejte [Integracija soglasja s piškotki](cookie-consent.md) za podrobnosti.
 
 ### contentView
 
-**Sprožilec:** Stran posameznega izdelka (kavelj `woocommerce_after_single_product`)
+**Sprožilec:** stran izdelka, hook `woocommerce_after_single_product`.
 
-**Poslana polja:**
-
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta trgovine WooCommerce (npr. `'HUF'`) |
-| id | string | ID izdelka |
-| name | string | Prikazno ime izdelka |
-| quantity | int | `1` (vedno — ogled enega izdelka) |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena izdelka |
-
-> **Opomba:** `totalItemPrice` ni lastnost dogodka contentView. bp.js ga ob izvajanju zavrne z napako "Invalid key totalItemPrice in contentView event", prav tako ga referenca API za ta dogodek ne navaja. Namesto tega je obvezen znotraj postavk niza `contents`.
+`unitPrice` je trenutna cena izdelka. Pri spremenljivem izdelku je to cena, ki jo WooCommerce
+prikaže pred izbiro različice.
 
 ---
 
 ### addToCart
 
-**Sprožilec:** JavaScript na strani odjemalca (sproži se takoj ob akciji dodajanja v košarico)
+**Sprožilec:** samo dejanje dodajanja v košarico. Vse poti so na strani odjemalca, zato dogodek
+preživi medpomnjenje strani. Poti so tri, katera se uporabi pa je odvisno od tega, kako trgovina
+izriše svoje gumbe:
 
-**Implementacija:** Dve poti, obe obravnavani na strani odjemalca za delovanje z medpomnjenjem strani:
+1. **Klasično AJAX dodajanje v košarico** (strani trgovine in arhivov). Posluša WooCommercov dogodek jQuery `added_to_cart` in bere atribute gumba `data-product_id`, `data-product_name`, `data-product_price` in `data-quantity`.
+2. **Klasična stran izdelka.** Prestreže pošiljanje `form.cart`. Podatki o izdelku so vgrajeni v nogo; pri spremenljivem izdelku se `display_price` izbrane različice prebere iz WooCommercovih podatkov jQuery `product_variations`.
+3. **Blokovne površine** (gumbi bloka Product Collection, blok Cart). Te tečejo na Interactivity API in ne pošljejo ne dogodka jQuery ne uporabnih podatkov, zato vtičnik primerja košarico iz [Store API](https://developer.woocommerce.com/docs/apis/store-api/) z zadnjim znanim stanjem in javi razliko. Sprememba količine v bloku Cart ne sproži `wc-blocks_added_to_cart`, zato je samodejno izvzeta.
 
-1. **AJAX dodajanje v košarico** (strani trgovine/arhiva): Posluša za WooCommerce jQuery dogodek `added_to_cart`. Prebere podatke o izdelku iz atributov `<button>` data (`data-product_id`, `data-product_name`, `data-product_price`, `data-quantity`).
+**Polja dogodka:** zgornja polja postavke in `step: 1`.
 
-2. **Oddaja obrazca na strani posameznega izdelka**: Prestrezanje oddaje `form.cart`. Podatki o izdelku so vgrajeni kot JSON v nogi. Za spremenljive izdelke prebere `display_price` izbrane variacije iz podatkov WooCommerce jQuery `product_variations`.
-
-**Poslana polja:**
-
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta trgovine |
-| id | string | ID izdelka |
-| name | string | Ime izdelka |
-| quantity | int | Dodana količina |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena na enoto |
-| totalItemPrice | float | `unitPrice * quantity` |
-| step | int | `1` |
+`quantity` je tisto, kar je kupec dejansko dodal. `unitPrice` pride, odvisno od poti, iz podatkov
+gumba, iz izbrane različice ali iz postavke Store API.
 
 ---
 
 ### initiateCheckout
 
-**Sprožilec:** Nalaganje strani blagajne (kavelj `woocommerce_before_checkout_form`)
-
-**Poslana polja:**
+**Sprožilec:** nalaganje strani blagajne. Zazna se prek `is_checkout()` z izključitvijo končne
+točke `order-received` — ne prek `woocommerce_before_checkout_form`, saj tega hooka blok Checkout
+nikoli ne sproži.
 
 | Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contents | array | Niz postavk košarice (glejte spodaj) |
+|-------|-----|----------|
+| contents | array | Ena postavka na vrstico košarice |
 | currency | string | Valuta trgovine |
-| revenue | float | Vmesna vsota košarice + davek (brez poštnine — morda še ni izračunana) |
+| revenue | float | Vmesni seštevek košarice + davek |
 | step | int | `1` |
 
-**Polja postavke vsebine:**
-
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta trgovine |
-| id | string | ID izdelka |
-| name | string | Ime izdelka |
-| quantity | int | Količina postavke |
-| unit | string | `'pcs'` |
-| unitPrice | float | Cena enote |
-| totalItemPrice | float | `unitPrice * quantity` |
+Dostava je iz `revenue` namenoma izpuščena: na začetku blagajne kupec običajno še ni izbral načina
+dostave, zato WooCommerce nima česa dodati.
 
 ---
 
 ### purchase
 
-**Sprožilec:** Stran zahvale (kavelj `woocommerce_thankyou`)
-
-**Preprečevanje podvajanja:** Uporablja post meta `_wc_barion_tracked` za preprečitev sprožitve ob ponovnem nalaganju strani.
-
-**Poslana polja:**
+**Sprožilec:** stran potrditve naročila, hook `woocommerce_thankyou`.
 
 | Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contents | array | Niz postavk naročila (glejte spodaj) |
+|-------|-----|----------|
+| contents | array | Ena postavka na vrstico naročila |
 | currency | string | Valuta naročila |
-| revenue | float | Skupaj naročilo (vključuje poštnino, davek, popuste) |
+| revenue | float | Skupni znesek naročila, z dostavo, davkom in popusti |
 | step | int | `1` |
 
-**Polja postavke vsebine:**
+`unitPrice` je tu `(item_total + item_tax) / quantity`, zato odraža kupone in druge popuste. Zato
+prihodka iz `purchase` in `initiateCheckout` nista primerljiva vrstico za vrstico.
 
-| Polje | Tip | Vrednost |
-|-------|-----|---------|
-| contentType | string | `'Product'` |
-| currency | string | Valuta naročila |
-| id | string | ID izdelka |
-| name | string | Ime postavke |
-| quantity | int | Količina postavke |
-| unit | string | `'pcs'` |
-| unitPrice | float | `(item_total + item_tax) / quantity` (odraža popuste) |
-| totalItemPrice | float | `unitPrice * quantity` |
+**Preprečevanje podvojitev:** naročilo dobi meta oznako `_wc_barion_tracked`, zato ponovno
+nalaganje strani potrditve ne pošlje drugega `purchase`.
 
-**Opomba o prihodku:** Dogodek `purchase` uporablja celotno vsoto naročila (vključno s poštnino), medtem ko `initiateCheckout` uporablja samo vmesno vsoto + davek (poštnina morda ni izračunana ob začetku blagajne).
+**Znano odstopanje.** Barion pričakuje `purchase` takrat, ko je plačilo res uspelo, in `purchase`
+s `step: -1`, ko je spodletelo. Vtičnik pošlje `purchase` s `step: 1` vsakič, ko kupec pride na
+stran potrditve naročila — pri načinih brez povezave, kot sta bančno nakazilo ali plačilo po
+povzetju, torej medtem ko je naročilo še neplačano. Vrednosti `step: -1` ne pošlje nikoli.
 
 ---
 
 ### setEncryptedEmail
 
-**Sprožilec:** Stran zahvale (kavelj `woocommerce_thankyou`) in stran blagajne — pri prijavljenih uporabnikih enkrat ob nalaganju, nato vsakič, ko kupec vnese drug veljaven e-poštni naslov za račun.
-
 **Klic bp():** `bp('identity', 'setEncryptedEmail', hash)`
 
-Naslov se pretvori v male črke in se v brskalniku zgosti z algoritmom SHA-1 (Web Crypto API), preden doseže `bp.js`. Barion API namesto navadnega naslova sprejme vnaprej izračunano zgoščeno vrednost SHA-1, predhodno zgoščevanje pa se izogne lastnemu regularnemu izrazu za e-pošto v `bp.js`, ki zavrača `+` v lokalnem delu in TLD, daljše od štirih črk. Vrednost, ki je že 40-znakovna šestnajstiška zgoščena vrednost, se posreduje nespremenjena; če Web Crypto API ni na voljo (okolje brez HTTPS), se pošlje navaden naslov.
+**Sprožilci:**
 
-Vrednosti, ki niso niti veljaven e-poštni naslov (po [specifikaciji HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) niti zgoščena vrednost SHA-1, se nikoli ne pošljejo, zato delno tipkanje na blagajni ne doseže `bp.js`.
+- Stran potrditve naročila, če ima naročilo e-poštni naslov za račun.
+- Stran blagajne, enkrat ob nalaganju za prijavljene kupce.
+- Stran blagajne, kadar koli kupec vnese drug veljaven e-poštni naslov za račun — iz polja `#billing_email` pri klasični blagajni ali iz podatkovne shrambe blokov Cart in Checkout pri blokovni blagajni.
 
-Na strani zahvale se sproži samo, ko ima naročilo e-poštni naslov za zaračunavanje.
+Naslov se pretvori v male črke in v brskalniku zgosti z algoritmom SHA-1 (Web Crypto API), preden
+pride do `bp.js`. Barion namesto navadnega naslova sprejme vnaprej izračunano zgoščeno vrednost
+SHA-1, predhodno zgoščevanje pa obide lasten regularni izraz bp.js, ki zavrača `+` v lokalnem delu
+in TLD-je, daljše od štirih črk. Vrednost, ki je že 40-znakovna šestnajstiška zgoščena vrednost, se
+posreduje nespremenjena. Če Web Crypto API ni na voljo — zunaj HTTPS — se pošlje navaden naslov.
+
+Vrednosti, ki niso ne veljaven e-poštni naslov (po
+[specifikaciji HTML5](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address)) ne
+zgoščena vrednost SHA-1, se ne pošljejo nikoli, zato delno tipkanje na blagajni ne pride do
+`bp.js`. Ponovljena vrednost ne naredi ničesar.
 
 ---
 
-## Neimplementirani dogodki
+## Dogodki, ki jih vtičnik ne pošilja
 
-| Dogodek | Razlog |
-|---------|--------|
-| `customEvent` | Ni potreben za standardno sledenje e-trgovine |
-| `initiatePurchase` | Barionov seznam obveznih dogodkov pravi, da implementirajte `initiatePurchase` ALI `purchase` — mi uporabljamo `purchase` |
-| `setEncryptedPhone` | Izbirno; telefonska številka ni zanesljivo na voljo v vseh tokih WooCommerce |
-| `search` | Izbirno; ni del obveznega nabora dogodkov |
+Barionova referenca dogodkov jih navaja med **obveznimi** upravljalci dogodkov. FAQ dodaja, da
+dogodka, ki mu v tvoji trgovini ne ustreza nobena uporabnikova namera, ni treba implementirati —
+to pokrije nekatere med njimi, ne pa vseh.
+
+| Dogodek | Zakaj ne |
+|---------|----------|
+| `initiatePurchase` | Tu odveč. Barion zahteva `initiatePurchase` *ali* `purchase`; vtičnik pošilja `purchase` |
+| `setEncryptedPhone` | Telefon za račun je v WooCommerce izbiren in ga v mnogih trgovinah ni |
+| `search`, `categorySelection`, `addPaymentInfo`, `removeFromCart` | Za tipično trgovino WooCommerce uporabni, a še niso implementirani |
+
+Priporočeni upravljalci — `customizeProduct`, `setUserProperties`, `signUp`, `clickPromo`,
+`clickProduct`, `clickProductDetail`, `error` — in `customEvent` prav tako niso implementirani.
+
+Če tvoja trgovina katerega od njih potrebuje, osnovni piksel pusti `bp()` na objektu `window`, zato
+`bp('track', 'search', { ... })` deluje iz tvoje lastne teme ali vtičnika.
