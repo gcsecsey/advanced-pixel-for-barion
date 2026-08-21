@@ -105,6 +105,9 @@ GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
 
 ## Changelog
 
+### 1.0.7
+- Fixed: a fatal error on any site that runs the plugin without WooCommerce, once a Pixel ID was saved and Full Tracking was on. The footer event script called `is_product()`, a function that only exists while WooCommerce is loaded, so the page died with `Call to undefined function is_product()`. The WooCommerce event hooks are now registered only when WooCommerce is active; the base pixel still loads without it, as documented. This dates back to 1.0.0
+
 ### 1.0.6
 - Fixed: `initiateCheckout` and `setEncryptedEmail` never fired on the WooCommerce Checkout block, which has been the default for new stores since WooCommerce 8.3. The plugin only listened for the classic checkout's PHP hooks and its `#billing_email` field, and the block has neither. It now reads the Cart and Checkout blocks' data store; classic checkout behaviour is unchanged
 - Fixed: `addToCart` never fired on shop or category pages, on any store. The events script was only loaded on pages that already had an event queued, which no archive page does, so the add-to-cart listeners were never present where customers actually add to cart. This dates back to 1.0.1

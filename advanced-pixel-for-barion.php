@@ -5,7 +5,7 @@
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
  * Author: Gergely Csecsey
  * Author URI: https://github.com/gcsecsey
- * Version: 1.0.6
+ * Version: 1.0.7
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * WC requires at least: 5.0
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_BARION_PIXEL_VERSION', '1.0.6');
+define('WC_BARION_PIXEL_VERSION', '1.0.7');
 define('WC_BARION_PIXEL_PATH', plugin_dir_path(__FILE__));
 define('WC_BARION_PIXEL_URL', plugin_dir_url(__FILE__));
 
@@ -94,8 +94,11 @@ class WC_Barion_Pixel {
             // Enqueue scripts
             add_action('wp_enqueue_scripts', array($this, 'enqueue_base_script'), 1);
             add_action('wp_footer', array($this, 'output_footer_action'), 999);
-            // WooCommerce event hooks (only if full tracking is enabled)
-            if ($this->is_full_tracking_enabled()) {
+            // WooCommerce event hooks (only if full tracking is enabled).
+            // Every callback below calls WooCommerce functions, so they must not
+            // be registered on a site without WooCommerce. The base pixel above
+            // stays active either way, as documented in docs/compatibility.md.
+            if ($this->is_full_tracking_enabled() && class_exists('WooCommerce')) {
                 add_action('woocommerce_after_single_product', array($this, 'track_content_view'));
                 add_action('woocommerce_thankyou', array($this, 'track_purchase'), 10, 1);
                 add_action('woocommerce_thankyou', array($this, 'track_set_encrypted_email'), 10, 1);
