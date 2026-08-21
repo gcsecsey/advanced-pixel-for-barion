@@ -103,6 +103,9 @@ GPL-2.0-or-later — pogledaj [LICENSE](../../LICENSE) za detalje.
 
 ## Dnevnik promjena
 
+### 1.0.7
+- Ispravljeno: fatalna pogreška na svakoj stranici koja je dodatak koristila bez WooCommercea, ako je Pixel ID bio spremljen, a puno praćenje uključeno. Skripta događaja u podnožju pozivala je `is_product()`, funkciju koja postoji samo dok je WooCommerce učitan, pa se stranica rušila uz `Call to undefined function is_product()`. Hookovi WooCommerce događaja sada se registriraju samo kada je WooCommerce aktivan; osnovni piksel se, kako je i dokumentirano, i dalje učitava bez njega. Pogreška postoji od verzije 1.0.0
+
 ### 1.0.6
 - Ispravljeno: `initiateCheckout` i `setEncryptedEmail` nikada se nisu slali na WooCommerce bloku Checkout, koji je od WooCommercea 8.3 zadan za nove trgovine. Dodatak je slušao samo PHP hookove klasične naplate i njezino polje `#billing_email`, a blok nema ni jedno ni drugo. Sada čita spremište podataka blokova Cart i Checkout; ponašanje klasične naplate ostaje isto
 - Ispravljeno: `addToCart` nikada se nije slao na stranicama trgovine ni kategorija, ni u jednoj trgovini. Skripta događaja učitavala se samo na stranicama na kojima je već čekao neki događaj, što na arhivskim stranicama nikada nije slučaj, pa osluškivači dodavanja u košaricu nisu bili prisutni upravo ondje gdje kupci dodaju u košaricu. Greška potječe iz verzije 1.0.1

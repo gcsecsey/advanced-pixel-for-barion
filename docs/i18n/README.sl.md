@@ -103,6 +103,9 @@ GPL-2.0-or-later — glejte [LICENSE](../../LICENSE) za podrobnosti.
 
 ## Dnevnik sprememb
 
+### 1.0.7
+- Popravljeno: usodna napaka na vsaki strani, ki je vtičnik uporabljala brez WooCommercea, če je bil Pixel ID shranjen in polno sledenje vklopljeno. Skripta dogodkov v nogi je klicala `is_product()`, funkcijo, ki obstaja le ob naloženem WooCommercu, zato se je stran sesula z `Call to undefined function is_product()`. Hooki dogodkov WooCommerce se zdaj registrirajo samo, kadar je WooCommerce dejaven; osnovni piksel se, kot je dokumentirano, naloži tudi brez njega. Napaka obstaja od različice 1.0.0
+
 ### 1.0.6
 - Popravljeno: `initiateCheckout` in `setEncryptedEmail` se na WooCommercovem bloku Checkout nista nikoli sprožila, čeprav je ta od WooCommerce 8.3 privzet za nove trgovine. Vtičnik je poslušal le PHP hooke klasične blagajne in njeno polje `#billing_email`, blok pa nima ne enega ne drugega. Zdaj bere podatkovno shrambo blokov Cart in Checkout; delovanje klasične blagajne ostaja enako
 - Popravljeno: `addToCart` se ni nikoli sprožil na straneh trgovine ali kategorij, v nobeni trgovini. Skripta dogodkov se je nalagala samo na straneh, kjer je dogodek že čakal v vrsti, česar na arhivskih straneh ni nikoli, zato poslušalcev za dodajanje v košarico ni bilo prav tam, kjer kupci dodajajo v košarico. Napaka izvira iz 1.0.1
