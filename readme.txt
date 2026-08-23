@@ -28,15 +28,14 @@ Full Tracking is also one of the conditions of Barion's discounted "Advanced" ga
 
 = Cookie Consent =
 
-The plugin integrates with the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), supporting all major cookie consent plugins:
+Barion requires a grantConsent event before it approves a Full Pixel integration. The plugin sends it automatically, and reads these consent managers directly, with no extra plugin:
 
 * CookieYes
 * Complianz
-* Real Cookie Banner
-* GDPR Cookie Compliance (Moove)
-* Cookie Notice by dFactory
+* Cookiebot
+* Cookie Law Info (legacy banner)
 
-Direct fallback integration with Cookie Law Info is also included.
+For every other cookie banner, install the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) plugin. It is the WordPress standard for passing consent between plugins, and Real Cookie Banner, GDPR Cookie Compliance (Moove) and Cookie Notice by dFactory all support it. You can also wire your banner up by hand in a few lines.
 
 = Supported Languages =
 
@@ -58,7 +57,7 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 
 * Base Pixel with automatic pageView tracking
 * Full e-commerce event tracking with all required fields
-* WP Consent API integration for universal cookie consent support
+* Automatic grantConsent and rejectConsent, required for Barion's Full Pixel approval
 * Client-side add-to-cart tracking (compatible with page caching)
 * Variable product support (tracks variation prices)
 * Duplicate purchase prevention
@@ -80,8 +79,8 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 
 = Optional =
 
-* [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) for universal cookie consent support
-* Any WP Consent API compatible cookie plugin (CookieYes, Complianz, etc.)
+* [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), if your cookie banner is not read directly
+* A cookie consent banner — Barion requires one before it approves a Full Pixel integration
 
 == Frequently Asked Questions ==
 
@@ -95,7 +94,7 @@ No. The [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) i
 
 = Which cookie consent plugins are supported? =
 
-All plugins that implement the WP Consent API standard: CookieYes, Complianz, Real Cookie Banner, GDPR Cookie Compliance (Moove), Cookie Notice by dFactory, and others. Direct fallback integration with Cookie Law Info is also built in.
+CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are read directly, with no extra plugin. Every other banner works through the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) plugin, including Real Cookie Banner, GDPR Cookie Compliance (Moove) and Cookie Notice by dFactory. Turn on Debug Mode to see which one the plugin found.
 
 = What is the difference between Base Pixel and Full Tracking? =
 
@@ -136,7 +135,7 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 2. Product page — Debug Mode logs `contentView` when the page loads, and `addToCart` when the customer adds the product to the cart.
 3. Checkout page — `initiateCheckout` carries the cart contents and the revenue, and `setEncryptedEmail` sends the SHA-1 hashed billing email.
 4. Order received page — `purchase` reports the completed order with its contents and revenue.
-5. Events wait for consent. The plugin reads the WP Consent API, so any compatible cookie banner controls the tracking.
+5. Events wait for consent. Accept marketing cookies in your banner and Debug Mode logs `Consent granted (grantConsent)`.
 
 == Changelog ==
 

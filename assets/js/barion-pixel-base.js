@@ -62,81 +62,44 @@
 		window.wcBarionRejectConsent();
 	});
 
-	// Detect the active consent manager and wire up listeners.
-	// Deferred until DOMContentLoaded because this script loads in <head> at priority 1,
-	// before consent plugins (Cookie Law Info, etc.) define their globals.
-	function wcBarionGetCliCookie(name) {
-		var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-		return match ? decodeURIComponent(match[1]) : '';
-	}
+	// Consent manager integration, in barion-consent.js. Started at
+	// DOMContentLoaded because this script runs in <head>, before consent
+	// plugins define their globals. The adapters make no further assumption
+	// about load order: they listen unconditionally and keep probing for a
+	// consent manager that arrives later.
+	function wcBarionStartConsent() {
+		if (typeof wcBarionWireConsent !== 'function') {
+			return;
+		}
 
-	function wcBarionDetectConsent() {
-		// --- Tier 1: WP Consent API integration ---
-		if (typeof wp_has_consent === 'function') {
-			if (wp_has_consent('marketing')) {
-				window.wcBarionGrantConsent();
-				if (debug) {
-					console.log('[Barion Pixel] Consent auto-granted via WP Consent API');
-				}
-			}
-			document.addEventListener('wp_listen_for_consent_change', function () {
-				if (wp_has_consent('marketing')) {
+		wcBarionWireConsent(
+			window,
+			document,
+			function (granted) {
+				if (granted) {
 					window.wcBarionGrantConsent();
-					if (debug) {
-						console.log('[Barion Pixel] Consent granted via WP Consent API change event');
-					}
 				} else {
 					window.wcBarionRejectConsent();
-					if (debug) {
-						console.log('[Barion Pixel] Consent rejected via WP Consent API change event');
-					}
 				}
-			});
-			return;
-		}
-
-		// --- Tier 2: Cookie Law Info / CookieYes direct integration (fallback) ---
-		if (typeof CLI !== 'undefined' && CLI.allowedCategories) {
-			if (wcBarionGetCliCookie('cookielawinfo-checkbox-non-necessary') === 'yes') {
-				window.wcBarionGrantConsent();
+			},
+			function (found) {
+				if (!debug) {
+					return;
+				}
+				if (found.length) {
+					console.log('[Barion Pixel] Consent manager detected: ' + found.join(', '));
+				} else {
+					console.warn(
+						'[Barion Pixel] No consent manager detected. grantConsent is only sent if your banner calls window.wcBarionGrantConsent(). The WP Consent API plugin wires this automatically.'
+					);
+				}
 			}
-			if (debug) {
-				console.log(
-					'[Barion Pixel] Cookie Law Info detected, initial non-necessary cookie:',
-					wcBarionGetCliCookie('cookielawinfo-checkbox-non-necessary')
-				);
-			}
-			document.querySelectorAll('.cli_action_button').forEach(function (btn) {
-				btn.addEventListener('click', function () {
-					setTimeout(function () {
-						if (wcBarionGetCliCookie('cookielawinfo-checkbox-non-necessary') === 'yes') {
-							window.wcBarionGrantConsent();
-						} else {
-							window.wcBarionRejectConsent();
-						}
-						if (debug) {
-							console.log(
-								'[Barion Pixel] Cookie Law Info button clicked, non-necessary cookie:',
-								wcBarionGetCliCookie('cookielawinfo-checkbox-non-necessary')
-							);
-						}
-					}, 100);
-				});
-			});
-			return;
-		}
-
-		// --- Tier 3: Manual integration ---
-		if (debug) {
-			console.log(
-				'[Barion Pixel] No consent manager detected. Call window.wcBarionGrantConsent() or window.wcBarionRejectConsent() manually.'
-			);
-		}
+		);
 	}
 
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', wcBarionDetectConsent);
+		document.addEventListener('DOMContentLoaded', wcBarionStartConsent);
 	} else {
-		wcBarionDetectConsent();
+		wcBarionStartConsent();
 	}
 })();

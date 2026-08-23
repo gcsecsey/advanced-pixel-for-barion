@@ -27,8 +27,7 @@ Barion Pixel integration for WooCommerce with full e-commerce event tracking, co
   - `initiateCheckout`: Fired when checkout begins
   - `purchase`: Fired on successful order completion (with duplicate prevention)
   - `setEncryptedEmail`: Sends billing email to Barion on purchase (encrypted by bp.js)
-- **WP Consent API Integration**: Universal cookie consent support — works with CookieYes, Complianz, Real Cookie Banner, GDPR Cookie Compliance, Cookie Notice, and more
-- **Cookie Law Info Fallback**: Direct integration for sites using CookieYes/Cookie Law Info
+- **Cookie Consent Integration**: Sends `grantConsent` and `rejectConsent` automatically. CookieYes, Complianz, Cookiebot and Cookie Law Info are read directly, with the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) covering everything else
 - **Admin Settings Panel**: Easy configuration through WordPress admin
 - **Debug Mode**: Console logging for testing and development
 - **bp.js Double-Load Detection**: Safely coexists with other plugins that load bp.js (e.g., Barion Payment Gateway)
@@ -86,14 +85,14 @@ Barion's own guides for setting up the pixel. The plugin's **Enable Full Pixel T
 - **WooCommerce**: Required for full event tracking (base pixel works without it)
 - **Barion Payment Gateway** ([woocommerce-barion](https://github.com/szelpe/woocommerce-barion)): Coexists perfectly — that plugin handles payments, this one handles pixel tracking
 - **Page caching**: Fully compatible (addToCart uses client-side JS)
-- **Cookie plugins**: Any WP Consent API compatible plugin works automatically
+- **Cookie plugins**: CookieYes, Complianz, Cookiebot and Cookie Law Info work on their own. Any WP Consent API compatible plugin works once that plugin is active
 
 ## Requirements
 
 - WordPress 5.0 or higher
 - PHP 7.4 or higher
 - WooCommerce 5.0+ (for full event tracking)
-- Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) for universal cookie consent support
+- Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) — needed only when your cookie banner is not one of the four read directly
 
 ## Contributing
 
