@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Advanced Pixel for Barion 1.0.0\n"
+"Project-Id-Version: Advanced Pixel for Barion 1.0.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/advanced-pixel-for-barion\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,9 +11,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-02-24T20:21:54+00:00\n"
 "PO-Revision-Date: 2026-02-24 20:21+0000\n"
+"Language: sr_RS\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: advanced-pixel-for-barion\n"
-"Language: sr_RS\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11) ? 0 : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)) ? 1 : 2;\n"
 
 #. Plugin Name of the plugin
@@ -41,50 +41,50 @@ msgstr ""
 msgid "https://github.com/gcsecsey"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:121
+#: advanced-pixel-for-barion.php:134
 msgid "Barion Pixel Settings"
 msgstr "Podešavanja Barion Pixel"
 
-#: advanced-pixel-for-barion.php:122
+#: advanced-pixel-for-barion.php:135
 msgid "Barion Pixel"
 msgstr "Barion Pixel"
 
-#: advanced-pixel-for-barion.php:139
+#: advanced-pixel-for-barion.php:152
 msgid "Barion Pixel Configuration"
 msgstr "Konfiguracija Barion Pixel"
 
-#: advanced-pixel-for-barion.php:146
+#: advanced-pixel-for-barion.php:159
 msgid "Pixel ID"
 msgstr "ID piksela"
 
-#: advanced-pixel-for-barion.php:154
+#: advanced-pixel-for-barion.php:167
 msgid "Enable Full Pixel Tracking"
 msgstr "Omogući potpuno praćenje piksela"
 
-#: advanced-pixel-for-barion.php:162
+#: advanced-pixel-for-barion.php:175
 msgid "Debug Mode"
 msgstr "Režim za otklanjanje grešaka"
 
-#: advanced-pixel-for-barion.php:214
+#: advanced-pixel-for-barion.php:227
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
 msgstr "Konfiguriši svoju integraciju Barion Pixel. Osnovni piksel će se učitati na svim stranicama kada je ID piksela unet. Potpuno praćenje uključuje događaje e-trgovine kao što su pregledi proizvoda, dodavanje u korpu, završetak porudžbine i kupovina."
 
-#: advanced-pixel-for-barion.php:231
+#: advanced-pixel-for-barion.php:249
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr "Unesi svoj Barion Pixel ID (npr. BP-0000000000-00)"
 
-#: advanced-pixel-for-barion.php:248
+#: advanced-pixel-for-barion.php:266
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
 msgstr "Omogući potpuno praćenje događaja Barion Pixel (contentView, addToCart, initiateCheckout, purchase)"
 
-#: advanced-pixel-for-barion.php:250
+#: advanced-pixel-for-barion.php:268
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
 msgstr "Skripta osnovnog piksela će uvek biti učitana. Omogući ovo za praćenje događaja e-trgovine."
 
-#: advanced-pixel-for-barion.php:267
+#: advanced-pixel-for-barion.php:285
 msgid "Enable debug mode (logs events to browser console)"
 msgstr "Omogući režim za otklanjanje grešaka (beleži događaje u konzolu pregledača)"
 
-#: advanced-pixel-for-barion.php:708
-msgid "Advanced Pixel for Barion: The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
-msgstr "Barion Pixel za WooCommerce: Dodatak Barion Payment Gateway takođe ima konfigurisan ID piksela. Oba dodatka će ispravno raditi zajedno — skripta osnovnog piksela će se učitati samo jednom. Možeš ukloniti ID piksela iz podešavanja platnog prolaza kako bi konfigurisao sve na jednom mestu."
+#: advanced-pixel-for-barion.php:231
+msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
+msgstr "Dodatak Barion Payment Gateway takođe ima konfigurisan ID piksela. Oba dodatka će ispravno raditi zajedno — skripta osnovnog piksela će se učitati samo jednom. Možeš ukloniti ID piksela iz podešavanja platnog prolaza kako bi konfigurisao sve na jednom mestu."

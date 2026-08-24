@@ -103,6 +103,10 @@ GPL-2.0-or-later — podrobnosti nájdeš v [LICENSE](../../LICENSE).
 
 ## Zoznam zmien
 
+### 1.0.7
+- Opravené: fatálna chyba na každom webe, ktorý plugin používal bez WooCommerce, ak bolo vyplnené Pixel ID a zapnuté plné sledovanie. Skript udalostí v pätičke volal funkciu `is_product()`, ktorá existuje iba pri načítanom WooCommerce, takže stránka spadla s chybou `Call to undefined function is_product()`. Hooky udalostí WooCommerce sa teraz registrujú len vtedy, keď je WooCommerce aktívny; základný pixel sa podľa dokumentácie načíta aj bez neho. Chyba pochádza z verzie 1.0.0
+- Opravené: poznámka o Pixel ID nastavenom aj v plugine Barion Payment Gateway sa vo všetkých jazykoch zobrazovala anglicky. Text bol v skoršom vydaní preformulovaný, ale preklady sa neaktualizovali
+
 ### 1.0.6
 - Opravené: `initiateCheckout` a `setEncryptedEmail` sa nikdy neodoslali na bloku Checkout vo WooCommerce, ktorý je od WooCommerce 8.3 predvolený pre nové obchody. Plugin počúval iba PHP hooky klasickej pokladne a jej pole `#billing_email`, a blok nemá ani jedno. Teraz číta dátové úložisko blokov Cart a Checkout; správanie klasickej pokladne sa nemení
 - Opravené: `addToCart` sa nikdy neodoslal na stránkach obchodu ani kategórií, a to v žiadnom obchode. Skript udalostí sa načítaval len na stránkach, kde už nejaká udalosť čakala vo fronte, čo pri výpisoch nikdy neplatí, takže poslucháče pridania do košíka chýbali práve tam, kde zákazníci do košíka pridávajú. Chyba pochádza z verzie 1.0.1
