@@ -103,6 +103,10 @@ GPL-2.0-or-later — vezi [LICENSE](../../LICENSE) pentru detalii.
 
 ## Jurnal de modificări
 
+### 1.0.7
+- Remediat: o eroare fatală pe orice site care rula plugin-ul fără WooCommerce, dacă un Pixel ID era salvat, iar urmărirea completă era activată. Scriptul de evenimente din subsol apela `is_product()`, o funcție care există doar cât timp WooCommerce este încărcat, așa că pagina se oprea cu `Call to undefined function is_product()`. Hook-urile de evenimente WooCommerce sunt acum înregistrate doar când WooCommerce este activ; pixelul de bază se încarcă în continuare fără el, așa cum este documentat. Eroarea există începând cu 1.0.0
+- Remediat: nota despre un ID Pixel setat și în plugin-ul Barion Payment Gateway apărea în engleză în toate limbile. Textul a fost reformulat într-o versiune anterioară, iar traducerile nu au fost niciodată actualizate
+
 ### 1.0.6
 - Remediat: `initiateCheckout` și `setEncryptedEmail` nu se declanșau niciodată pe blocul Checkout din WooCommerce, care este implicit pentru magazinele noi începând cu WooCommerce 8.3. Plugin-ul asculta doar hook-urile PHP ale finalizării clasice și câmpul ei `#billing_email`, iar blocul nu are niciunul. Acum citește depozitul de date al blocurilor Cart și Checkout; comportamentul finalizării clasice rămâne neschimbat
 - Remediat: `addToCart` nu se declanșa niciodată pe paginile de magazin sau de categorie, în niciun magazin. Scriptul de evenimente se încărca doar pe paginile care aveau deja un eveniment în coadă, ceea ce nu se întâmplă niciodată pe paginile de arhivă, așa că ascultătorii pentru adăugarea în coș lipseau exact acolo unde clienții adaugă în coș. Eroarea datează din 1.0.1

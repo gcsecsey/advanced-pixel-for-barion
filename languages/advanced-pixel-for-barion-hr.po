@@ -2,10 +2,10 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Advanced Pixel for Barion 1.0.6\n"
+"Project-Id-Version: Advanced Pixel for Barion 1.0.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/advanced-pixel-for-barion\n"
-"POT-Creation-Date: 2026-08-23T18:53:07+00:00\n"
-"PO-Revision-Date: 2026-08-23 18:53+0000\n"
+"POT-Creation-Date: 2026-08-25T09:36:08+00:00\n"
+"PO-Revision-Date: 2026-02-24 20:21+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: hr\n"
@@ -41,62 +41,62 @@ msgstr ""
 msgid "https://github.com/gcsecsey"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:133
+#: advanced-pixel-for-barion.php:134
 msgid "Barion Pixel Settings"
 msgstr "Postavke Barion Pixela"
 
-#: advanced-pixel-for-barion.php:134
+#: advanced-pixel-for-barion.php:135
 msgid "Barion Pixel"
 msgstr "Barion Pixel"
 
-#: advanced-pixel-for-barion.php:151
+#: advanced-pixel-for-barion.php:152
 msgid "Barion Pixel Configuration"
 msgstr "Konfiguracija Barion Pixela"
 
-#: advanced-pixel-for-barion.php:158
+#: advanced-pixel-for-barion.php:159
 msgid "Pixel ID"
 msgstr "Pixel ID"
 
-#: advanced-pixel-for-barion.php:166
+#: advanced-pixel-for-barion.php:167
 msgid "Enable Full Pixel Tracking"
 msgstr "Omogući potpuno praćenje Pixelom"
 
-#: advanced-pixel-for-barion.php:174
+#: advanced-pixel-for-barion.php:175
 msgid "Debug Mode"
 msgstr "Način rada za otklanjanje pogrešaka"
 
-#: advanced-pixel-for-barion.php:226
+#: advanced-pixel-for-barion.php:227
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
 msgstr "Konfiguriraj svoju Barion Pixel integraciju. Osnovni Pixel učitat će se na svim stranicama kada je naveden Pixel ID. Potpuno praćenje uključuje e-trgovinske događaje kao što su pregledi proizvoda, dodavanje u košaricu, naplata i kupnja."
 
-#: advanced-pixel-for-barion.php:233
+#: advanced-pixel-for-barion.php:234
 msgid "The WP Consent API plugin is not active. Consent is still forwarded automatically for CookieYes, Complianz, Cookiebot and Cookie Law Info."
 msgstr "Dodatak WP Consent API nije aktivan. Privola se svejedno automatski prosljeđuje za CookieYes, Complianz, Cookiebot i Cookie Law Info."
 
-#: advanced-pixel-for-barion.php:235
+#: advanced-pixel-for-barion.php:236
 msgid "With any other cookie banner you must call window.wcBarionGrantConsent() yourself. Barion does not approve a Full Pixel integration that never sends grantConsent."
 msgstr "Uz bilo koju drugu traku za kolačiće moraš sam pozvati window.wcBarionGrantConsent(). Barion ne odobrava Full Pixel integraciju koja nikada ne šalje grantConsent."
 
-#: advanced-pixel-for-barion.php:237
+#: advanced-pixel-for-barion.php:238
 msgid "Install the WP Consent API plugin"
 msgstr "Instaliraj dodatak WP Consent API"
 
-#: advanced-pixel-for-barion.php:243
+#: advanced-pixel-for-barion.php:244
 msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
 msgstr "Dodatak Barion Payment Gateway također ima konfiguriran Pixel ID. Oba dodatka radit će ispravno zajedno — skripta osnovnog Pixela učitat će se samo jednom. Možeš ukloniti Pixel ID iz postavki platnog pristupnika kako bi konfiguraciju držao na jednom mjestu."
 
-#: advanced-pixel-for-barion.php:261
+#: advanced-pixel-for-barion.php:262
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr "Unesi svoj Barion Pixel ID (npr. BP-0000000000-00)"
 
-#: advanced-pixel-for-barion.php:278
+#: advanced-pixel-for-barion.php:279
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
 msgstr "Omogući potpuno praćenje događaja Barion Pixelom (contentView, addToCart, initiateCheckout, purchase)"
 
-#: advanced-pixel-for-barion.php:280
+#: advanced-pixel-for-barion.php:281
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
 msgstr "Skripta osnovnog Pixela uvijek će se učitati. Omogući ovo za praćenje e-trgovinskih događaja."
 
-#: advanced-pixel-for-barion.php:297
+#: advanced-pixel-for-barion.php:298
 msgid "Enable debug mode (logs events to browser console)"
 msgstr "Omogući način rada za otklanjanje pogrešaka (zapisuje događaje u konzolu preglednika)"
