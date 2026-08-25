@@ -226,6 +226,19 @@ class WC_Barion_Pixel {
     public function render_section_description() {
         echo '<p>' . esc_html__('Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase.', 'advanced-pixel-for-barion') . '</p>';
 
+        // Barion rejects a Full Pixel integration that never sends grantConsent,
+        // and the merchant has no way to see that from here. Without the WP
+        // Consent API only the banners the plugin knows by name are bridged.
+        if (!function_exists('wp_has_consent')) {
+            echo '<div class="notice notice-warning inline"><p>';
+            echo esc_html__('The WP Consent API plugin is not active. Consent is still forwarded automatically for CookieYes, Complianz, Cookiebot and Cookie Law Info.', 'advanced-pixel-for-barion');
+            echo ' ';
+            echo esc_html__('With any other cookie banner you must call window.wcBarionGrantConsent() yourself. Barion does not approve a Full Pixel integration that never sends grantConsent.', 'advanced-pixel-for-barion');
+            echo ' <a href="https://wordpress.org/plugins/wp-consent-api/" target="_blank" rel="noopener noreferrer">';
+            echo esc_html__('Install the WP Consent API plugin', 'advanced-pixel-for-barion');
+            echo '</a></p></div>';
+        }
+
         $barion_settings = get_option('woocommerce_barion_settings', array());
         if (!empty($barion_settings['barion_pixel_id']) && !empty($this->options['pixel_id'])) {
             echo '<p>' . esc_html__('The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place.', 'advanced-pixel-for-barion') . '</p>';
@@ -294,9 +307,16 @@ class WC_Barion_Pixel {
      */
     public function enqueue_base_script() {
         wp_enqueue_script(
+            'wc-barion-consent',
+            WC_BARION_PIXEL_URL . 'assets/js/barion-consent.js',
+            array(),
+            WC_BARION_PIXEL_VERSION,
+            false
+        );
+        wp_enqueue_script(
             'wc-barion-pixel-base',
             WC_BARION_PIXEL_URL . 'assets/js/barion-pixel-base.js',
-            array(),
+            array('wc-barion-consent'),
             WC_BARION_PIXEL_VERSION,
             false
         );

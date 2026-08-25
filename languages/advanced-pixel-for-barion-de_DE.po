@@ -4,14 +4,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Advanced Pixel for Barion 1.0.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/advanced-pixel-for-barion\n"
+"POT-Creation-Date: 2026-08-25T09:36:08+00:00\n"
+"PO-Revision-Date: 2026-02-24 20:21+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-24T20:21:54+00:00\n"
-"PO-Revision-Date: 2026-02-24 20:21+0000\n"
-"Language: de_DE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: advanced-pixel-for-barion\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -69,22 +69,34 @@ msgstr "Debug-Modus"
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
 msgstr "Konfiguriere deine Barion Pixel-Integration. Das Basis-Pixel wird auf allen Seiten geladen, wenn eine Pixel-ID angegeben ist. Vollständiges Tracking umfasst E-Commerce-Ereignisse wie Produktansichten, Warenkorb, Kasse und Kauf."
 
-#: advanced-pixel-for-barion.php:249
+#: advanced-pixel-for-barion.php:234
+msgid "The WP Consent API plugin is not active. Consent is still forwarded automatically for CookieYes, Complianz, Cookiebot and Cookie Law Info."
+msgstr "Das Plugin WP Consent API ist nicht aktiv. Die Einwilligung wird trotzdem automatisch für CookieYes, Complianz, Cookiebot und Cookie Law Info weitergegeben."
+
+#: advanced-pixel-for-barion.php:236
+msgid "With any other cookie banner you must call window.wcBarionGrantConsent() yourself. Barion does not approve a Full Pixel integration that never sends grantConsent."
+msgstr "Bei jedem anderen Cookie-Banner musst du window.wcBarionGrantConsent() selbst aufrufen. Barion genehmigt keine Full-Pixel-Integration, die niemals grantConsent sendet."
+
+#: advanced-pixel-for-barion.php:238
+msgid "Install the WP Consent API plugin"
+msgstr "Plugin WP Consent API installieren"
+
+#: advanced-pixel-for-barion.php:244
+msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
+msgstr "Das Barion Payment Gateway-Plugin hat ebenfalls eine Pixel-ID konfiguriert. Beide Plugins funktionieren korrekt zusammen — das Basis-Pixel-Skript wird nur einmal geladen. Du kannst die Pixel-ID aus den Zahlungs-Gateway-Einstellungen entfernen, um die Konfiguration an einem Ort zu bündeln."
+
+#: advanced-pixel-for-barion.php:262
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr "Gib deine Barion Pixel-ID ein (z. B. BP-0000000000-00)"
 
-#: advanced-pixel-for-barion.php:266
+#: advanced-pixel-for-barion.php:279
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
 msgstr "Vollständiges Barion Pixel-Event-Tracking aktivieren (contentView, addToCart, initiateCheckout, purchase)"
 
-#: advanced-pixel-for-barion.php:268
+#: advanced-pixel-for-barion.php:281
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
 msgstr "Das Basis-Pixel-Skript wird immer geladen. Aktiviere diese Option, um E-Commerce-Ereignisse zu verfolgen."
 
-#: advanced-pixel-for-barion.php:285
+#: advanced-pixel-for-barion.php:298
 msgid "Enable debug mode (logs events to browser console)"
 msgstr "Debug-Modus aktivieren (protokolliert Ereignisse in der Browser-Konsole)"
-
-#: advanced-pixel-for-barion.php:231
-msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
-msgstr "Das Barion Payment Gateway-Plugin hat ebenfalls eine Pixel-ID konfiguriert. Beide Plugins funktionieren korrekt zusammen — das Basis-Pixel-Skript wird nur einmal geladen. Du kannst die Pixel-ID aus den Zahlungs-Gateway-Einstellungen entfernen, um die Konfiguration an einem Ort zu bündeln."
