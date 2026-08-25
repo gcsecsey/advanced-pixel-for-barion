@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Advanced Pixel for Barion 1.0.7\n"
+"Project-Id-Version: Advanced Pixel for Barion 1.0.8\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/advanced-pixel-for-barion\n"
 "POT-Creation-Date: 2026-08-25T09:36:08+00:00\n"
 "PO-Revision-Date: 2026-02-24 20:21+0000\n"

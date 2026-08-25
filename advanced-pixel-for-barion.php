@@ -5,7 +5,7 @@
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
  * Author: Gergely Csecsey
  * Author URI: https://github.com/gcsecsey
- * Version: 1.0.7
+ * Version: 1.0.8
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * WC requires at least: 5.0
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_BARION_PIXEL_VERSION', '1.0.7');
+define('WC_BARION_PIXEL_VERSION', '1.0.8');
 define('WC_BARION_PIXEL_PATH', plugin_dir_path(__FILE__));
 define('WC_BARION_PIXEL_URL', plugin_dir_url(__FILE__));
 

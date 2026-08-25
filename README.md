@@ -104,6 +104,11 @@ GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
 
 ## Changelog
 
+### 1.0.8
+- Fixed: `grantConsent` was never sent on a site without the separate WP Consent API plugin, so Barion refused to approve the Full Pixel integration. Consent detection tried three sources in turn and stopped at the first match, and the last of them attached no listener at all. CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are now read directly, with no extra plugin
+- Fixed: `grantConsent` was also missed for a returning visitor who had already answered the banner, and on any site whose consent manager finished loading after the page did. The plugin now keeps looking for a consent manager for ten seconds after the page loads, rather than checking once
+- Added: the settings page warns when no consent manager can be reached, so a broken consent setup is visible before Barion refuses the integration rather than after
+
 ### 1.0.7
 - Fixed: a fatal error on any site that runs the plugin without WooCommerce, once a Pixel ID was saved and Full Tracking was on. The footer event script called `is_product()`, a function that only exists while WooCommerce is loaded, so the page died with `Call to undefined function is_product()`. The WooCommerce event hooks are now registered only when WooCommerce is active; the base pixel still loads without it, as documented. This dates back to 1.0.0
 - Fixed: the note about a Pixel ID also being set in the Barion Payment Gateway plugin was shown in English in every language. It was reworded in an earlier release and the translations were never updated to match

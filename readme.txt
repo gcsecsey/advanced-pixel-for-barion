@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -139,6 +139,11 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Changelog ==
 
+= 1.0.8 =
+* Fix: `grantConsent` was never sent on a site without the separate WP Consent API plugin, so Barion refused to approve the Full Pixel integration. Consent detection tried three sources in turn and stopped at the first match, and the last of them attached no listener at all. CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are now read directly, with no extra plugin.
+* Fix: `grantConsent` was also missed for a returning visitor who had already answered the banner, and on any site whose consent manager finished loading after the page did. The plugin now keeps looking for a consent manager for ten seconds after the page loads, rather than checking once.
+* New: the settings page warns when no consent manager can be reached, so a broken consent setup is visible before Barion refuses the integration rather than after.
+
 = 1.0.7 =
 * Fix: a fatal error on any site that runs the plugin without WooCommerce, once a Pixel ID was saved and Full Tracking was on. The footer event script called `is_product()`, a function that only exists while WooCommerce is loaded, so the page died with `Call to undefined function is_product()`. The WooCommerce event hooks are now registered only when WooCommerce is active. The base pixel still loads without WooCommerce, as documented. This dates back to 1.0.0.
 * Fix: the note about a Pixel ID also being set in the Barion Payment Gateway plugin was shown in English in every language. It was reworded in an earlier release and the translations were never updated to match.
@@ -181,6 +186,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.8 =
+Important for every store that needs Barion's Full Pixel approval. grantConsent is now sent with CookieYes, Complianz, Cookiebot and Cookie Law Info without the WP Consent API plugin, and it is no longer missed for returning visitors.
 
 = 1.0.7 =
 Fixes a fatal error on sites that run the plugin without WooCommerce. Stores that have WooCommerce active are unaffected.

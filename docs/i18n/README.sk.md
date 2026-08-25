@@ -103,6 +103,11 @@ GPL-2.0-or-later — podrobnosti nájdeš v [LICENSE](../../LICENSE).
 
 ## Zoznam zmien
 
+### 1.0.8
+- Opravené: `grantConsent` sa nikdy neodoslal na weboch bez samostatného pluginu WP Consent API, takže Barion neschválil integráciu Full Pixel. Detekcia súhlasu skúšala tri zdroje po sebe a zastavila sa pri prvom náleze, pričom posledný z nich neregistroval žiadny poslucháč. CookieYes, Complianz, Cookiebot a staršia lišta Cookie Law Info sa teraz čítajú priamo, bez ďalšieho pluginu
+- Opravené: `grantConsent` chýbal aj u vracajúcich sa návštevníkov, ktorí už na lištu odpovedali, a na každom webe, ktorého správca súhlasu sa načítal až po stránke. Plugin teraz hľadá správcu súhlasu desať sekúnd po načítaní stránky, namiesto jedinej kontroly
+- Nové: stránka nastavení upozorní, keď nie je dostupný žiadny správca súhlasu, takže je chybné nastavenie vidieť skôr, než Barion integráciu odmietne
+
 ### 1.0.7
 - Opravené: fatálna chyba na každom webe, ktorý plugin používal bez WooCommerce, ak bolo vyplnené Pixel ID a zapnuté plné sledovanie. Skript udalostí v pätičke volal funkciu `is_product()`, ktorá existuje iba pri načítanom WooCommerce, takže stránka spadla s chybou `Call to undefined function is_product()`. Hooky udalostí WooCommerce sa teraz registrujú len vtedy, keď je WooCommerce aktívny; základný pixel sa podľa dokumentácie načíta aj bez neho. Chyba pochádza z verzie 1.0.0
 - Opravené: poznámka o Pixel ID nastavenom aj v plugine Barion Payment Gateway sa vo všetkých jazykoch zobrazovala anglicky. Text bol v skoršom vydaní preformulovaný, ale preklady sa neaktualizovali

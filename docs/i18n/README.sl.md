@@ -103,6 +103,11 @@ GPL-2.0-or-later — glejte [LICENSE](../../LICENSE) za podrobnosti.
 
 ## Dnevnik sprememb
 
+### 1.0.8
+- Popravljeno: `grantConsent` se nikoli ni poslal na straneh brez ločenega vtičnika WP Consent API, zato Barion ni odobril integracije Full Pixel. Zaznavanje privolitve je zaporedoma preizkusilo tri vire in se ustavilo pri prvem najdenem, zadnji med njimi pa ni registriral nobenega poslušalca. CookieYes, Complianz, Cookiebot in stara pasica Cookie Law Info se zdaj berejo neposredno, brez dodatnega vtičnika
+- Popravljeno: `grantConsent` je izostal tudi pri vračajočih se obiskovalcih, ki so na pasico že odgovorili, in na vsaki strani, katere upravitelj privolitev se je naložil po strani. Vtičnik zdaj išče upravitelja privolitev deset sekund po nalaganju strani, namesto enkratnega preverjanja
+- Novo: stran z nastavitvami opozori, kadar noben upravitelj privolitev ni dosegljiv, tako da je napačna nastavitev vidna, preden Barion zavrne integracijo
+
 ### 1.0.7
 - Popravljeno: usodna napaka na vsaki strani, ki je vtičnik uporabljala brez WooCommercea, če je bil Pixel ID shranjen in polno sledenje vklopljeno. Skripta dogodkov v nogi je klicala `is_product()`, funkcijo, ki obstaja le ob naloženem WooCommercu, zato se je stran sesula z `Call to undefined function is_product()`. Hooki dogodkov WooCommerce se zdaj registrirajo samo, kadar je WooCommerce dejaven; osnovni piksel se, kot je dokumentirano, naloži tudi brez njega. Napaka obstaja od različice 1.0.0
 - Popravljeno: opomba o ID-ju piksla, nastavljenem tudi v vtičniku Barion Payment Gateway, se je v vseh jezikih prikazovala v angleščini. Besedilo je bilo v prejšnji izdaji preoblikovano, prevodi pa niso bili posodobljeni
