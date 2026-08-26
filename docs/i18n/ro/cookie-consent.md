@@ -77,7 +77,7 @@ iar plugin-ul trebuie să se bazeze pe integrările directe.
 |--------|----------------|
 | [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5 mil.+ |
 | [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1 mil.+ |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1 mil.+ |
+| [Cookie Compliance by Hu-manity.co](https://wordpress.org/plugins/cookie-notice/) | 900 mii+ |
 | [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300 mii+ |
 | [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100 mii+ |
 

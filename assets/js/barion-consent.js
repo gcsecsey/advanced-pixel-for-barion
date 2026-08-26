@@ -133,6 +133,32 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 		onConsent( granted );
 	}
 
+	// The first answer an adapter ever gives describes what the visitor decided
+	// before this page load, so it is recorded and never sent. Only what
+	// changes afterwards is a decision made here.
+	//
+	// This has to sit in front of the events too, not just the probe. Cookiebot
+	// raises CookiebotOnConsentReady as soon as it initialises, replaying an
+	// earlier visit's answer through the same listener a real click uses, and a
+	// visitor who clicked anything at all before that would otherwise have the
+	// replay sent as though they had just accepted.
+	//
+	// A first answer of "no consent" is left unrecorded on purpose. No adapter
+	// can tell an undecided visitor from one who refused, so a decline arrives
+	// as an event carrying the value already held. Leaving `reported` alone
+	// keeps that a change, which is what makes rejectConsent fire at all.
+	function observe( adapter, granted ) {
+		if ( ! adapter.seen ) {
+			adapter.seen = true;
+			if ( granted ) {
+				reported = true;
+			}
+			return;
+		}
+
+		report( granted );
+	}
+
 	adapters.forEach( function ( adapter ) {
 		adapter.events.forEach( function ( eventName ) {
 			adapter.target.addEventListener( eventName, function () {
@@ -141,14 +167,14 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 				}
 
 				if ( ! adapter.delay ) {
-					report( adapter.read() );
+					observe( adapter, adapter.read() );
 					return;
 				}
 
 				scope.setTimeout( function () {
 					var settled = adapter.read();
 					if ( null !== settled ) {
-						report( settled );
+						observe( adapter, settled );
 					}
 				}, adapter.delay );
 			} );
@@ -168,16 +194,11 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 				found.push( adapter.name );
 			}
 
-			// Finding a manager is not the visitor deciding anything. A manager
-			// that appears mid-visit is replaying an earlier visit's answer, no
-			// matter what the visitor has clicked on this page, so the state is
-			// recorded and never sent. Going through report() here would send
-			// it: an unrelated click earlier in the page load is enough to open
-			// the gate. Consent is only ever sent from a manager's own change
-			// event, below.
-			if ( granted ) {
-				reported = true;
-			}
+			// Finding a manager is not the visitor deciding anything, so this
+			// goes through observe() rather than report(). It also gives the
+			// adapter its first answer in the common case, which is what makes
+			// a later accept or decline read as a change.
+			observe( adapter, granted );
 		} );
 
 		return found.length > 0;

@@ -98,7 +98,12 @@ jobs:
     # boot, not a target.
     timeout-minutes: 20
     steps:
+      # This is the only job that runs third-party install scripts (npm ci) and
+      # fetches a browser, so it is the one where leaving the token in
+      # .git/config is worth avoiding. Nothing here pushes.
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 22

@@ -76,7 +76,7 @@ Banner nichts weiter, und das Plugin muss auf die direkten Integrationen zurück
 |--------|----------------|
 | [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5 Mio.+ |
 | [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1 Mio.+ |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1 Mio.+ |
+| [Cookie Compliance by Hu-manity.co](https://wordpress.org/plugins/cookie-notice/) | 900 Tsd.+ |
 | [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300 Tsd.+ |
 | [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100 Tsd.+ |
 

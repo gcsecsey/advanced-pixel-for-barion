@@ -125,13 +125,36 @@ test( 'rejects when the WP Consent API change event reports withdrawal', () => {
 
 // The regression behind the reported "grantConsent never arrives": a consent
 // manager that finishes loading after this script ran left nothing listening.
+// The probe tick is the real sequence: the manager defines its globals holding
+// no consent, the probe finds it, and only then can the visitor accept.
 test( 'grants when the WP Consent API loads after the adapters are wired', () => {
 	const h = harness();
 	h.act();
-	h.scope.wp_consent_type = 'optin';
+	Object.assign( h.scope, wpConsentApi( false ) );
+	h.tick();
 	h.scope.wp_has_consent = () => true;
 	h.fire( 'wp_listen_for_consent_change' );
 	assert.deepStrictEqual( h.granted, [ true ] );
+} );
+
+// Cookiebot replays an earlier visit through CookiebotOnConsentReady, the same
+// listener a real click uses, so an unrelated gesture must not turn it into an
+// acceptance.
+test( 'does not send a banner replay that arrives after an unrelated gesture', () => {
+	const h = harness();
+	h.act();
+	h.scope.Cookiebot = { consent: { marketing: true } };
+	h.fire( 'CookiebotOnConsentReady' );
+	assert.deepStrictEqual( h.granted, [] );
+} );
+
+// The counterpart: a first-time visitor declining reads the same "no consent"
+// the adapter already held, so only leaving that unrecorded makes it a change.
+test( 'still sends rejectConsent when a first-time visitor declines', () => {
+	const h = harness( cookieYes( false ) );
+	h.act();
+	h.fire( 'cookieyes_consent_update' );
+	assert.deepStrictEqual( h.granted, [ false ] );
 } );
 
 test( 'listens for WP Consent API changes even with no consent manager present', () => {

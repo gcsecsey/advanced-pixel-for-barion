@@ -78,7 +78,7 @@ továbbítanak, és a bővítménynek a közvetlen integrációkra kell hagyatko
 |--------|----------------|
 | [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5M+ |
 | [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ |
+| [Cookie Compliance by Hu-manity.co](https://wordpress.org/plugins/cookie-notice/) | 900E+ |
 | [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ |
 | [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ |
 
