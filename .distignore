@@ -9,4 +9,12 @@ docs/
 tests/
 README.md
 CONTRIBUTING.md
+AGENTS.md
+CLAUDE.md
+.coderabbit.yaml
 CONSENT_INTEGRATION.md
+vendor
+composer.json
+composer.lock
+phpcs.xml.dist
+phpstan.neon.dist

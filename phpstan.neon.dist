@@ -1,0 +1,16 @@
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+	level: 5
+	paths:
+		- advanced-pixel-for-barion.php
+		- uninstall.php
+	bootstrapFiles:
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+	ignoreErrors:
+		# The stubs type WC()->cart as non-null, but it is null before the cart loads.
+		-
+			identifier: booleanNot.alwaysFalse
+			path: advanced-pixel-for-barion.php
+			count: 1

@@ -9,92 +9,92 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-25T14:35:57+00:00\n"
+"POT-Creation-Date: 2026-08-26T10:18:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: advanced-pixel-for-barion\n"
 
 #. Plugin Name of the plugin
-#: advanced-pixel-for-barion.php
+#: advanced-pixel-for-barion.php:3
 msgid "Advanced Pixel for Barion"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: advanced-pixel-for-barion.php
+#: advanced-pixel-for-barion.php:4
 msgid "https://github.com/gcsecsey/advanced-pixel-for-barion"
 msgstr ""
 
 #. Description of the plugin
-#: advanced-pixel-for-barion.php
+#: advanced-pixel-for-barion.php:5
 msgid "Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility."
 msgstr ""
 
 #. Author of the plugin
-#: advanced-pixel-for-barion.php
+#: advanced-pixel-for-barion.php:6
 msgid "Gergely Csecsey"
 msgstr ""
 
 #. Author URI of the plugin
-#: advanced-pixel-for-barion.php
+#: advanced-pixel-for-barion.php:7
 msgid "https://github.com/gcsecsey"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:134
+#: advanced-pixel-for-barion.php:139
 msgid "Barion Pixel Settings"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:135
+#: advanced-pixel-for-barion.php:140
 msgid "Barion Pixel"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:152
+#: advanced-pixel-for-barion.php:157
 msgid "Barion Pixel Configuration"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:159
+#: advanced-pixel-for-barion.php:164
 msgid "Pixel ID"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:167
+#: advanced-pixel-for-barion.php:172
 msgid "Enable Full Pixel Tracking"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:175
+#: advanced-pixel-for-barion.php:180
 msgid "Debug Mode"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:227
+#: advanced-pixel-for-barion.php:232
 msgid "Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase."
 msgstr ""
 
-#: advanced-pixel-for-barion.php:234
+#: advanced-pixel-for-barion.php:239
 msgid "The WP Consent API plugin is not active. Consent is still forwarded automatically for CookieYes, Complianz, Cookiebot and Cookie Law Info."
 msgstr ""
 
-#: advanced-pixel-for-barion.php:236
+#: advanced-pixel-for-barion.php:241
 msgid "With any other cookie banner you must call window.wcBarionGrantConsent() yourself. Barion does not approve a Full Pixel integration that never sends grantConsent."
 msgstr ""
 
-#: advanced-pixel-for-barion.php:238
+#: advanced-pixel-for-barion.php:243
 msgid "Install the WP Consent API plugin"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:244
+#: advanced-pixel-for-barion.php:249
 msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
 msgstr ""
 
-#: advanced-pixel-for-barion.php:262
+#: advanced-pixel-for-barion.php:267
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:279
+#: advanced-pixel-for-barion.php:284
 msgid "Enable full Barion Pixel event tracking (contentView, addToCart, initiateCheckout, purchase)"
 msgstr ""
 
-#: advanced-pixel-for-barion.php:281
+#: advanced-pixel-for-barion.php:286
 msgid "Base Pixel script will always be loaded. Enable this to track e-commerce events."
 msgstr ""
 
-#: advanced-pixel-for-barion.php:298
+#: advanced-pixel-for-barion.php:303
 msgid "Enable debug mode (logs events to browser console)"
 msgstr ""

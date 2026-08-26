@@ -41,6 +41,9 @@ Do not paste your real Pixel ID or a customer's email address into an issue.
    input, and prefix new globals with `wc_barion_pixel_`.
 4. Describe how you tested the change. `docs/testing-notes.md` lists the bp.js quirks that are easy
    to trip over.
+5. Run the checks CI will run: `composer install`, then `composer lint` (PHPCS with the WordPress
+   Coding Standards and PHP 7.4+ compatibility), `composer phpstan`, `node --test`, and
+   `php tests/<file>.php` for each PHP test. `composer lint:fix` repairs most style issues.
 5. Do not bump the version number or edit the changelog — releases are tagged separately.
 
 ## Translations
