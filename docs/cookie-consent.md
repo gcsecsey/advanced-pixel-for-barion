@@ -36,17 +36,24 @@ These work with no extra plugin:
 
 | Consent manager | Read through |
 |---|---|
-| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` and `wp_listen_for_consent_change` |
+| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` and `wp_listen_for_consent_change`, but only once a banner registers a consent type with it |
 | [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | `getCkyConsent()` and `cookieyes_consent_update` |
 | [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | `cmplz_has_consent('marketing')` and `cmplz_status_change` |
 | [Cookiebot](https://wordpress.org/plugins/cookiebot/) | `Cookiebot.consent.marketing` and `CookiebotOnAccept` / `CookiebotOnDecline` / `CookiebotOnConsentReady` |
 | Cookie Law Info 2.x, legacy banner | the `cookielawinfo-checkbox-non-necessary` cookie, re-read after a banner click |
 | Anything else | you call the functions yourself — see [Manual integration](#manual-integration) |
 
-Two rules apply to all of them:
+Three rules apply to all of them:
 
+- **Consent is sent when the visitor answers the banner, never at page load.** Barion asks for `grantConsent` at the moment of the click, and rejects an integration that sends it before the visitor has touched anything — from Barion's side that looks like a shop which never asks. The plugin therefore reads the consent state on load but keeps it to itself, and only sends what the visitor decides on this page load.
 - **Nothing is sent before the visitor answers.** On a page load with no marketing consent the plugin stays silent rather than sending `rejectConsent`. There is nothing to report until the banner is answered.
 - **Only changes are sent.** A repeated identical state is not sent twice, which matters because one click can arrive through two adapters at once.
+
+A returning visitor who accepted on an earlier visit therefore triggers nothing,
+and that is correct: bp.js stores the answer in its own `BarionMarketingConsent`
+cookie, so Barion already has it. Re-sending it on every page load is what got
+the integration rejected in the first place. To watch `grantConsent` fire, clear
+your cookies first so the banner asks again.
 
 ## WP Consent API — still recommended
 
@@ -67,7 +74,7 @@ integrations.
 |--------|----------------|
 | [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1.5M+ |
 | [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ |
+| [Cookie Compliance by Hu-manity.co](https://wordpress.org/plugins/cookie-notice/) | 900K+ |
 | [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ |
 | [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ |
 
@@ -178,3 +185,10 @@ All messages are prefixed with `[Barion Pixel]`.
 `No consent manager detected` also appears as a warning on the plugin's settings
 page when the WP Consent API plugin is inactive, since this is the failure that
 gets a Full Pixel integration rejected.
+
+The settings page carries a second warning for the trap behind that one: the WP
+Consent API active with no cookie banner registered against it. On its own the
+API answers "granted" for everybody, because an unset consent type is how it says
+that no banner is driving it. Installing it next to a banner that does not
+support it therefore does not connect anything — it only makes every visitor look
+like they consented. The plugin ignores it in that state.

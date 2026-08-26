@@ -8,6 +8,9 @@
 	<exclude-pattern>/vendor/*</exclude-pattern>
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 	<exclude-pattern>/tools/*</exclude-pattern>
+	<!-- Gitignored agent scratch space. CI never sees it, so scanning it only
+	     makes `composer lint` fail on a working copy and pass in CI. -->
+	<exclude-pattern>/.context/*</exclude-pattern>
 
 	<arg name="basepath" value="."/>
 	<arg name="parallel" value="8"/>

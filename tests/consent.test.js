@@ -29,23 +29,31 @@ const harness = ( globals, cookie ) => {
 	const doc = { addEventListener, cookie: cookie || '' };
 	const granted = [];
 	let detected = null;
+	let alreadyGranted = null;
 
 	wireConsent(
 		scope,
 		doc,
 		( value ) => granted.push( value ),
-		( names ) => {
+		( names, held ) => {
 			detected = names;
+			alreadyGranted = held;
 		}
 	);
+
+	const fire = ( name ) => ( listeners[ name ] || [] ).forEach( ( handler ) => handler( {} ) );
 
 	return {
 		scope,
 		doc,
 		granted,
 		detected: () => detected,
+		alreadyGranted: () => alreadyGranted,
 		probing: () => intervals.some( Boolean ),
-		fire: ( name ) => ( listeners[ name ] || [] ).forEach( ( handler ) => handler( {} ) ),
+		fire,
+		// Nothing is sent before the visitor touches the page, so every test of
+		// a banner click has to start with the gesture that click really makes.
+		act: () => fire( 'pointerdown' ),
 		listens: ( name ) => Boolean( listeners[ name ] ),
 		tick: ( times = 1 ) => {
 			for ( let i = 0; i < times; i++ ) {
@@ -59,37 +67,94 @@ const cookieYes = ( advertisement ) => ( {
 	getCkyConsent: () => ( { categories: { advertisement } } ),
 } );
 
-test( 'grants when the WP Consent API already holds marketing consent', () => {
-	const h = harness( { wp_has_consent: () => true } );
-	assert.deepStrictEqual( h.granted, [ true ] );
+// The WP Consent API only carries a real answer once a cookie banner has
+// registered a consent type with it.
+const wpConsentApi = ( marketing ) => ( {
+	wp_consent_type: 'optin',
+	wp_has_consent: () => marketing,
 } );
 
-test( 'stays silent when the visitor has not answered the banner yet', () => {
-	const h = harness( { wp_has_consent: () => false } );
+// Barion rejects an integration whose grantConsent arrives at page load instead
+// of on the accept click, because that is indistinguishable from a shop that
+// never asks. bp.js stores the consent itself, so there is nothing to replay.
+test( 'does not send consent that already stood when the page loaded', () => {
+	assert.deepStrictEqual( harness( wpConsentApi( true ) ).granted, [] );
+} );
+
+test( 'does not send consent a banner replays at page load', () => {
+	const h = harness( { Cookiebot: { consent: { marketing: true } } } );
+	h.fire( 'CookiebotOnConsentReady' );
 	assert.deepStrictEqual( h.granted, [] );
 } );
 
-test( 'grants when the WP Consent API change event reports acceptance', () => {
-	const h = harness( { wp_has_consent: () => false } );
+test( 'sends consent when the visitor accepts on this page load', () => {
+	const h = harness( wpConsentApi( false ) );
+	h.act();
 	h.scope.wp_has_consent = () => true;
 	h.fire( 'wp_listen_for_consent_change' );
 	assert.deepStrictEqual( h.granted, [ true ] );
 } );
 
-test( 'rejects when the WP Consent API change event reports withdrawal', () => {
+// The reported bug: with no banner registered, wp_has_consent() answers
+// "granted" for everyone, so every page load sent grantConsent.
+test( 'ignores the WP Consent API when no cookie banner registered a consent type', () => {
 	const h = harness( { wp_has_consent: () => true } );
+	h.tick( 20 );
+	assert.deepStrictEqual( h.granted, [] );
+	assert.deepStrictEqual( h.detected(), [] );
+} );
+
+test( 'reads the WP Consent API once a banner registers a consent type late', () => {
+	const h = harness( { wp_has_consent: () => false } );
+	h.scope.wp_consent_type = 'optin';
+	h.tick();
+	assert.deepStrictEqual( h.detected(), [ 'WP Consent API' ] );
+} );
+
+test( 'stays silent when the visitor has not answered the banner yet', () => {
+	assert.deepStrictEqual( harness( wpConsentApi( false ) ).granted, [] );
+} );
+
+test( 'rejects when the WP Consent API change event reports withdrawal', () => {
+	const h = harness( wpConsentApi( true ) );
+	h.act();
 	h.scope.wp_has_consent = () => false;
 	h.fire( 'wp_listen_for_consent_change' );
-	assert.deepStrictEqual( h.granted, [ true, false ] );
+	assert.deepStrictEqual( h.granted, [ false ] );
 } );
 
 // The regression behind the reported "grantConsent never arrives": a consent
 // manager that finishes loading after this script ran left nothing listening.
+// The probe tick is the real sequence: the manager defines its globals holding
+// no consent, the probe finds it, and only then can the visitor accept.
 test( 'grants when the WP Consent API loads after the adapters are wired', () => {
 	const h = harness();
+	h.act();
+	Object.assign( h.scope, wpConsentApi( false ) );
+	h.tick();
 	h.scope.wp_has_consent = () => true;
 	h.fire( 'wp_listen_for_consent_change' );
 	assert.deepStrictEqual( h.granted, [ true ] );
+} );
+
+// Cookiebot replays an earlier visit through CookiebotOnConsentReady, the same
+// listener a real click uses, so an unrelated gesture must not turn it into an
+// acceptance.
+test( 'does not send a banner replay that arrives after an unrelated gesture', () => {
+	const h = harness();
+	h.act();
+	h.scope.Cookiebot = { consent: { marketing: true } };
+	h.fire( 'CookiebotOnConsentReady' );
+	assert.deepStrictEqual( h.granted, [] );
+} );
+
+// The counterpart: a first-time visitor declining reads the same "no consent"
+// the adapter already held, so only leaving that unrecorded makes it a change.
+test( 'still sends rejectConsent when a first-time visitor declines', () => {
+	const h = harness( cookieYes( false ) );
+	h.act();
+	h.fire( 'cookieyes_consent_update' );
+	assert.deepStrictEqual( h.granted, [ false ] );
 } );
 
 test( 'listens for WP Consent API changes even with no consent manager present', () => {
@@ -98,6 +163,7 @@ test( 'listens for WP Consent API changes even with no consent manager present',
 
 test( 'grants on the CookieYes consent update event', () => {
 	const h = harness( cookieYes( false ) );
+	h.act();
 	h.scope.getCkyConsent = cookieYes( true ).getCkyConsent;
 	h.fire( 'cookieyes_consent_update' );
 	assert.deepStrictEqual( h.granted, [ true ] );
@@ -105,19 +171,23 @@ test( 'grants on the CookieYes consent update event', () => {
 
 test( 'rejects when CookieYes reports advertising cookies declined', () => {
 	const h = harness( cookieYes( true ) );
+	h.act();
 	h.scope.getCkyConsent = cookieYes( false ).getCkyConsent;
 	h.fire( 'cookieyes_consent_update' );
-	assert.deepStrictEqual( h.granted, [ true, false ] );
+	assert.deepStrictEqual( h.granted, [ false ] );
 } );
 
 test( 'grants on the Complianz status change event', () => {
-	const h = harness( { cmplz_has_consent: ( category ) => category === 'marketing' } );
+	const h = harness( { cmplz_has_consent: () => false } );
+	h.act();
+	h.scope.cmplz_has_consent = ( category ) => category === 'marketing';
 	h.fire( 'cmplz_status_change' );
 	assert.deepStrictEqual( h.granted, [ true ] );
 } );
 
 test( 'grants on the Cookiebot accept event', () => {
 	const h = harness( { Cookiebot: { consent: { marketing: false } } } );
+	h.act();
 	h.scope.Cookiebot.consent.marketing = true;
 	h.fire( 'CookiebotOnAccept' );
 	assert.deepStrictEqual( h.granted, [ true ] );
@@ -125,27 +195,32 @@ test( 'grants on the Cookiebot accept event', () => {
 
 test( 'rejects on the Cookiebot decline event', () => {
 	const h = harness( { Cookiebot: { consent: { marketing: true } } } );
+	h.act();
 	h.scope.Cookiebot.consent.marketing = false;
 	h.fire( 'CookiebotOnDecline' );
-	assert.deepStrictEqual( h.granted, [ true, false ] );
+	assert.deepStrictEqual( h.granted, [ false ] );
 } );
 
 // CookieYes bridges into the WP Consent API when both are installed, so one
 // click can arrive twice. Barion only needs the transitions.
 test( 'reports a repeated state only once', () => {
-	const h = harness( { wp_has_consent: () => true, ...cookieYes( true ) } );
+	const h = harness( { ...wpConsentApi( false ), ...cookieYes( false ) } );
+	h.act();
+	h.scope.wp_has_consent = () => true;
+	h.scope.getCkyConsent = cookieYes( true ).getCkyConsent;
 	h.fire( 'wp_listen_for_consent_change' );
 	h.fire( 'cookieyes_consent_update' );
 	assert.deepStrictEqual( h.granted, [ true ] );
 } );
 
 test( 'reports every real change of mind', () => {
-	const h = harness( { wp_has_consent: () => true } );
+	const h = harness( wpConsentApi( true ) );
+	h.act();
 	h.scope.wp_has_consent = () => false;
 	h.fire( 'wp_listen_for_consent_change' );
 	h.scope.wp_has_consent = () => true;
 	h.fire( 'wp_listen_for_consent_change' );
-	assert.deepStrictEqual( h.granted, [ true, false, true ] );
+	assert.deepStrictEqual( h.granted, [ false, true ] );
 } );
 
 // Sites that upgraded from Cookie Law Info 2.x and kept the old banner have no
@@ -154,6 +229,7 @@ const legacyCli = { CLI: { allowedCategories: [] } };
 
 test( 'grants when a legacy Cookie Law Info banner is accepted', () => {
 	const h = harness( legacyCli );
+	h.act();
 	h.doc.cookie = 'cookielawinfo-checkbox-non-necessary=yes';
 	h.fire( 'click' );
 	assert.deepStrictEqual( h.granted, [ true ] );
@@ -161,14 +237,15 @@ test( 'grants when a legacy Cookie Law Info banner is accepted', () => {
 
 test( 'rejects when a legacy Cookie Law Info banner is declined', () => {
 	const h = harness( legacyCli );
+	h.act();
 	h.doc.cookie = 'cookielawinfo-checkbox-non-necessary=no';
 	h.fire( 'click' );
 	assert.deepStrictEqual( h.granted, [ false ] );
 } );
 
-test( 'grants for a returning visitor who already accepted legacy Cookie Law Info', () => {
+test( 'stays silent for a returning visitor who accepted legacy Cookie Law Info earlier', () => {
 	const h = harness( legacyCli, 'other=1; cookielawinfo-checkbox-non-necessary=yes' );
-	assert.deepStrictEqual( h.granted, [ true ] );
+	assert.deepStrictEqual( h.granted, [] );
 } );
 
 test( 'ignores clicks when no legacy banner is present', () => {
@@ -180,17 +257,46 @@ test( 'ignores clicks when no legacy banner is present', () => {
 
 // A returning visitor raises no consent event, and a manager served from a CDN
 // can define its globals after the page has finished loading. A single probe
-// would never read it, so nothing at all would be sent on that page load.
-test( 'grants when a consent manager appears after the page has loaded', () => {
+// would never read it, so the manager would go unnoticed for the whole visit.
+test( 'finds a consent manager that appears after the page has loaded', () => {
 	const h = harness();
-	h.scope.wp_has_consent = () => true;
+	Object.assign( h.scope, wpConsentApi( true ) );
 	h.tick();
+	assert.deepStrictEqual( h.detected(), [ 'WP Consent API' ] );
+} );
+
+test( 'does not send consent that the probe alone found', () => {
+	const h = harness();
+	Object.assign( h.scope, wpConsentApi( true ) );
+	h.tick();
+	assert.deepStrictEqual( h.granted, [] );
+} );
+
+// A gesture anywhere on the page is not an answer to the banner. A returning
+// visitor who clicks a link before a CDN-served manager has loaded used to get
+// grantConsent the moment the probe found it, which is the page-load send
+// Barion rejects.
+test( 'does not send consent found by the probe after an unrelated gesture', () => {
+	const h = harness();
+	h.act();
+	Object.assign( h.scope, wpConsentApi( true ) );
+	h.tick();
+	assert.deepStrictEqual( h.granted, [] );
+} );
+
+test( 'still sends consent when a late manager reports the visitor accepting', () => {
+	const h = harness();
+	h.act();
+	Object.assign( h.scope, wpConsentApi( false ) );
+	h.tick();
+	h.scope.wp_has_consent = () => true;
+	h.fire( 'wp_listen_for_consent_change' );
 	assert.deepStrictEqual( h.granted, [ true ] );
 } );
 
 test( 'stays silent when a late consent manager reports consent refused', () => {
 	const h = harness();
-	h.scope.wp_has_consent = () => false;
+	Object.assign( h.scope, wpConsentApi( false ) );
 	h.tick();
 	assert.deepStrictEqual( h.granted, [] );
 } );
@@ -198,7 +304,7 @@ test( 'stays silent when a late consent manager reports consent refused', () => 
 test( 'stops probing once a consent manager answers', () => {
 	const h = harness();
 	assert.ok( h.probing() );
-	h.scope.wp_has_consent = () => false;
+	Object.assign( h.scope, wpConsentApi( false ) );
 	h.tick();
 	assert.ok( ! h.probing() );
 } );
@@ -214,15 +320,15 @@ test( 'does not probe when a consent manager is present from the start', () => {
 } );
 
 test( 'names the consent managers it found', () => {
-	assert.deepStrictEqual( harness( { wp_has_consent: () => false } ).detected(), [ 'WP Consent API' ] );
+	assert.deepStrictEqual( harness( wpConsentApi( false ) ).detected(), [ 'WP Consent API' ] );
 	assert.deepStrictEqual( harness( cookieYes( false ) ).detected(), [ 'CookieYes' ] );
 } );
 
-test( 'names a consent manager that appeared late', () => {
-	const h = harness();
-	h.scope.wp_has_consent = () => false;
-	h.tick();
-	assert.deepStrictEqual( h.detected(), [ 'WP Consent API' ] );
+// Debug mode explains the silence with this, so a merchant testing as a
+// returning visitor does not report the missing grantConsent as a bug.
+test( 'reports whether consent already stood when the page loaded', () => {
+	assert.strictEqual( harness( wpConsentApi( true ) ).alreadyGranted(), true );
+	assert.strictEqual( harness( wpConsentApi( false ) ).alreadyGranted(), false );
 } );
 
 // Reporting "no consent manager" while one is still loading would send the

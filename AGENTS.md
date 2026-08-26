@@ -14,6 +14,15 @@ POT file — run `composer i18n:pot` after changing a translatable string.
 Tests are dependency-free on purpose: `node:test` for JS, plain PHP scripts with
 WordPress stubs in `tests/`. Keep them that way.
 
+`tests/playground/` is the one exception, and it earns it. Consent depends on script
+load order and on whether a real click reached the page before the banner answered —
+neither is reproducible in a stub, and getting it wrong is what Barion rejects an
+integration for. So it runs the plugin in real WordPress via Playground and drives a
+real banner in headless Chromium: `npm install`, `npx playwright install chromium`,
+then `npm run test:browser`. CI gates on it (the `consent-browser` job). Everything
+under `tests/*.js` and `tests/*.php` stays dependency-free — do not let the browser
+suite's dependencies leak into them, and keep `package.json` scoped to it.
+
 ## Where to look
 
 - `CONTRIBUTING.md` — PR rules (no version bumps, no changelog edits), translation workflow.

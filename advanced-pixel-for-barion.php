@@ -242,6 +242,16 @@ class WC_Barion_Pixel {
 			echo ' <a href="https://wordpress.org/plugins/wp-consent-api/" target="_blank" rel="noopener noreferrer">';
 			echo esc_html__( 'Install the WP Consent API plugin', 'advanced-pixel-for-barion' );
 			echo '</a></p></div>';
+		} elseif ( function_exists( 'wp_get_consent_type' ) && '' === wp_get_consent_type() ) {
+			// Installing the WP Consent API is the advice above, but on its own
+			// it is not a consent manager: with no banner registered it reports
+			// marketing consent as granted for everyone, and the merchant has
+			// no way to see that from the front end.
+			echo '<div class="notice notice-warning inline"><p>';
+			echo esc_html__( 'The WP Consent API plugin is active, but no cookie banner has registered with it. On its own it reports marketing consent as granted for every visitor, including visitors who never answered your banner.', 'advanced-pixel-for-barion' );
+			echo ' ';
+			echo esc_html__( 'The plugin therefore ignores it. Connect your cookie banner to the WP Consent API, or call window.wcBarionGrantConsent() from the accept button of your banner and window.wcBarionRejectConsent() from its reject button.', 'advanced-pixel-for-barion' );
+			echo '</p></div>';
 		}
 
 		$barion_settings = get_option( 'woocommerce_barion_settings', array() );

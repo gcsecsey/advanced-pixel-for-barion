@@ -34,7 +34,15 @@ V prijavo ne prilepi svojega pravega Pixel ID-ja ali kupčevega e-poštnega nasl
    čiščenje vseh vnosov in predpona `wc_barion_pixel_` pri novih globalnih simbolih.
 4. Opiši, kako si spremembo preizkusil. `docs/testing-notes.md` navaja posebnosti bp.js, na katerih
    se je lahko spotakniti.
-5. Ne dvigaj številke različice in ne urejaj dnevnika sprememb — izdaje se označujejo posebej.
+5. Poženi preverjanja, ki jih poganja tudi CI: `composer install`, nato `composer lint` (PHPCS s
+   standardi kodiranja WordPressa in združljivostjo s PHP 7.4+), `composer phpstan`, `node --test`
+   in `php tests/<datoteka>.php` za vsak PHP test. `composer lint:fix` popravi večino slogovnih
+   najdb.
+6. Poženi brskalniški komplet za soglasje: `npm install`, `npx playwright install --with-deps chromium`, nato
+   `npm run test:browser`. Zažene WordPress v Playgroundu in preveri, da soglasje pride do Bariona
+   ob kliku na sprejem in nikoli ob nalaganju strani — glej
+   [`tests/playground/README.md`](../../../tests/playground/README.md).
+7. Ne dvigaj številke različice in ne urejaj dnevnika sprememb — izdaje se označujejo posebej.
 
 ## Prevodi
 

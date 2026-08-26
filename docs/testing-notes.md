@@ -142,11 +142,12 @@ different code paths for `addToCart`, `initiateCheckout` and `setEncryptedEmail`
 
 ### Consent integration
 
-1. Clear all cookies.
+1. Clear all cookies. This matters — the check below only works on a visitor the banner still has to ask.
 2. Load any page. `[Barion Pixel] Base pixel initialized` appears — the base pixel loads before any consent decision, by design.
-3. Accept cookies in your banner. `Consent granted (grantConsent)` appears.
-4. Reload — consent is granted again on load, without the banner.
-5. Withdraw consent and check `Consent rejected (rejectConsent)` appears.
+3. Do not touch anything yet. No `grantConsent` may appear. Barion rejects an integration that sends consent at page load.
+4. Accept cookies in your banner. `Consent granted (grantConsent)` appears now.
+5. Reload. Nothing is sent this time, and the console says consent already stood when the page loaded. bp.js keeps the answer in its own cookie, so Barion already has it.
+6. Withdraw consent and check `Consent rejected (rejectConsent)` appears.
 
 ---
 
@@ -172,6 +173,8 @@ This is the failure Barion rejects a Full Pixel integration for, so check it
 first. With Debug Mode on, the console says which case you are in.
 
 - `Consent manager detected: …` but no `grantConsent` after you accept — the manager was found but reports no marketing consent. Check that your banner's marketing or advertising category is the one you accepted.
+- `Marketing consent already stood when this page loaded` — nothing is wrong. You are testing as a returning visitor. Clear your cookies and start again at step 1.
+- `No consent manager detected` while the WP Consent API plugin is active — the API is installed but your cookie banner does not register with it, so it reports consent as granted for everyone and the plugin ignores it. The settings page says the same. Connect the banner to the API, or call the functions yourself.
 - `No consent manager detected` — the plugin found nothing to read. This line appears ten seconds after the page loads, not immediately, because a consent manager served from a CDN can take that long to appear. CookieYes, Complianz, Cookiebot and legacy Cookie Law Info are read directly. For any other banner, install [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) or call `window.wcBarionGrantConsent()` from your banner's accept callback.
 - Nothing at all in the console — the base script did not run. A consent plugin that blocks unknown scripts may have blocked it. Barion asks for the base pixel to load regardless of consent, so add it to your blocker's allow list.
 

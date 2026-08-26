@@ -9,97 +9,94 @@ Maßgeblich ist hier Barions eigene Seite:
 Dort stehen auch der von Barion empfohlene Banner-Text und die aktuelle Liste von Barions
 Werbepartnern. Lies sie vor dem Livegang — die Compliance liegt beim Händler, nicht beim Plugin.
 
+Barion führt `grantConsent` außerdem unter den Events auf, die
+[implementiert sein müssen](https://docs.barion.com/Implementing_the_Full_Barion_Pixel),
+bevor eine Full-Pixel-Integration freigegeben wird. Ein Shop, der es nie sendet, hat keinen
+Anspruch auf die niedrigeren Gebühren, so vollständig der Rest der Integration auch sein mag.
+
 ## Was das Plugin tut
 
 Das Basis-Pixel-Skript wird immer geladen, und `pageView` wird immer ausgelöst. Barion
-dokumentiert das als berechtigtes Interesse: das Basis-Pixel dient der Prävention von
-Zahlungsbetrug, und ohne Marketing-Einwilligung erhobene Daten werden ausschließlich dafür
-verwendet.
+dokumentiert das als berechtigtes Interesse: Das Basis-Pixel dient der Betrugsprävention bei
+Zahlungen, und ohne Marketing-Einwilligung erhobene Daten werden ausschließlich dafür genutzt.
 
-Darüber hinaus ruft das Plugin `bp('consent', 'grantConsent')` auf, wenn der Kunde
-Marketing-Cookies akzeptiert, und `bp('consent', 'rejectConsent')`, wenn er ablehnt. Barion führt
-beide als erforderlich. Dein Banner muss deshalb eine echte Ablehnoption bieten — bei einem
-Banner, das nur Zustimmung kennt, hat das Plugin nichts zu melden.
+Darüber hinaus ruft das Plugin `bp('consent', 'grantConsent')` auf, wenn die Kundin oder der
+Kunde Marketing-Cookies akzeptiert, und `bp('consent', 'rejectConsent')` bei Ablehnung. Barion
+führt beides als erforderlich auf. Dein Banner muss deshalb eine echte Ablehnen-Option bieten —
+bei einem Banner, das nur „Akzeptieren“ kennt, hat das Plugin nichts zu melden.
 
-Das Plugin sucht in dieser Reihenfolge nach einem Consent-Manager und hält beim ersten Treffer an:
+## Wie die Einwilligung erkannt wird
 
-1. **WP Consent API** (empfohlen) — universell, funktioniert mit allen großen Cookie-Plugins
-2. **Cookie Law Info** (Fallback) — direkte Integration für CookieYes / Cookie Law Info
-3. **Manuell** — für eigene Consent-Manager
+Das Plugin wählt kein einzelnes Consent-Management aus. Es abonniert gleichzeitig jedes ihm
+bekannte Einwilligungssignal und leitet die erste echte Antwort sowie jede spätere Änderung
+weiter. Die Ladereihenfolge spielt keine Rolle: Die Listener werden registriert, bevor
+irgendein Consent-Management existiert, sodass auch ein spät erscheinendes Banner erfasst wird.
+Eine wiederkehrende Besucherin sieht kein Banner und löst daher gar kein Event aus — deshalb
+sucht das Plugin zusätzlich jede halbe Sekunde nach einem Consent-Management, bis eines
+antwortet, und gibt zehn Sekunden nach dem Laden der Seite auf.
 
----
+Diese funktionieren ohne zusätzliches Plugin:
 
-## Stufe 1: WP Consent API (empfohlen)
+| Consent-Management | Ausgelesen über |
+|---|---|
+| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` und `wp_listen_for_consent_change`, aber erst, wenn ein Banner dort einen Consent-Typ registriert hat |
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | `getCkyConsent()` und `cookieyes_consent_update` |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | `cmplz_has_consent('marketing')` und `cmplz_status_change` |
+| [Cookiebot](https://wordpress.org/plugins/cookiebot/) | `Cookiebot.consent.marketing` und `CookiebotOnAccept` / `CookiebotOnDecline` / `CookiebotOnConsentReady` |
+| Cookie Law Info 2.x, altes Banner | das Cookie `cookielawinfo-checkbox-non-necessary`, nach einem Banner-Klick erneut gelesen |
+| Alles andere | du rufst die Funktionen selbst auf — siehe [Manuelle Integration](#manuelle-integration) |
 
-Die [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) ist der WordPress-Standard,
-um Einwilligungen zwischen Plugins weiterzugeben. Das Barion Pixel registriert sich in der
-Kategorie `marketing`.
+Für alle gelten drei Regeln:
 
-### Funktionsweise
+- **Die Einwilligung wird gesendet, wenn die Besucherin das Banner beantwortet, niemals beim Laden der Seite.** Barion erwartet `grantConsent` im Moment des Klicks und lehnt eine Integration ab, die es sendet, bevor jemand irgendetwas berührt hat — aus Barions Sicht sieht das aus wie ein Shop, der nie fragt. Das Plugin liest den Einwilligungsstatus deshalb beim Laden aus, behält ihn aber für sich und sendet nur das, was die Besucherin bei diesem Seitenaufruf entscheidet.
+- **Vor der Antwort wird nichts gesendet.** Bei einem Seitenaufruf ohne Marketing-Einwilligung bleibt das Plugin still, statt `rejectConsent` zu senden. Solange das Banner nicht beantwortet ist, gibt es nichts zu melden.
+- **Nur Änderungen werden gesendet.** Ein wiederholt gleicher Status wird nicht zweimal gesendet, was wichtig ist, weil ein einzelner Klick über zwei Adapter gleichzeitig ankommen kann.
 
-Nach `DOMContentLoaded` prüft das Plugin, ob die Funktion `wp_has_consent()` existiert. Falls ja:
+Eine wiederkehrende Besucherin, die bei einem früheren Besuch zugestimmt hat, löst deshalb
+nichts aus — und das ist richtig so: bp.js speichert die Antwort in seinem eigenen Cookie
+`BarionMarketingConsent`, Barion hat sie also bereits. Genau das erneute Senden bei jedem
+Seitenaufruf hat überhaupt erst zur Ablehnung der Integration geführt. Wenn du `grantConsent`
+auslösen sehen willst, lösche zuerst deine Cookies, damit das Banner wieder fragt.
 
-1. Liegt die `marketing`-Einwilligung bereits vor, wird `grantConsent` sofort ausgelöst.
-2. Danach horcht das Plugin auf `wp_listen_for_consent_change` und sendet bei jeder Änderung `grantConsent` oder `rejectConsent`.
+## WP Consent API — weiterhin empfohlen
 
-Beachte, was *nicht* in dieser Liste steht: bei einem Seitenaufruf ohne Marketing-Einwilligung
-bleibt das Plugin still, statt `rejectConsent` zu senden. Solange der Kunde das Banner nicht
-beantwortet hat, gibt es nichts zu melden — und die Antwort kommt über das Änderungs-Event.
+Die [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) ist der
+WordPress-Standard, um Einwilligungen zwischen Plugins weiterzugeben, und das Barion Pixel
+registriert sich unter ihrer Kategorie `marketing`. Sie ist ein **eigenes Plugin** — nicht Teil
+von WordPress und nicht Teil deines Cookie-Banners. Ein
+[Vorschlag zur Aufnahme in den Core](https://make.wordpress.org/core/2024/12/04/lets-reconsider-adopting-the-wp-consent-api/)
+ist offen, aber nicht umgesetzt.
 
-### Unterstützte Cookie-Plugins
+Installiere sie, wenn dein Cookie-Banner nicht in der Tabelle oben steht. Die meisten Banner
+unterstützen die WP Consent API, aber nur solange dieses Plugin aktiv ist: CookieYes lädt seine
+Brücke zum Beispiel nur, wenn die Klasse `WP_CONSENT_API` existiert. Ohne sie leiten diese
+Banner nichts weiter, und das Plugin muss auf die direkten Integrationen zurückfallen.
 
-Jedes Plugin, das die WP Consent API implementiert, funktioniert automatisch:
-
-| Plugin | Aktive Installationen | Hinweis |
-|--------|-----------------------|---------|
-| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5 Mio.+ | WP Consent API integriert |
-| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1 Mio.+ | Mitentwickler der WP Consent API |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1 Mio.+ | WP Consent API-kompatibel |
-| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300.000+ | WP Consent API-kompatibel |
-| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100.000+ | WP Consent API-kompatibel |
-
-### Einrichtung
-
-1. Installiere und aktiviere die [WP Consent API](https://wordpress.org/plugins/wp-consent-api/).
-2. Installiere und konfiguriere dein Cookie-Consent-Plugin.
-3. Installiere und konfiguriere Advanced Pixel for Barion.
-
-Mehr ist nicht nötig — die Einwilligung wird automatisch verarbeitet.
-
----
-
-## Stufe 2: Cookie Law Info (Fallback)
-
-Kommt zum Zug, wenn die WP Consent API nicht verfügbar ist, wohl aber
-[Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes.
-
-### Funktionsweise
-
-1. Das Plugin prüft das globale Objekt `CLI` und dessen `allowedCategories`.
-2. Steht das Cookie `cookielawinfo-checkbox-non-necessary` bereits auf `yes` — ein wiederkehrender Besucher, der zugestimmt hat —, wird `grantConsent` sofort ausgelöst.
-3. Klicks auf die `.cli_action_button`-Elemente des Banners werden beobachtet. Kurz nach einem Klick liest das Plugin das Cookie erneut und sendet entsprechend `grantConsent` oder `rejectConsent`.
-
-### Einrichtung
-
-Keine. Beide Plugins installieren, fertig.
+| Plugin | Aktive Installationen |
+|--------|----------------|
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5 Mio.+ |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1 Mio.+ |
+| [Cookie Compliance by Hu-manity.co](https://wordpress.org/plugins/cookie-notice/) | 900 Tsd.+ |
+| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300 Tsd.+ |
+| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100 Tsd.+ |
 
 ---
 
-## Stufe 3: Manuelle Integration
+## Manuelle Integration
 
-Für eigene Consent-Manager oder wenn keine der obigen Varianten greift.
+Für eigene Consent-Management-Lösungen oder wenn nichts davon zutrifft.
 
 ### Methode 1: JavaScript-Funktionen (empfohlen)
 
 ```javascript
-// Wenn der Benutzer Marketing-Cookies akzeptiert
+// When user accepts marketing cookies
 function onMarketingConsentGranted() {
     if (typeof window.wcBarionGrantConsent === 'function') {
         window.wcBarionGrantConsent();
     }
 }
 
-// Wenn der Benutzer Marketing-Cookies ablehnt
+// When user rejects marketing cookies
 function onMarketingConsentRejected() {
     if (typeof window.wcBarionRejectConsent === 'function') {
         window.wcBarionRejectConsent();
@@ -110,45 +107,30 @@ function onMarketingConsentRejected() {
 ### Methode 2: Eigene DOM-Events
 
 ```javascript
-// Einwilligung erteilen
+// Grant consent
 document.dispatchEvent(new Event('wcBarionGrantConsent'));
 
-// Einwilligung ablehnen
+// Reject consent
 document.dispatchEvent(new Event('wcBarionRejectConsent'));
 ```
 
 ### Methode 3: WordPress-Action-Hook
 
 ```php
-// In deinem Consent-Manager-Plugin oder Theme
+// In your consent manager plugin or theme
 add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
     <script>
-    // Hier deine eigene Consent-Logik
+    // Your custom consent logic here
     </script>
     <?php
 }
 ```
 
-### Beispiele für bestimmte Consent-Manager
+### Beispiel: OneTrust
 
-**Cookiebot:**
-```javascript
-window.addEventListener('CookiebotOnAccept', function() {
-    if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
-    } else {
-        window.wcBarionRejectConsent();
-    }
-});
-window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
-});
-```
-
-**OneTrust:**
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
@@ -161,24 +143,24 @@ function OptanonWrapper() {
 
 ---
 
-## Was du weiterhin selbst erledigen musst
+## Was du selbst erledigen musst
 
-Das Plugin leitet die Einwilligung weiter. Deine Richtlinien schreibt es nicht und dein Banner
-konfiguriert es nicht — Barion verlangt beides. Aus
+Das Plugin leitet die Einwilligung weiter. Es kann weder deine Richtlinien schreiben noch dein
+Banner konfigurieren, und Barion verlangt beides. Aus
 [Barions Anforderungen](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements):
 
-- **Nimm die Barion-Cookies in deine Cookie-Richtlinie auf.** `ba_vid`, `ba_vid.xxx`, `ba_sid` und `ba_sid.xxx` gehören zu den notwendigen Cookies — sie dienen der Betrugsprävention auf Basis von Barions berechtigtem Interesse und benötigen keine Einwilligung. `BarionMarketingConsent.xxx` sowie die Cookies der Medien- und Werbepartner gehören zu den Marketing-Cookies und benötigen eine Einwilligung.
-- **Erwähne das Barion Pixel in deiner Datenschutzerklärung** und verlinke Barions [Datenschutzhinweis](https://www.barion.com/de/datenschutzhinweis/).
-- **Ermögliche es Kunden, ihre Einwilligung jederzeit zu ändern oder zu widerrufen**, und frage erneut nach. Barion verlangt, dass das Banner mindestens alle 13 Monate wieder erscheint, und empfiehlt 30 Tage.
+- **Nimm die Barion-Cookies in deine Cookie-Richtlinie auf.** `ba_vid`, `ba_vid.xxx`, `ba_sid` und `ba_sid.xxx` gehören zu den notwendigen Cookies — sie dienen der Betrugsprävention auf Basis von Barions berechtigtem Interesse und brauchen keine Einwilligung. `BarionMarketingConsent.xxx` sowie die Cookies der Medien- und Werbepartner gehören zu den Marketing-Cookies und brauchen sehr wohl eine Einwilligung.
+- **Erwähne das Barion Pixel in deiner Datenschutzerklärung** und verlinke Barions [Datenschutzhinweis](https://www.barion.com/en/privacy-notice/).
+- **Lass Kundinnen und Kunden ihre Einwilligung jederzeit ändern oder widerrufen** und frage erneut nach. Barion verlangt, dass das Banner mindestens alle 13 Monate erneut erscheint, und empfiehlt 30 Tage.
 - **Verwende Barions empfohlenen Banner-Text**, wo es geht. Er steht auf der Anforderungsseite und deckt die Datenweitergabe an Partner ab, die das Barion Pixel mit sich bringt.
 
 ---
 
 ## Wie sich die Einwilligung auf das Pixel auswirkt
 
-| Zustand | Basis-Pixel (bp.js) | pageView | Marketing-Datenerhebung |
-|---------|---------------------|----------|-------------------------|
-| Vor jeder Consent-Entscheidung | Geladen | Wird ausgelöst (Betrugsprävention) | Nein |
+| Status | Basis-Pixel (bp.js) | pageView | Marketing-Datenerhebung |
+|-------|--------------------|----------|--------------------------|
+| Vor jeder Einwilligungsaktion | Geladen | Wird ausgelöst (Betrugsprävention) | Nein |
 | Nach `grantConsent` | Geladen | Wird ausgelöst | Ja |
 | Nach `rejectConsent` | Geladen | Wird ausgelöst (Betrugsprävention) | Nein |
 
@@ -186,22 +168,29 @@ konfiguriert es nicht — Barion verlangt beides. Aus
 
 ## Testen
 
-1. Aktiviere den **Debug-Modus** unter Einstellungen > Barion Pixel.
+1. Aktiviere **Debug Mode** unter Einstellungen > Barion Pixel.
 2. Öffne die Browser-Konsole (F12).
 3. Achte auf diese Meldungen:
 
 | Meldung | Bedeutung |
-|---------|-----------|
-| `Consent auto-granted via WP Consent API` | Stufe 1, Einwilligung lag beim Laden bereits vor |
-| `Consent granted via WP Consent API change event` | Stufe 1, Kunde hat soeben zugestimmt |
-| `Consent rejected via WP Consent API change event` | Stufe 1, Kunde hat soeben abgelehnt |
-| `Cookie Law Info detected, initial non-necessary cookie: …` | Stufe 2 hat übernommen, mit dem gelesenen Cookie-Wert |
-| `Cookie Law Info button clicked, non-necessary cookie: …` | Stufe 2, Kunde hat das Banner benutzt |
-| `No consent manager detected…` | Stufe 3 — nichts gefunden, rufe die Funktionen selbst auf |
-| `Consent granted (grantConsent)` | `grantConsent` hat bp.js erreicht (jede Stufe) |
-| `Consent rejected (rejectConsent)` | `rejectConsent` hat bp.js erreicht (jede Stufe) |
+|---------|---------|
+| `Consent manager detected: …` | Die genannten Manager wurden gefunden und eingebunden |
+| `No consent manager detected…` | Nichts gefunden — ruf die Funktionen selbst auf |
+| `Consent granted (grantConsent)` | `grantConsent` hat bp.js erreicht |
+| `Consent rejected (rejectConsent)` | `rejectConsent` hat bp.js erreicht |
 
-Alle Meldungen tragen das Präfix `[Barion Pixel]`.
+Allen Meldungen ist `[Barion Pixel]` vorangestellt.
 
-4. Teste sowohl den Zustimmungs- als auch den Ablehnpfad deines Banners.
-5. Die Consent-Funktionen können gefahrlos mehrfach aufgerufen werden.
+4. Teste an deinem Banner sowohl den Zustimmungs- als auch den Ablehnungsweg.
+5. Die Consent-Funktionen dürfen gefahrlos mehrfach aufgerufen werden.
+
+`No consent manager detected` erscheint auch als Warnung auf der Einstellungsseite des
+Plugins, wenn das Plugin WP Consent API inaktiv ist, denn das ist der Fehler, wegen dem eine
+Full-Pixel-Integration abgelehnt wird.
+
+Die Einstellungsseite trägt eine zweite Warnung für die Falle dahinter: die WP Consent API ist
+aktiv, aber kein Cookie-Banner hat sich dort registriert. Für sich allein antwortet die API für
+jeden mit „erteilt“, denn ein nicht gesetzter Consent-Typ ist ihre Art zu sagen, dass sie von
+keinem Banner gesteuert wird. Sie neben einem Banner zu installieren, das sie nicht
+unterstützt, verbindet deshalb gar nichts — es lässt nur jede Besucherin so aussehen, als hätte
+sie zugestimmt. In diesem Zustand ignoriert das Plugin sie.

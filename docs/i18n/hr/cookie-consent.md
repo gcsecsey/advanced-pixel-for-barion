@@ -2,103 +2,100 @@
 >
 > [English version](../../cookie-consent.md)
 
-# Integracija pristanka na kolačiće
+# Integracija privole za kolačiće
 
 Ovdje je mjerodavna Barionova vlastita stranica:
 [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements).
-Na njoj je i tekst trake za pristanak koji Barion preporučuje te aktualan popis Barionovih
+Na njoj je i tekst trake za kolačiće koji Barion preporučuje te aktualan popis Barionovih
 oglašivačkih partnera. Pročitaj je prije puštanja u rad — usklađenost je odgovornost trgovca, ne
 dodatka.
 
+Barion navodi `grantConsent` i među događajima koje je
+[obavezno implementirati](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+prije nego što se integracija Full Pixel odobri. Trgovina koja ga nikada ne pošalje nema pravo
+na niže naknade, koliko god ostatak integracije bio potpun.
+
 ## Što dodatak radi
 
-Skripta osnovnog pixela uvijek se učitava, a `pageView` se uvijek šalje. Barion to dokumentira kao
-legitimni interes: osnovni pixel služi sprječavanju prijevara u plaćanju, a podaci prikupljeni bez
-marketinškog pristanka koriste se samo u tu svrhu.
+Skripta osnovnog piksela uvijek se učitava i `pageView` se uvijek pokreće. Barion to
+dokumentira kao legitimni interes: osnovni piksel postoji radi sprječavanja prijevara pri
+plaćanju, a podaci prikupljeni bez marketinške privole koriste se isključivo za to.
 
 Povrh toga, dodatak poziva `bp('consent', 'grantConsent')` kada kupac prihvati marketinške
-kolačiće i `bp('consent', 'rejectConsent')` kada ih odbije. Barion oba navodi kao obavezna. Tvoja
-traka zato mora nuditi stvarnu mogućnost odbijanja — kod trake koja poznaje samo prihvaćanje
-dodatak nema što javiti.
+kolačiće i `bp('consent', 'rejectConsent')` kada ih odbije. Barion oboje navodi kao obavezno.
+Tvoja traka zato mora nuditi stvarnu mogućnost odbijanja — kod trake samo s gumbom za
+prihvaćanje dodatak nema što signalizirati.
 
-Dodatak traži upravitelja pristanka ovim redom i staje kod prvog pronađenog:
+## Kako se privola prepoznaje
 
-1. **WP Consent API** (preporučeno) — univerzalno, radi sa svim većim dodacima za kolačiće
-2. **Cookie Law Info** (rezerva) — izravna integracija za CookieYes / Cookie Law Info
-3. **Ručno** — za vlastite upravitelje pristanka
+Dodatak ne bira jednog upravitelja privola. Istodobno se pretplaćuje na svaki signal privole
+koji poznaje i prosljeđuje prvi stvarni odgovor te svaku sljedeću promjenu. Redoslijed
+učitavanja nije bitan: slušatelji su registrirani prije nego što ijedan upravitelj privola
+postoji, pa se hvata i traka koja se pojavi kasnije. Posjetitelj koji se vraća ne vidi traku i
+stoga ne pokreće nikakav događaj — zato dodatak dodatno svakih pola sekunde traži upravitelja
+privola dok neki ne odgovori, a odustaje deset sekundi nakon učitavanja stranice.
 
----
+Ovi rade bez dodatnog dodatka:
 
-## Razina 1: WP Consent API (preporučeno)
+| Upravitelj privola | Čita se preko |
+|---|---|
+| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` i `wp_listen_for_consent_change`, ali tek kada kod njega traka registrira vrstu privole |
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | `getCkyConsent()` i `cookieyes_consent_update` |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | `cmplz_has_consent('marketing')` i `cmplz_status_change` |
+| [Cookiebot](https://wordpress.org/plugins/cookiebot/) | `Cookiebot.consent.marketing` i `CookiebotOnAccept` / `CookiebotOnDecline` / `CookiebotOnConsentReady` |
+| Cookie Law Info 2.x, stara traka | kolačić `cookielawinfo-checkbox-non-necessary`, ponovno pročitan nakon klika na traku |
+| Bilo što drugo | funkcije pozivaš sam — vidi [Ručna integracija](#ručna-integracija) |
+
+Na sve se primjenjuju tri pravila:
+
+- **Privola se šalje kada posjetitelj odgovori na traci, nikada pri učitavanju stranice.** Barion očekuje `grantConsent` u trenutku klika i odbija integraciju koja ga pošalje prije nego što je posjetitelj išta dotaknuo — s Barionove strane to izgleda kao trgovina koja nikada ne pita. Dodatak zato pri učitavanju pročita stanje privole, ali ga zadrži za sebe i šalje samo ono što posjetitelj odluči pri tom učitavanju stranice.
+- **Prije posjetiteljeva odgovora ne šalje se ništa.** Pri učitavanju stranice bez marketinške privole dodatak šuti umjesto da šalje `rejectConsent`. Dok se na traku ne odgovori, nema se što prijaviti.
+- **Šalju se samo promjene.** Ponovljeno isto stanje ne šalje se dvaput, što je važno jer jedan klik može stići kroz dva adaptera istodobno.
+
+Posjetitelj koji se vraća, a prihvatio je pri ranijem posjetu, stoga ne pokreće ništa — i to je
+ispravno: bp.js sprema odgovor u vlastiti kolačić `BarionMarketingConsent`, pa ga Barion već
+ima. Upravo je ponovno slanje pri svakom učitavanju stranice bilo ono zbog čega je integracija
+odbijena. Želiš li vidjeti kako se `grantConsent` pokreće, prvo obriši kolačiće da traka
+ponovno pita.
+
+## WP Consent API — i dalje preporučeno
 
 [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) je WordPressov standard za
-prosljeđivanje pristanka među dodacima. Barion Pixel registrira se u kategoriji `marketing`.
+prosljeđivanje privole među dodacima, a Barion Pixel se registrira u njegovoj kategoriji
+`marketing`. To je **zaseban dodatak** — nije dio WordPressa ni dio tvoje trake za kolačiće.
+[Prijedlog za uključivanje u jezgru](https://make.wordpress.org/core/2024/12/04/lets-reconsider-adopting-the-wp-consent-api/)
+otvoren je, ali nije prihvaćen.
 
-### Kako radi
+Instaliraj ga kada tvoje trake za kolačiće nema u gornjoj tablici. Većina traka podržava WP
+Consent API, ali samo dok je taj dodatak aktivan: CookieYes, primjerice, učitava svoj most samo
+ako postoji klasa `WP_CONSENT_API`. Bez njega te trake ne prosljeđuju ništa i dodatak se mora
+osloniti na izravne integracije.
 
-Nakon `DOMContentLoaded` dodatak provjerava postoji li funkcija `wp_has_consent()`. Ako postoji:
-
-1. Ako je pristanak `marketing` već dan, `grantConsent` se šalje odmah.
-2. Od tada dodatak osluškuje `wp_listen_for_consent_change` i pri svakoj promjeni šalje `grantConsent` ili `rejectConsent`.
-
-Primijeti što na popisu *nije*: pri učitavanju stranice na kojoj marketinškog pristanka nema,
-dodatak šuti umjesto da pošalje `rejectConsent`. Dok kupac nije odgovorio na traku, nema se što
-javiti — a odgovor stiže preko događaja promjene.
-
-### Podržani dodaci za kolačiće
-
-Automatski radi svaki dodatak koji implementira WP Consent API:
-
-| Dodatak | Aktivnih instalacija | Napomena |
-|---------|----------------------|----------|
-| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5M+ | WP Consent API ugrađen |
-| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ | Suautor WP Consent API-ja |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ | Kompatibilan s WP Consent API-jem |
-| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ | Kompatibilan s WP Consent API-jem |
-| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ | Kompatibilan s WP Consent API-jem |
-
-### Postavljanje
-
-1. Instaliraj i aktiviraj [WP Consent API](https://wordpress.org/plugins/wp-consent-api/).
-2. Instaliraj i podesi svoj dodatak za pristanak na kolačiće.
-3. Instaliraj i podesi Advanced Pixel for Barion.
-
-Ništa više — pristanak se obrađuje automatski.
+| Dodatak | Aktivne instalacije |
+|--------|----------------|
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5 mil.+ |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1 mil.+ |
+| [Cookie Compliance by Hu-manity.co](https://wordpress.org/plugins/cookie-notice/) | 900 tis.+ |
+| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300 tis.+ |
+| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100 tis.+ |
 
 ---
 
-## Razina 2: Cookie Law Info (rezerva)
+## Ručna integracija
 
-Koristi se kada WP Consent API nije dostupan, a
-[Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes jest.
+Za vlastite upravitelje privola ili kada ništa od navedenog ne vrijedi.
 
-### Kako radi
-
-1. Dodatak provjerava globalni objekt `CLI` i njegov `allowedCategories`.
-2. Ako kolačić `cookielawinfo-checkbox-non-necessary` već ima vrijednost `yes` — povratni posjetitelj koji je prihvatio — `grantConsent` se šalje odmah.
-3. Prate se klikovi na elemente `.cli_action_button` u traci. Kratko nakon klika dodatak ponovno čita kolačić i prema tome šalje `grantConsent` ili `rejectConsent`.
-
-### Postavljanje
-
-Nema ga. Instaliraj oba dodatka i radi.
-
----
-
-## Razina 3: Ručna integracija
-
-Za vlastite upravitelje pristanka ili gdje ništa od navedenog ne vrijedi.
-
-### Metoda 1: JavaScript funkcije (preporučeno)
+### 1. način: JavaScript funkcije (preporučeno)
 
 ```javascript
-// Kada korisnik prihvati marketinške kolačiće
+// When user accepts marketing cookies
 function onMarketingConsentGranted() {
     if (typeof window.wcBarionGrantConsent === 'function') {
         window.wcBarionGrantConsent();
     }
 }
 
-// Kada korisnik odbije marketinške kolačiće
+// When user rejects marketing cookies
 function onMarketingConsentRejected() {
     if (typeof window.wcBarionRejectConsent === 'function') {
         window.wcBarionRejectConsent();
@@ -106,48 +103,33 @@ function onMarketingConsentRejected() {
 }
 ```
 
-### Metoda 2: Vlastiti DOM događaji
+### 2. način: Vlastiti DOM događaji
 
 ```javascript
-// Davanje pristanka
+// Grant consent
 document.dispatchEvent(new Event('wcBarionGrantConsent'));
 
-// Odbijanje pristanka
+// Reject consent
 document.dispatchEvent(new Event('wcBarionRejectConsent'));
 ```
 
-### Metoda 3: WordPress action hook
+### 3. način: WordPress action hook
 
 ```php
-// U tvojem dodatku za upravljanje pristankom ili u temi
+// In your consent manager plugin or theme
 add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
     <script>
-    // Ovdje ide tvoja logika pristanka
+    // Your custom consent logic here
     </script>
     <?php
 }
 ```
 
-### Primjeri za pojedine upravitelje pristanka
+### Primjer: OneTrust
 
-**Cookiebot:**
-```javascript
-window.addEventListener('CookiebotOnAccept', function() {
-    if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
-    } else {
-        window.wcBarionRejectConsent();
-    }
-});
-window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
-});
-```
-
-**OneTrust:**
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
@@ -160,47 +142,53 @@ function OptanonWrapper() {
 
 ---
 
-## Što i dalje moraš sam
+## Što moraš srediti sam
 
-Dodatak prosljeđuje pristanak. Tvoje politike neće napisati ni traku podesiti, a Barion traži i
-jedno i drugo. Iz
+Dodatak prosljeđuje privolu. Ne može napisati tvoje politike ni podesiti tvoju traku, a Barion
+zahtijeva oboje. Iz
 [Barionovih zahtjeva](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements):
 
-- **Dodaj Barionove kolačiće u svoju politiku kolačića.** `ba_vid`, `ba_vid.xxx`, `ba_sid` i `ba_sid.xxx` idu među nužne kolačiće — služe sprječavanju prijevara na temelju Barionova legitimnog interesa i ne traže pristanak. `BarionMarketingConsent.xxx` te kolačići medijskih i oglašivačkih partnera idu među marketinške kolačiće i traže pristanak.
+- **Dodaj Barionove kolačiće u svoju politiku kolačića.** `ba_vid`, `ba_vid.xxx`, `ba_sid` i `ba_sid.xxx` spadaju među nužne kolačiće — služe sprječavanju prijevara na temelju Barionova legitimnog interesa i ne traže privolu. `BarionMarketingConsent.xxx` te kolačići medijskih i oglašivačkih partnera spadaju među marketinške kolačiće i privolu traže.
 - **Spomeni Barion Pixel u svojoj politici privatnosti** i poveži Barionovu [obavijest o privatnosti](https://www.barion.com/en/privacy-notice/).
-- **Omogući kupcima da u svakom trenutku promijene ili povuku pristanak** i pitaj ih ponovno. Barion traži da se traka ponovno pojavi barem svakih 13 mjeseci, a preporučuje 30 dana.
-- **Koristi tekst trake koji Barion preporučuje**, gdje god možeš. Nalazi se na stranici sa zahtjevima i pokriva dijeljenje podataka s partnerima koje Barion Pixel podrazumijeva.
+- **Omogući kupcima da bilo kada promijene ili povuku privolu** i pitaj ih ponovno. Barion traži da se traka ponovno pojavi barem svakih 13 mjeseci, a preporučuje 30 dana.
+- **Koristi tekst trake koji Barion preporučuje** gdje god možeš. Nalazi se na stranici sa zahtjevima i pokriva dijeljenje podataka s partnerima koje Barion Pixel podrazumijeva.
 
 ---
 
-## Kako pristanak utječe na pixel
+## Kako privola utječe na piksel
 
-| Stanje | Osnovni pixel (bp.js) | pageView | Prikupljanje marketinških podataka |
-|--------|-----------------------|----------|------------------------------------|
-| Prije bilo kakve odluke o pristanku | Učitan | Šalje se (sprječavanje prijevara) | Ne |
-| Nakon `grantConsent` | Učitan | Šalje se | Da |
-| Nakon `rejectConsent` | Učitan | Šalje se (sprječavanje prijevara) | Ne |
+| Stanje | Osnovni piksel (bp.js) | pageView | Prikupljanje marketinških podataka |
+|-------|--------------------|----------|--------------------------|
+| Prije bilo kakve radnje privole | Učitan | Pokreće se (sprječavanje prijevara) | Ne |
+| Nakon `grantConsent` | Učitan | Pokreće se | Da |
+| Nakon `rejectConsent` | Učitan | Pokreće se (sprječavanje prijevara) | Ne |
 
 ---
 
 ## Testiranje
 
-1. Uključi **način za otklanjanje pogrešaka** u Postavke > Barion Pixel.
+1. Uključi **Debug Mode** u Postavke > Barion Pixel.
 2. Otvori konzolu preglednika (F12).
-3. Prati ove poruke:
+3. Potraži ove poruke:
 
 | Poruka | Značenje |
-|--------|----------|
-| `Consent auto-granted via WP Consent API` | Razina 1, pristanak je pri učitavanju već postojao |
-| `Consent granted via WP Consent API change event` | Razina 1, kupac je upravo prihvatio |
-| `Consent rejected via WP Consent API change event` | Razina 1, kupac je upravo odbio |
-| `Cookie Law Info detected, initial non-necessary cookie: …` | Preuzela je razina 2, s pročitanom vrijednošću kolačića |
-| `Cookie Law Info button clicked, non-necessary cookie: …` | Razina 2, kupac je koristio traku |
-| `No consent manager detected…` | Razina 3 — ništa nije pronađeno, funkcije pozovi sam |
-| `Consent granted (grantConsent)` | `grantConsent` je stigao do bp.js (bilo koja razina) |
-| `Consent rejected (rejectConsent)` | `rejectConsent` je stigao do bp.js (bilo koja razina) |
+|---------|---------|
+| `Consent manager detected: …` | Navedeni upravitelji pronađeni su i povezani |
+| `No consent manager detected…` | Ništa nije pronađeno — funkcije pozovi sam |
+| `Consent granted (grantConsent)` | `grantConsent` je stigao do bp.js |
+| `Consent rejected (rejectConsent)` | `rejectConsent` je stigao do bp.js |
 
 Sve poruke imaju prefiks `[Barion Pixel]`.
 
-4. Testiraj na svojoj traci i put prihvaćanja i put odbijanja.
-5. Funkcije pristanka sigurno se mogu pozivati više puta.
+4. Na svojoj traci testiraj i put prihvaćanja i put odbijanja.
+5. Funkcije privole sigurno je pozivati više puta.
+
+`No consent manager detected` pojavljuje se i kao upozorenje na stranici postavki dodatka kada
+dodatak WP Consent API nije aktivan, jer je to greška zbog koje se integracija Full Pixel
+odbija.
+
+Stranica postavki nosi drugo upozorenje za zamku iza toga: WP Consent API je aktivan, ali kod
+njega se nije registrirala nijedna traka za kolačiće. Sam po sebi API svima odgovara „dano“, jer
+nepostavljena vrsta privole njegov je način da kaže da ga ne pokreće nijedna traka.
+Instalirati ga uz traku koja ga ne podržava zato ništa ne povezuje — samo čini da svaki
+posjetitelj izgleda kao da je pristao. U tom stanju dodatak ga zanemaruje.

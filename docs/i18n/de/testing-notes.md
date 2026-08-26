@@ -70,7 +70,7 @@ protokollieren.
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
-[Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Consent manager detected: WP Consent API
 [Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
@@ -145,11 +145,12 @@ Führe sie sowohl in einem klassischen als auch in einem Block-Shop aus — beid
 
 ### Consent-Integration
 
-1. Lösche alle Cookies.
+1. Lösche alle Cookies. Das ist wichtig — die Prüfung unten funktioniert nur bei einer Besucherin, die das Banner noch fragen muss.
 2. Lade eine beliebige Seite. `[Barion Pixel] Base pixel initialized` erscheint — das Basis-Pixel lädt bewusst vor jeder Consent-Entscheidung.
-3. Akzeptiere Cookies in deinem Banner. `Consent granted (grantConsent)` erscheint.
-4. Lade neu — die Einwilligung wird beim Laden erneut erteilt, ohne Banner.
-5. Widerrufe die Einwilligung und prüfe, ob `Consent rejected (rejectConsent)` erscheint.
+3. Fass noch nichts an. Es darf kein `grantConsent` erscheinen. Barion lehnt eine Integration ab, die die Einwilligung beim Laden der Seite sendet.
+4. Akzeptiere Cookies in deinem Banner. Jetzt erscheint `Consent granted (grantConsent)`.
+5. Lade neu. Diesmal wird nichts gesendet, und die Konsole meldet, dass die Einwilligung beim Laden bereits bestand. bp.js speichert die Antwort in seinem eigenen Cookie, Barion hat sie also bereits.
+6. Widerrufe die Einwilligung und prüfe, ob `Consent rejected (rejectConsent)` erscheint.
 
 ---
 
@@ -171,9 +172,18 @@ Plugin überspringt das Laden des Skripts und initialisiert trotzdem mit deiner 
 
 ### Einwilligung wird nicht erteilt
 
-- **WP Consent API**: das WP-Consent-API-Plugin muss installiert sein und dein Cookie-Plugin muss es unterstützen.
-- **Cookie Law Info**: das Plugin muss aktiv und das globale `CLI` verfügbar sein.
-- **Manuell**: rufe `window.wcBarionGrantConsent()` aus dem Callback deines Consent-Managers auf.
+Das ist der Fehler, wegen dem Barion eine Full-Pixel-Integration ablehnt, prüfe ihn also
+zuerst. Bei aktivem Debug Mode sagt dir die Konsole, in welchem Fall du bist.
+
+- `Consent manager detected: …`, aber nach dem Akzeptieren kein `grantConsent` — der Manager wurde gefunden, meldet aber keine Marketing-Einwilligung. Prüfe, ob du wirklich die Marketing- oder Werbekategorie deines Banners akzeptiert hast.
+- `Marketing consent already stood when this page loaded` — es ist nichts kaputt. Du testest als wiederkehrende Besucherin. Lösche deine Cookies und beginne wieder bei Schritt 1.
+- `No consent manager detected`, während das Plugin WP Consent API aktiv ist — die API ist installiert, aber dein Cookie-Banner registriert sich nicht bei ihr, also meldet sie für alle eine erteilte Einwilligung, und das Plugin ignoriert sie. Die Einstellungsseite sagt dasselbe. Verbinde das Banner mit der API oder rufe die Funktionen selbst auf.
+- `No consent manager detected` — das Plugin hat nichts zum Auslesen gefunden. Diese Zeile erscheint zehn Sekunden nach dem Laden der Seite, nicht sofort, weil ein von einem CDN ausgeliefertes Consent-Management so lange brauchen kann. CookieYes, Complianz, Cookiebot und das alte Cookie Law Info werden direkt gelesen. Für jedes andere Banner installiere [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) oder rufe `window.wcBarionGrantConsent()` aus dem Zustimmungs-Callback deines Banners auf.
+- Gar nichts in der Konsole — das Basis-Skript lief nicht. Ein Consent-Plugin, das unbekannte Skripte blockiert, kann es blockiert haben. Barion verlangt, dass das Basis-Pixel unabhängig von der Einwilligung lädt, nimm es also in die Freigabeliste deines Blockers auf.
+
+Bei einem Seitenaufruf, bei dem die Einwilligung noch nicht erteilt wurde, bleibt das Plugin
+still. Das ist Absicht: `rejectConsent` bedeutet, dass die Besucherin Nein gesagt hat, nicht,
+dass sie noch nicht geantwortet hat.
 
 ### purchase wird bei einer unbezahlten Bestellung ausgelöst
 

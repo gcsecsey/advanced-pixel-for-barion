@@ -67,7 +67,7 @@ Otvor konzolu (F12 > Konzola) a hľadaj správy `[Barion Pixel]`:
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
-[Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Consent manager detected: WP Consent API
 [Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
@@ -142,11 +142,12 @@ Prejdi ho v klasickom aj v blokovom obchode — pre `addToCart`, `initiateChecko
 
 ### Integrácia súhlasu
 
-1. Vymaž všetky cookies.
+1. Vymaž všetky cookies. Na tom záleží — kontrola nižšie funguje len pri návštevníkovi, ktorého sa lišta ešte musí spýtať.
 2. Načítaj ľubovoľnú stránku. Objaví sa `[Barion Pixel] Base pixel initialized` — základný pixel sa zámerne načítava pred akýmkoľvek rozhodnutím o súhlase.
-3. Prijmi cookies v lište. Objaví sa `Consent granted (grantConsent)`.
-4. Načítaj znovu — súhlas sa udelí pri načítaní, bez lišty.
-5. Odvolaj súhlas a over, že sa objaví `Consent rejected (rejectConsent)`.
+3. Zatiaľ sa ničoho nedotýkaj. Nesmie sa objaviť žiadny `grantConsent`. Barion odmieta integráciu, ktorá posiela súhlas pri načítaní stránky.
+4. Prijmi cookies v lište. Až teraz sa objaví `Consent granted (grantConsent)`.
+5. Načítaj znovu. Tentoraz sa neodošle nič a konzola uvedie, že súhlas už pri načítaní stránky existoval. bp.js si odpoveď drží vo vlastnej cookie, Barion ju teda už má.
+6. Odvolaj súhlas a over, že sa objaví `Consent rejected (rejectConsent)`.
 
 ---
 
@@ -168,9 +169,17 @@ načítanie skriptu preskočí a aj tak sa inicializuje s tvojím Pixel ID. Pozr
 
 ### Súhlas sa neudeľuje
 
-- **WP Consent API**: plugin WP Consent API musí byť nainštalovaný a tvoj cookie plugin ho musí podporovať.
-- **Cookie Law Info**: plugin musí byť aktívny a globálny objekt `CLI` dostupný.
-- **Ručne**: zavolaj `window.wcBarionGrantConsent()` z callbacku svojho správcu súhlasu.
+Práve kvôli tejto chybe Barion odmieta integráciu Full Pixel, tak ju skontroluj ako prvú.
+So zapnutým Debug Mode ti konzola povie, v ktorom prípade si.
+
+- `Consent manager detected: …`, ale po prijatí žiadny `grantConsent` — správca bol nájdený, ale nehlási marketingový súhlas. Over si, že si prijal práve marketingovú či reklamnú kategóriu svojej lišty.
+- `Marketing consent already stood when this page loaded` — nič nie je zle. Testuješ ako vracajúci sa návštevník. Zmaž cookies a začni znovu od kroku 1.
+- `No consent manager detected`, zatiaľ čo je plugin WP Consent API aktívny — API je nainštalované, ale tvoja cookie lišta sa uňho neregistruje, takže hlási súhlas ako udelený pre každého a plugin ho ignoruje. Stránka nastavení hovorí to isté. Prepoj lištu s API, alebo funkcie zavolaj sám.
+- `No consent manager detected` — plugin nenašiel nič na čítanie. Tento riadok sa objaví desať sekúnd po načítaní stránky, nie okamžite, pretože správca súhlasu servírovaný z CDN sa môže objaviť až tak neskoro. CookieYes, Complianz, Cookiebot a staršie Cookie Law Info sa čítajú priamo. Pri akejkoľvek inej lište nainštaluj [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) alebo zavolaj `window.wcBarionGrantConsent()` z callbacku prijatia svojej lišty.
+- V konzole vôbec nič — základný skript sa nespustil. Mohol ho zablokovať plugin súhlasu, ktorý blokuje neznáme skripty. Barion žiada, aby sa základný pixel načítal bez ohľadu na súhlas, pridaj ho teda na zoznam povolených vo svojom blokovači.
+
+Pri načítaní stránky, kde súhlas ešte nebol udelený, zostáva plugin ticho. Je to zámer:
+`rejectConsent` znamená, že návštevník povedal nie, nie že ešte neodpovedal.
 
 ### purchase sa odošle pri nezaplatenej objednávke
 

@@ -35,7 +35,15 @@ Nu lipi în issue ID-ul tău real de Pixel sau adresa de e-mail a unui client.
    sanitizează toate intrările și prefixează globalele noi cu `wc_barion_pixel_`.
 4. Descrie cum ai testat modificarea. `docs/testing-notes.md` enumeră particularitățile bp.js de
    care te poți lovi ușor.
-5. Nu crește numărul de versiune și nu edita jurnalul de modificări — lansările sunt etichetate
+5. Rulează verificările pe care le rulează și CI: `composer install`, apoi `composer lint` (PHPCS
+   cu standardele de codare WordPress și compatibilitate PHP 7.4+), `composer phpstan`,
+   `node --test` și `php tests/<fișier>.php` pentru fiecare test PHP. `composer lint:fix` repară
+   majoritatea problemelor de stil.
+6. Rulează suita de browser pentru consimțământ: `npm install`, `npx playwright install --with-deps chromium`,
+   apoi `npm run test:browser`. Pornește WordPress în Playground și verifică faptul că
+   consimțământul ajunge la Barion la clicul pe acceptare și niciodată la încărcarea paginii — vezi
+   [`tests/playground/README.md`](../../../tests/playground/README.md).
+7. Nu crește numărul de versiune și nu edita jurnalul de modificări — lansările sunt etichetate
    separat.
 
 ## Traduceri

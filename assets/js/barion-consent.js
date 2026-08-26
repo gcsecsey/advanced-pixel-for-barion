@@ -9,7 +9,8 @@
  * Every listener is therefore registered unconditionally and reads its global
  * at event time. Barion's own consent calls are idempotent, but one click can
  * arrive through two adapters at once (CookieYes also bridges into the WP
- * Consent API), so only transitions are reported.
+ * Consent API), so only transitions are reported — and only those the visitor
+ * makes on this page load, never a state the banner replays at load.
  *
  * Loaded as a plain script in the browser (declares one global) and required
  * directly by tests/consent.test.js in Node.
@@ -17,9 +18,11 @@
  * @param {object}   scope     Window-like object holding the consent globals.
  * @param {object}   doc       Document-like object, for document-level events.
  * @param {function} onConsent Receives true to grant, false to reject.
- * @param {function} onDetect  Receives the names of the consent managers found,
- *                             once one of them answers or the probe gives up.
- *                             The list is empty when none ever appeared.
+ * @param {function} onDetect  Receives the names of the consent managers found
+ *                             and whether marketing consent already stood when
+ *                             the page loaded, once one of them answers or the
+ *                             probe gives up. The list is empty when none ever
+ *                             appeared.
  */
 function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 	// read() returns null when its consent manager is not on the page.
@@ -30,6 +33,16 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 			events: [ 'wp_listen_for_consent_change' ],
 			read: function () {
 				if ( typeof scope.wp_has_consent !== 'function' ) {
+					return null;
+				}
+				// With no consent type registered, wp_has_consent() answers
+				// "granted" for every visitor — its own way of saying that no
+				// cookie banner drives it. Reading that as a real answer
+				// reports consent nobody gave, so the API counts as absent.
+				var consentType = typeof scope.wp_consent_type !== 'undefined'
+					? scope.wp_consent_type
+					: scope.wp_fallback_consent_type;
+				if ( ! consentType ) {
 					return null;
 				}
 				return Boolean( scope.wp_has_consent( 'marketing' ) );
@@ -90,13 +103,60 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 
 	var found = [];
 	var reported = null;
+	var acted = false;
+
+	// Barion wants grantConsent at the moment the visitor clicks accept, and
+	// rejects an integration that sends it at page load. Consent that already
+	// stands on load is an earlier visit replayed — Cookiebot raises
+	// CookiebotOnConsentReady every time — and bp.js keeps that answer in its
+	// own cookie anyway, so the state is recorded but nothing is sent until the
+	// visitor touches the page. Capture phase, and before the adapters below,
+	// so the gesture is on record by the time the banner's handler answers.
+	// click is listed because a banner using element.click() raises no pointer
+	// event at all.
+	[ 'pointerdown', 'keydown', 'touchstart', 'click' ].forEach( function ( eventName ) {
+		doc.addEventListener( eventName, function () {
+			acted = true;
+		}, true );
+	} );
 
 	function report( granted ) {
 		if ( granted === reported ) {
 			return;
 		}
 		reported = granted;
+
+		if ( ! acted ) {
+			return;
+		}
+
 		onConsent( granted );
+	}
+
+	// The first answer an adapter ever gives describes what the visitor decided
+	// before this page load, so it is recorded and never sent. Only what
+	// changes afterwards is a decision made here.
+	//
+	// This has to sit in front of the events too, not just the probe. Cookiebot
+	// raises CookiebotOnConsentReady as soon as it initialises, replaying an
+	// earlier visit's answer through the same listener a real click uses, and a
+	// visitor who clicked anything at all before that would otherwise have the
+	// replay sent as though they had just accepted.
+	//
+	// A first answer of "no consent" is left unrecorded on purpose. No adapter
+	// can tell an undecided visitor from one who refused, so a decline arrives
+	// as an event carrying the value already held. Leaving `reported` alone
+	// keeps that a change, which is what makes rejectConsent fire at all.
+	function observe( adapter, granted ) {
+		if ( ! adapter.seen ) {
+			adapter.seen = true;
+			if ( granted ) {
+				reported = true;
+			}
+			return;
+		}
+
+		report( granted );
 	}
 
 	adapters.forEach( function ( adapter ) {
@@ -107,22 +167,22 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 				}
 
 				if ( ! adapter.delay ) {
-					report( adapter.read() );
+					observe( adapter, adapter.read() );
 					return;
 				}
 
 				scope.setTimeout( function () {
 					var settled = adapter.read();
 					if ( null !== settled ) {
-						report( settled );
+						observe( adapter, settled );
 					}
 				}, adapter.delay );
 			} );
 		} );
 	} );
 
-	// Names every consent manager that is on the page now and reports the ones
-	// that hold consent. Returns false while none of them has answered.
+	// Names every consent manager that is on the page now and records what they
+	// hold. Returns false while none of them has answered.
 	function probe() {
 		adapters.forEach( function ( adapter ) {
 			var granted = adapter.read();
@@ -134,12 +194,11 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 				found.push( adapter.name );
 			}
 
-			// Before the visitor answers the banner there is nothing to report,
-			// so a missing consent stays silent rather than sending
-			// rejectConsent.
-			if ( granted ) {
-				report( true );
-			}
+			// Finding a manager is not the visitor deciding anything, so this
+			// goes through observe() rather than report(). It also gives the
+			// adapter its first answer in the common case, which is what makes
+			// a later accept or decline read as a change.
+			observe( adapter, granted );
 		} );
 
 		return found.length > 0;
@@ -147,7 +206,7 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 
 	function detected() {
 		if ( onDetect ) {
-			onDetect( found );
+			onDetect( found, true === reported );
 		}
 	}
 

@@ -71,7 +71,7 @@ Nyisd meg a konzolt (F12 > Konzol), és keresd a `[Barion Pixel]` üzeneteket:
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
-[Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Consent manager detected: WP Consent API
 [Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
@@ -146,11 +146,12 @@ Futtasd le klasszikus és blokkos boltban is — a kettő teljesen eltérő kód
 
 ### Hozzájárulás integráció
 
-1. Töröld az összes cookie-t.
+1. Töröld az összes cookie-t. Ez lényeges — az alábbi ellenőrzés csak olyan látogatónál működik, akit a sávnak még meg kell kérdeznie.
 2. Tölts be egy oldalt. Megjelenik a `[Barion Pixel] Base pixel initialized` üzenet — az alap pixel szándékosan minden hozzájárulási döntés előtt betöltődik.
-3. Fogadd el a cookie-kat a sávban. Megjelenik a `Consent granted (grantConsent)` üzenet.
-4. Töltsd újra — a hozzájárulás sáv nélkül, betöltéskor újra megadódik.
-5. Vond vissza a hozzájárulást, és ellenőrizd, hogy megjelenik a `Consent rejected (rejectConsent)` üzenet.
+3. Még ne nyúlj semmihez. Nem jelenhet meg `grantConsent`. A Barion elutasítja azt az integrációt, amelyik oldalbetöltéskor küld hozzájárulást.
+4. Fogadd el a cookie-kat a sávban. Most megjelenik a `Consent granted (grantConsent)` üzenet.
+5. Töltsd újra. Ezúttal semmi nem megy el, és a konzol azt írja, hogy a hozzájárulás már megvolt az oldal betöltésekor. A bp.js a saját cookie-jában tárolja a választ, tehát a Barionnak már megvan.
+6. Vond vissza a hozzájárulást, és ellenőrizd, hogy megjelenik a `Consent rejected (rejectConsent)` üzenet.
 
 ---
 
@@ -172,9 +173,18 @@ inicializál. Lásd a [Kompatibilitást](compatibility.md).
 
 ### Nem adódik meg a hozzájárulás
 
-- **WP Consent API**: a WP Consent API bővítménynek telepítve kell lennie, és a cookie-bővítményednek támogatnia kell.
-- **Cookie Law Info**: a bővítménynek aktívnak kell lennie, és a `CLI` globálisnak elérhetőnek.
-- **Kézi**: hívd a `window.wcBarionGrantConsent()` függvényt a hozzájárulás-kezelőd visszahívásából.
+Ez az a hiba, ami miatt a Barion elutasítja a Teljes Pixel integrációt, ezért ezt ellenőrizd
+először. Bekapcsolt Debug Mode mellett a konzol megmondja, melyik esetben vagy.
+
+- `Consent manager detected: …`, de elfogadás után nincs `grantConsent` — a kezelőt megtalálta, de az nem jelez marketing-hozzájárulást. Ellenőrizd, hogy a sávod marketing vagy hirdetési kategóriáját fogadtad-e el.
+- `Marketing consent already stood when this page loaded` — semmi baj nincs. Visszatérő látogatóként tesztelsz. Töröld a cookie-kat, és kezdd újra az 1. lépéstől.
+- `No consent manager detected`, miközben a WP Consent API bővítmény aktív — az API telepítve van, de a cookie-sávod nem regisztrál nála, ezért mindenkinél megadottnak jelenti a hozzájárulást, és a bővítmény figyelmen kívül hagyja. A beállítási oldal ugyanezt írja. Kösd össze a sávot az API-val, vagy hívd meg te a függvényeket.
+- `No consent manager detected` — a bővítmény nem talált mit olvasni. Ez a sor tíz másodperccel az oldal betöltése után jelenik meg, nem azonnal, mert egy CDN-ről kiszolgált hozzájárulás-kezelő ennyi ideig is késhet. A CookieYes, a Complianz, a Cookiebot és a régi Cookie Law Info közvetlenül olvasható. Bármely más sávhoz telepítsd a [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) bővítményt, vagy hívd a `window.wcBarionGrantConsent()` függvényt a sávod elfogadási visszahívásából.
+- Egyáltalán semmi a konzolban — az alap szkript nem futott le. Egy ismeretlen szkripteket blokkoló hozzájárulás-bővítmény blokkolhatta. A Barion azt kéri, hogy az alap pixel a hozzájárulástól függetlenül betöltődjön, ezért vedd fel a blokkolód engedélyezési listájára.
+
+A bővítmény csendben marad azon az oldalbetöltésen, ahol a hozzájárulást még nem adták meg.
+Ez szándékos: a `rejectConsent` azt jelenti, hogy a látogató nemet mondott, nem azt, hogy még
+nem válaszolt.
 
 ### A purchase fizetetlen rendelésnél is elindul
 

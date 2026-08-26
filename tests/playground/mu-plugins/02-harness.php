@@ -16,11 +16,14 @@ add_action('template_redirect', function () {
 <h1>Barion consent harness</h1>
 <pre id="out">running...</pre>
 <script>
+// A scenario with click:null expects [] throughout: consent that already stood
+// when the page loaded is a decision from an earlier visit, and Barion rejects
+// an integration that replays it instead of sending grantConsent on the click.
 var SCENARIOS = [
     { name: 'CookieYes - accept',                 query: 'cmp=cookieyes',            click: 'accept', expect: [ 'grantConsent' ] },
     { name: 'CookieYes - decline',                query: 'cmp=cookieyes',            click: 'decline', expect: [ 'rejectConsent' ] },
     { name: 'CookieYes - no answer yet',          query: 'cmp=cookieyes',            click: null,      expect: [] },
-    { name: 'CookieYes - returning, accepted',    query: 'cmp=cookieyes&prior=1',    click: null,      expect: [ 'grantConsent' ] },
+    { name: 'CookieYes - returning, accepted',    query: 'cmp=cookieyes&prior=1',    click: null,      expect: [] },
     { name: 'CookieYes - loads late, then accept', query: 'cmp=cookieyes&late=1',    click: 'accept',  expect: [ 'grantConsent' ] },
     { name: 'CookieYes - accept twice',           query: 'cmp=cookieyes',            click: 'accept2', expect: [ 'grantConsent' ] },
     { name: 'CookieYes - accept then decline',    query: 'cmp=cookieyes',            click: 'both',    expect: [ 'grantConsent', 'rejectConsent' ] },
@@ -33,7 +36,7 @@ var SCENARIOS = [
     { name: 'Cookie Law Info legacy - accept',    query: 'cmp=cli',                  click: 'accept',  expect: [ 'grantConsent' ] },
     { name: 'Cookie Law Info legacy - decline',   query: 'cmp=cli',                  click: 'decline', expect: [ 'rejectConsent' ] },
     { name: 'No consent manager',                 query: 'cmp=none',                 click: null,      expect: [] },
-    { name: 'Late CMP, returning visitor, no click', query: 'cmp=cookieyes&late=1&prior=1', click: null, expect: [ 'grantConsent' ] }
+    { name: 'Late CMP, returning visitor, no click', query: 'cmp=cookieyes&late=1&prior=1', click: null, expect: [] }
 ];
 
 
@@ -41,10 +44,11 @@ var REAL = [
     { name: 'Real WPCA optin - accept',            query: 'real=1&ctype=optin',  cookie: null,    click: 'accept',  expect: [ 'grantConsent' ] },
     { name: 'Real WPCA optin - decline',           query: 'real=1&ctype=optin',  cookie: null,    click: 'decline', expect: [ 'rejectConsent' ] },
     { name: 'Real WPCA optin - no answer yet',     query: 'real=1&ctype=optin',  cookie: null,    click: null,      expect: [] },
-    { name: 'Real WPCA optin - returning, allowed', query: 'real=1&ctype=optin', cookie: 'allow', click: null,      expect: [ 'grantConsent' ] },
+    { name: 'Real WPCA optin - returning, allowed', query: 'real=1&ctype=optin', cookie: 'allow', click: null,      expect: [] },
     { name: 'Real WPCA optin - returning, denied',  query: 'real=1&ctype=optin', cookie: 'deny',  click: null,      expect: [] },
     { name: 'Real WPCA optin - deny then allow',   query: 'real=1&ctype=optin',  cookie: 'deny',  click: 'accept',  expect: [ 'grantConsent' ] },
-    { name: 'Real WPCA, no consent type set',      query: 'real=1&ctype=none',   cookie: null,    click: null,      expect: [ 'grantConsent' ] }
+    { name: 'Real WPCA, no consent type set',      query: 'real=1&ctype=none',   cookie: null,    click: null,      expect: [] },
+    { name: 'Real WPCA, no consent type set, clicked', query: 'real=1&ctype=none', cookie: null, click: 'accept',  expect: [] }
 ];
 
 function wait( ms ) {

@@ -67,7 +67,7 @@ Otvori konzolu (F12 > Konzola) i traži poruke `[Barion Pixel]`:
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
-[Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Consent manager detected: WP Consent API
 [Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
@@ -142,11 +142,12 @@ Prođi je i u klasičnoj i u blokovskoj prodavnici — za `addToCart`, `initiate
 
 ### Integracija saglasnosti
 
-1. Obriši sve kolačiće.
+1. Obriši sve kolačiće. To je važno — provera ispod radi samo kod posetioca kojeg traka tek treba da pita.
 2. Učitaj bilo koju stranicu. Pojavi se `[Barion Pixel] Base pixel initialized` — osnovni piksel se namerno učitava pre bilo kakve odluke o saglasnosti.
-3. Prihvati kolačiće u svojoj traci. Pojavi se `Consent granted (grantConsent)`.
-4. Ponovo učitaj — saglasnost se pri učitavanju daje ponovo, bez trake.
-5. Povuci saglasnost i proveri da li se pojavljuje `Consent rejected (rejectConsent)`.
+3. Zasad ništa ne diraj. Ne sme da se pojavi nikakav `grantConsent`. Barion odbija integraciju koja šalje saglasnost pri učitavanju stranice.
+4. Prihvati kolačiće u svojoj traci. Tek sada se pojavi `Consent granted (grantConsent)`.
+5. Ponovo učitaj. Ovaj put se ne šalje ništa, a konzola javlja da je saglasnost već postojala pri učitavanju stranice. bp.js čuva odgovor u sopstvenom kolačiću, pa ga Barion već ima.
+6. Povuci saglasnost i proveri da li se pojavljuje `Consent rejected (rejectConsent)`.
 
 ---
 
@@ -168,9 +169,17 @@ preskače učitavanje skripte i svejedno se inicijalizuje sa tvojim Pixel ID-om.
 
 ### Saglasnost se ne daje
 
-- **WP Consent API**: dodatak WP Consent API mora biti instaliran i tvoj dodatak za kolačiće mora ga podržavati.
-- **Cookie Law Info**: dodatak mora biti aktivan i globalni `CLI` dostupan.
-- **Ručno**: pozovi `window.wcBarionGrantConsent()` iz callbacka svog upravljača saglasnošću.
+Upravo zbog ove greške Barion odbija integraciju Full Pixel, pa je proveri prvu. Sa uključenim
+Debug Mode konzola ti kaže u kom si slučaju.
+
+- `Consent manager detected: …`, ali nakon prihvatanja nema `grantConsent` — upravljač je pronađen, ali ne javlja marketinšku saglasnost. Proveri da li si prihvatio baš marketinšku ili oglasnu kategoriju svoje trake.
+- `Marketing consent already stood when this page loaded` — ništa nije u kvaru. Testiraš kao posetilac koji se vraća. Obriši kolačiće i počni ponovo od koraka 1.
+- `No consent manager detected` dok je dodatak WP Consent API aktivan — API je instaliran, ali se tvoja traka za kolačiće kod njega ne registruje, pa on javlja saglasnost kao datu za sve, a dodatak ga zanemaruje. Stranica podešavanja kaže isto. Poveži traku sa API-jem ili funkcije pozovi sam.
+- `No consent manager detected` — dodatak nije našao šta da čita. Ovaj red pojavljuje se deset sekundi nakon učitavanja stranice, ne odmah, jer upravljač saglasnosti koji se servira sa CDN-a može toliko da kasni. CookieYes, Complianz, Cookiebot i stari Cookie Law Info čitaju se direktno. Za bilo koju drugu traku instaliraj [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) ili pozovi `window.wcBarionGrantConsent()` iz callbacka prihvatanja svoje trake.
+- U konzoli baš ništa — osnovna skripta se nije pokrenula. Mogao ju je blokirati dodatak za saglasnost koji blokira nepoznate skripte. Barion traži da se osnovni piksel učita bez obzira na saglasnost, pa ga dodaj na spisak dozvoljenih u svom blokatoru.
+
+Pri učitavanju stranice na kojoj saglasnost još nije data dodatak ćuti. To je namerno:
+`rejectConsent` znači da je posetilac rekao ne, a ne da još nije odgovorio.
 
 ### purchase se šalje za neplaćenu porudžbinu
 

@@ -71,7 +71,7 @@ Deschide consola (F12 > Consolă) și caută mesajele `[Barion Pixel]`:
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
-[Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Consent manager detected: WP Consent API
 [Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
@@ -146,11 +146,12 @@ complet diferite pentru `addToCart`, `initiateCheckout` și `setEncryptedEmail`.
 
 ### Integrarea consimțământului
 
-1. Șterge toate cookie-urile.
+1. Șterge toate cookie-urile. Contează — verificarea de mai jos funcționează doar la un vizitator pe care bara trebuie încă să îl întrebe.
 2. Încarcă orice pagină. Apare `[Barion Pixel] Base pixel initialized` — pixelul de bază se încarcă intenționat înainte de orice decizie de consimțământ.
-3. Acceptă cookie-urile în bara ta. Apare `Consent granted (grantConsent)`.
-4. Reîncarcă — consimțământul se acordă din nou la încărcare, fără bară.
-5. Retrage consimțământul și verifică dacă apare `Consent rejected (rejectConsent)`.
+3. Deocamdată nu atinge nimic. Nu are voie să apară niciun `grantConsent`. Barion respinge o integrare care trimite consimțământul la încărcarea paginii.
+4. Acceptă cookie-urile în bara ta. Abia acum apare `Consent granted (grantConsent)`.
+5. Reîncarcă. De data asta nu se trimite nimic, iar consola spune că consimțământul exista deja la încărcarea paginii. bp.js păstrează răspunsul în propriul cookie, deci Barion îl are deja.
+6. Retrage consimțământul și verifică dacă apare `Consent rejected (rejectConsent)`.
 
 ---
 
@@ -172,9 +173,17 @@ Payment Gateway, un tag Google Tag Manager, un fragment din temă. Este inofensi
 
 ### Consimțământul nu se acordă
 
-- **WP Consent API**: plugin-ul WP Consent API trebuie instalat, iar plugin-ul tău de cookie-uri trebuie să îl suporte.
-- **Cookie Law Info**: plugin-ul trebuie să fie activ și globalul `CLI` disponibil.
-- **Manual**: apelează `window.wcBarionGrantConsent()` din callback-ul managerului tău de consimțământ.
+Tocmai din cauza acestei erori Barion respinge o integrare Full Pixel, așa că verific-o prima.
+Cu Debug Mode pornit, consola îți spune în ce caz ești.
+
+- `Consent manager detected: …`, dar după acceptare niciun `grantConsent` — managerul a fost găsit, dar nu raportează consimțământ de marketing. Verifică dacă ai acceptat chiar categoria de marketing sau publicitate a barei tale.
+- `Marketing consent already stood when this page loaded` — nu e nimic stricat. Testezi ca vizitator care revine. Șterge cookie-urile și ia-o de la pasul 1.
+- `No consent manager detected` în timp ce plugin-ul WP Consent API este activ — API-ul este instalat, dar bara ta de cookie-uri nu se înregistrează la el, așa că raportează consimțământul ca acordat pentru toată lumea, iar plugin-ul îl ignoră. Pagina de setări spune același lucru. Conectează bara la API sau apelează tu funcțiile.
+- `No consent manager detected` — plugin-ul nu a găsit nimic de citit. Linia apare la zece secunde după încărcarea paginii, nu imediat, pentru că un manager de consimțământ servit de pe un CDN poate întârzia atât. CookieYes, Complianz, Cookiebot și vechiul Cookie Law Info sunt citite direct. Pentru orice altă bară, instalează [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) sau apelează `window.wcBarionGrantConsent()` din callback-ul de acceptare al barei tale.
+- Absolut nimic în consolă — scriptul de bază nu a rulat. Poate l-a blocat un plugin de consimțământ care blochează scripturile necunoscute. Barion cere ca pixelul de bază să se încarce indiferent de consimțământ, deci adaugă-l în lista de permise a blocatorului tău.
+
+La o încărcare de pagină unde consimțământul nu a fost încă acordat, plugin-ul tace. Este
+intenționat: `rejectConsent` înseamnă că vizitatorul a spus nu, nu că încă nu a răspuns.
 
 ### purchase se trimite pentru o comandă neplătită
 

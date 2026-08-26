@@ -3,3 +3,4 @@ vendor/
 *.log
 .context/
 .playwright-mcp/
+node_modules/
