@@ -10,97 +10,95 @@ Ugyanitt található a Barion által ajánlott cookie-sáv szövege és a Barion
 partnereinek aktuális listája. Éles indulás előtt olvasd el — a megfelelés a kereskedő
 felelőssége, nem a bővítményé.
 
+A Barion a `grantConsent` eseményt is felsorolja azok között, amelyeket
+[kötelező megvalósítani](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+a Teljes Pixel integráció jóváhagyása előtt. Az a bolt, amelyik soha nem küldi el, nem
+jogosult az alacsonyabb díjakra, akármilyen teljes is az integráció többi része.
+
 ## Mit csinál a bővítmény
 
-Az alap pixel szkript mindig betöltődik, és a `pageView` mindig elindul. A Barion ezt jogos
-érdekként dokumentálja: az alap pixel a fizetési csalások megelőzését szolgálja, és a marketing
-hozzájárulás nélkül gyűjtött adatot csak erre használják.
+Az alap pixel szkript mindig betöltődik, és a `pageView` mindig elsül. A Barion ezt
+jogos érdekként dokumentálja: az alap pixel a fizetési csalás megelőzését szolgálja, és
+a marketing-hozzájárulás nélkül gyűjtött adatot csak erre használják.
 
-Ezen felül a bővítmény meghívja a `bp('consent', 'grantConsent')` függvényt, ha a vásárló
-elfogadja a marketing cookie-kat, és a `bp('consent', 'rejectConsent')` függvényt, ha
-elutasítja. A Barion mindkettőt kötelezőnek sorolja fel. A sávodnak ezért valódi elutasítási
-lehetőséget kell kínálnia — csak elfogadást engedő sávnál a bővítménynek nincs mit jeleznie.
+Ezen felül a bővítmény meghívja a `bp('consent', 'grantConsent')` függvényt, amikor a
+vásárló elfogadja a marketing cookie-kat, és a `bp('consent', 'rejectConsent')`
+függvényt, amikor elutasítja. A Barion mindkettőt kötelezőnek sorolja fel. A sávodnak
+ezért valódi elutasítási lehetőséget kell kínálnia — csak elfogadás gombbal a
+bővítménynek nincs mit jeleznie.
 
-A bővítmény ebben a sorrendben keres hozzájárulás-kezelőt, és az elsőnél megáll:
+## Hogyan ismeri fel a hozzájárulást
 
-1. **WP Consent API** (ajánlott) — univerzális, minden nagyobb cookie-bővítménnyel működik
-2. **Cookie Law Info** (tartalék) — közvetlen integráció a CookieYes / Cookie Law Info bővítményhez
-3. **Kézi** — egyedi hozzájárulás-kezelőkhöz
+A bővítmény nem választ ki egyetlen hozzájárulás-kezelőt. Egyszerre feliratkozik minden
+ismert hozzájárulási jelzésre, és továbbítja az első valódi választ, majd minden ezt
+követő változást. A betöltési sorrend nem számít: a figyelők azelőtt regisztrálódnak,
+hogy bármelyik hozzájárulás-kezelő létezne, így a később megjelenő sáv is elérhető. A
+visszatérő látogató nem lát sávot, ezért semmilyen eseményt nem vált ki — emiatt a
+bővítmény félmásodpercenként keres hozzájárulás-kezelőt is, amíg egyik nem válaszol, és
+az oldal betöltése után tíz másodperccel feladja.
 
----
+Ezek külön bővítmény nélkül működnek:
 
-## 1. szint: WP Consent API (ajánlott)
+| Hozzájárulás-kezelő | Amin keresztül olvassa |
+|---|---|
+| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` és `wp_listen_for_consent_change`, de csak akkor, ha egy sáv hozzájárulási típust regisztrált nála |
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | `getCkyConsent()` és `cookieyes_consent_update` |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | `cmplz_has_consent('marketing')` és `cmplz_status_change` |
+| [Cookiebot](https://wordpress.org/plugins/cookiebot/) | `Cookiebot.consent.marketing` és `CookiebotOnAccept` / `CookiebotOnDecline` / `CookiebotOnConsentReady` |
+| Cookie Law Info 2.x, régi sáv | a `cookielawinfo-checkbox-non-necessary` cookie, a sávra kattintás után újraolvasva |
+| Bármi más | te hívod meg a függvényeket — lásd [Kézi integráció](#kézi-integráció) |
 
-A [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) a WordPress szabványa a
-hozzájárulás bővítmények közötti továbbítására. A Barion Pixel a `marketing` kategóriában
-regisztrál.
+Mindegyikre három szabály vonatkozik:
 
-### Hogyan működik
+- **A hozzájárulás akkor megy el, amikor a látogató válaszol a sávon, soha nem az oldal betöltésekor.** A Barion a `grantConsent` eseményt a kattintás pillanatában várja, és elutasítja azt az integrációt, amelyik azelőtt küldi el, hogy a látogató bármihez hozzáért volna — a Barion oldaláról ez úgy néz ki, mint egy bolt, amelyik soha nem kérdez. A bővítmény ezért betöltéskor beolvassa a hozzájárulás állapotát, de megtartja magának, és csak azt küldi el, amit a látogató ezen az oldalbetöltésen eldönt.
+- **A látogató válasza előtt semmi nem megy el.** Olyan oldalbetöltésnél, ahol nincs marketing-hozzájárulás, a bővítmény csendben marad, nem küld `rejectConsent` eseményt. Amíg a sávra nem érkezik válasz, nincs mit jelenteni.
+- **Csak a változások mennek el.** Az ismételt azonos állapot nem megy el kétszer, ami azért számít, mert egyetlen kattintás egyszerre két adapteren is megérkezhet.
 
-A `DOMContentLoaded` esemény után a bővítmény megnézi, létezik-e a `wp_has_consent()` függvény.
-Ha igen:
+Az a visszatérő látogató tehát, aki egy korábbi látogatáskor elfogadta, semmit nem vált
+ki — és ez így helyes: a bp.js a saját `BarionMarketingConsent` cookie-jában tárolja a
+választ, tehát a Barionnak már megvan. Az újraküldés minden oldalbetöltéskor éppen az
+volt, ami miatt az integrációt elutasították. Ha látni akarod elsülni a `grantConsent`
+eseményt, előbb töröld a cookie-kat, hogy a sáv újra kérdezzen.
 
-1. Ha a `marketing` hozzájárulás már megvan, a `grantConsent` azonnal elindul.
-2. Ezután a bővítmény a `wp_listen_for_consent_change` eseményre figyel, és minden változásnál elküldi a `grantConsent` vagy a `rejectConsent` eseményt.
+## WP Consent API — továbbra is ajánlott
 
-Vedd észre, mi *nincs* a listában: olyan oldalbetöltésnél, ahol nincs marketing hozzájárulás, a
-bővítmény hallgat, nem küld `rejectConsent` eseményt. Amíg a vásárló nem válaszolt a sávra,
-nincs mit jelenteni, a válasz pedig a változás eseményen keresztül érkezik meg.
+A [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) a WordPress szabványa
+a hozzájárulás bővítmények közötti továbbítására, és a Barion Pixel a `marketing`
+kategóriájában regisztrál. Ez egy **külön bővítmény** — nem része a WordPressnek, és nem
+része a cookie-sávodnak. A
+[core-ba emelésére vonatkozó javaslat](https://make.wordpress.org/core/2024/12/04/lets-reconsider-adopting-the-wp-consent-api/)
+nyitott, de nincs elfogadva.
 
-### Támogatott cookie-bővítmények
+Akkor telepítsd, ha a cookie-sávod nincs a fenti táblázatban. A legtöbb sáv támogatja a
+WP Consent API-t, de csak amíg az a bővítmény aktív: a CookieYes például csak akkor
+tölti be a hidat, ha a `WP_CONSENT_API` osztály létezik. Nélküle ezek a sávok semmit nem
+továbbítanak, és a bővítménynek a közvetlen integrációkra kell hagyatkoznia.
 
-Minden bővítmény működik, amely megvalósítja a WP Consent API-t:
-
-| Bővítmény | Aktív telepítés | Megjegyzés |
-|-----------|-----------------|------------|
-| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5M+ | Beépített WP Consent API |
-| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ | A WP Consent API társalkotója |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ | WP Consent API kompatibilis |
-| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ | WP Consent API kompatibilis |
-| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ | WP Consent API kompatibilis |
-
-### Beállítás
-
-1. Telepítsd és aktiváld a [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) bővítményt.
-2. Telepítsd és állítsd be a cookie-hozzájárulás bővítményedet.
-3. Telepítsd és állítsd be az Advanced Pixel for Barion bővítményt.
-
-Más teendő nincs — a hozzájárulás kezelése automatikus.
-
----
-
-## 2. szint: Cookie Law Info (tartalék)
-
-Akkor lép működésbe, ha a WP Consent API nem érhető el, de a
-[Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes igen.
-
-### Hogyan működik
-
-1. A bővítmény megnézi a `CLI` globális objektumot és annak `allowedCategories` mezőjét.
-2. Ha a `cookielawinfo-checkbox-non-necessary` cookie értéke már `yes` — visszatérő vásárló, aki korábban elfogadta —, a `grantConsent` azonnal elindul.
-3. Figyeli a sáv `.cli_action_button` elemeire adott kattintásokat. A kattintás után röviddel újra beolvassa a cookie-t, és ennek megfelelően küldi a `grantConsent` vagy a `rejectConsent` eseményt.
-
-### Beállítás
-
-Nincs teendő. Telepítsd mindkét bővítményt, és működik.
+| Bővítmény | Aktív telepítések |
+|--------|----------------|
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5M+ |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ |
+| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ |
+| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ |
+| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ |
 
 ---
 
-## 3. szint: Kézi integráció
+## Kézi integráció
 
-Egyedi hozzájárulás-kezelőkhöz, vagy ha a fentiek egyike sem alkalmazható.
+Egyedi hozzájárulás-kezelőkhöz, vagy ha a fentiek közül egyik sem érvényes.
 
 ### 1. módszer: JavaScript függvények (ajánlott)
 
 ```javascript
-// Amikor a felhasználó elfogadja a marketing cookie-kat
+// When user accepts marketing cookies
 function onMarketingConsentGranted() {
     if (typeof window.wcBarionGrantConsent === 'function') {
         window.wcBarionGrantConsent();
     }
 }
 
-// Amikor a felhasználó elutasítja a marketing cookie-kat
+// When user rejects marketing cookies
 function onMarketingConsentRejected() {
     if (typeof window.wcBarionRejectConsent === 'function') {
         window.wcBarionRejectConsent();
@@ -111,45 +109,30 @@ function onMarketingConsentRejected() {
 ### 2. módszer: Egyedi DOM események
 
 ```javascript
-// Hozzájárulás megadása
+// Grant consent
 document.dispatchEvent(new Event('wcBarionGrantConsent'));
 
-// Hozzájárulás elutasítása
+// Reject consent
 document.dispatchEvent(new Event('wcBarionRejectConsent'));
 ```
 
 ### 3. módszer: WordPress action hook
 
 ```php
-// A hozzájárulás-kezelő bővítményedben vagy a sablonodban
+// In your consent manager plugin or theme
 add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
     <script>
-    // Ide jön a saját hozzájárulási logikád
+    // Your custom consent logic here
     </script>
     <?php
 }
 ```
 
-### Példák konkrét hozzájárulás-kezelőkhöz
+### Példa: OneTrust
 
-**Cookiebot:**
-```javascript
-window.addEventListener('CookiebotOnAccept', function() {
-    if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
-    } else {
-        window.wcBarionRejectConsent();
-    }
-});
-window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
-});
-```
-
-**OneTrust:**
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
@@ -164,45 +147,52 @@ function OptanonWrapper() {
 
 ## Amit neked kell elintézned
 
-A bővítmény továbbítja a hozzájárulást. A szabályzataidat nem írja meg, és a sávodat nem
-állítja be, a Barion viszont mindkettőt megköveteli. A
+A bővítmény továbbítja a hozzájárulást. A szabályzataidat nem tudja megírni, a sávodat
+nem tudja beállítani, a Barion viszont mindkettőt megköveteli. A
 [Barion követelményeiből](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements):
 
-- **Vedd fel a Barion cookie-kat a cookie-szabályzatodba.** A `ba_vid`, `ba_vid.xxx`, `ba_sid` és `ba_sid.xxx` a szükséges cookie-k közé tartozik — a csalásmegelőzést szolgálják a Barion jogos érdeke alapján, és nem igényelnek hozzájárulást. A `BarionMarketingConsent.xxx`, valamint a média- és hirdetési partnerek cookie-jai a marketing cookie-k közé tartoznak, és hozzájárulást igényelnek.
-- **Említsd meg a Barion Pixelt az adatkezelési tájékoztatódban**, és hivatkozz a Barion [adatvédelmi tájékoztatójára](https://www.barion.com/hu/adatvedelmi-tajekoztato/).
-- **Tedd lehetővé, hogy a vásárlók bármikor módosítsák vagy visszavonják a hozzájárulásukat**, és kérdezd meg őket újra. A Barion azt kéri, hogy a sáv legalább 13 havonta jelenjen meg újra, és 30 napot javasol.
-- **Használd a Barion által ajánlott sávszöveget**, ahol lehet. A követelmények oldalán található, és lefedi a partneri adatmegosztást is, amivel a Barion Pixel jár.
+- **Vedd fel a Barion cookie-kat a cookie-szabályzatodba.** A `ba_vid`, `ba_vid.xxx`, `ba_sid` és `ba_sid.xxx` az elengedhetetlen cookie-k közé tartozik — a Barion jogos érdeke alapján a csalásmegelőzést szolgálják, és nem igényelnek hozzájárulást. A `BarionMarketingConsent.xxx` és a média- és hirdetési partnerek cookie-jai a marketing cookie-k közé tartoznak, és igényelnek hozzájárulást.
+- **Említsd meg a Barion Pixelt az adatkezelési tájékoztatódban**, és hivatkozz a Barion [adatvédelmi tájékoztatójára](https://www.barion.com/en/privacy-notice/).
+- **Tedd lehetővé, hogy a vásárlók bármikor módosítsák vagy visszavonják a hozzájárulásukat**, és kérdezz rá újra. A Barion azt kéri, hogy a sáv legalább 13 havonta jelenjen meg újra, és 30 napot ajánl.
+- **Használd a Barion által ajánlott sávszöveget**, ahol csak tudod. A követelményoldalon található, és lefedi azt a partneri adatmegosztást, amit a Barion Pixel jelent.
 
 ---
 
 ## Hogyan hat a hozzájárulás a pixelre
 
 | Állapot | Alap pixel (bp.js) | pageView | Marketing adatgyűjtés |
-|---------|--------------------|----------|-----------------------|
-| Bármilyen hozzájárulási döntés előtt | Betöltve | Elindul (csalásmegelőzés) | Nincs |
-| `grantConsent` után | Betöltve | Elindul | Van |
-| `rejectConsent` után | Betöltve | Elindul (csalásmegelőzés) | Nincs |
+|-------|--------------------|----------|--------------------------|
+| Bármilyen hozzájárulási művelet előtt | Betöltve | Elsül (csalásmegelőzés) | Nem |
+| `grantConsent` után | Betöltve | Elsül | Igen |
+| `rejectConsent` után | Betöltve | Elsül (csalásmegelőzés) | Nem |
 
 ---
 
 ## Tesztelés
 
-1. Kapcsold be a **Hibakeresési módot** a Beállítások > Barion Pixel oldalon.
-2. Nyisd meg a böngészőkonzolt (F12).
+1. Kapcsold be a **Debug Mode** beállítást a Beállítások > Barion Pixel oldalon.
+2. Nyisd meg a böngésző konzolját (F12).
 3. Keresd ezeket az üzeneteket:
 
 | Üzenet | Jelentés |
-|--------|----------|
-| `Consent auto-granted via WP Consent API` | 1. szint, a hozzájárulás betöltéskor már megvolt |
-| `Consent granted via WP Consent API change event` | 1. szint, a vásárló most fogadta el |
-| `Consent rejected via WP Consent API change event` | 1. szint, a vásárló most utasította el |
-| `Cookie Law Info detected, initial non-necessary cookie: …` | A 2. szint vette át, a beolvasott cookie-értékkel |
-| `Cookie Law Info button clicked, non-necessary cookie: …` | 2. szint, a vásárló használta a sávot |
-| `No consent manager detected…` | 3. szint — a bővítmény nem talált semmit, hívd te a függvényeket |
-| `Consent granted (grantConsent)` | A `grantConsent` eljutott a bp.js-hez (bármelyik szinten) |
-| `Consent rejected (rejectConsent)` | A `rejectConsent` eljutott a bp.js-hez (bármelyik szinten) |
+|---------|---------|
+| `Consent manager detected: …` | A megnevezett kezelőket megtalálta és bekötötte |
+| `No consent manager detected…` | Nem talált semmit — hívd meg te a függvényeket |
+| `Consent granted (grantConsent)` | A `grantConsent` eljutott a bp.js-hez |
+| `Consent rejected (rejectConsent)` | A `rejectConsent` eljutott a bp.js-hez |
 
 Minden üzenet `[Barion Pixel]` előtaggal jelenik meg.
 
 4. Teszteld a sávodon az elfogadási és az elutasítási utat is.
 5. A hozzájárulási függvények többször is nyugodtan hívhatók.
+
+A `No consent manager detected` figyelmeztetésként a bővítmény beállítási oldalán is
+megjelenik, ha a WP Consent API bővítmény inaktív, mivel ez az a hiba, ami miatt a
+Teljes Pixel integrációt elutasítják.
+
+A beállítási oldal egy második figyelmeztetést is tartalmaz az emögött rejlő csapdára: a
+WP Consent API aktív, de egyetlen cookie-sáv sem regisztrált nála. Önmagában az API
+mindenkire „megadva” választ ad, mert a be nem állított hozzájárulási típussal éppen azt
+mondja, hogy nincs mögötte sáv. Ha olyan sáv mellé telepíted, amelyik nem támogatja,
+ezzel semmit nem kötsz össze — csak azt éred el, hogy minden látogató úgy néz ki, mintha
+hozzájárult volna. A bővítmény ilyen állapotban figyelmen kívül hagyja.

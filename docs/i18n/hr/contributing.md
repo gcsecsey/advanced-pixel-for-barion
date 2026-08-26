@@ -34,7 +34,15 @@ Nemoj u prijavu zalijepiti svoj stvarni Pixel ID ni adresu e-pošte kupca.
    sanitizacija svih ulaza i prefiks `wc_barion_pixel_` za nove globalne simbole.
 4. Opiši kako si testirao promjenu. `docs/testing-notes.md` navodi posebnosti bp.js-a na kojima se
    lako spotaknuti.
-5. Nemoj podizati broj verzije ni uređivati dnevnik promjena — izdanja se označavaju zasebno.
+5. Pokreni provjere koje pokreće i CI: `composer install`, zatim `composer lint` (PHPCS s
+   WordPressovim standardima kodiranja i kompatibilnošću s PHP 7.4+), `composer phpstan`,
+   `node --test` i `php tests/<datoteka>.php` za svaki PHP test. `composer lint:fix` popravlja
+   većinu stilskih nalaza.
+6. Pokreni preglednički komplet za pristanak: `npm install`, `npx playwright install chromium`,
+   zatim `npm run test:browser`. Pokreće WordPress u Playgroundu i provjerava da pristanak stiže
+   Barionu pri kliku na prihvaćanje, a nikada pri učitavanju stranice — vidi
+   [`tests/playground/README.md`](../../../tests/playground/README.md).
+7. Nemoj podizati broj verzije ni uređivati dnevnik promjena — izdanja se označavaju zasebno.
 
 ## Prijevodi
 

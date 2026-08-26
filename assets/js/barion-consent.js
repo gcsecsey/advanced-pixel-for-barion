@@ -9,7 +9,8 @@
  * Every listener is therefore registered unconditionally and reads its global
  * at event time. Barion's own consent calls are idempotent, but one click can
  * arrive through two adapters at once (CookieYes also bridges into the WP
- * Consent API), so only transitions are reported.
+ * Consent API), so only transitions are reported — and only those the visitor
+ * makes on this page load, never a state the banner replays at load.
  *
  * Loaded as a plain script in the browser (declares one global) and required
  * directly by tests/consent.test.js in Node.
@@ -17,9 +18,11 @@
  * @param {object}   scope     Window-like object holding the consent globals.
  * @param {object}   doc       Document-like object, for document-level events.
  * @param {function} onConsent Receives true to grant, false to reject.
- * @param {function} onDetect  Receives the names of the consent managers found,
- *                             once one of them answers or the probe gives up.
- *                             The list is empty when none ever appeared.
+ * @param {function} onDetect  Receives the names of the consent managers found
+ *                             and whether marketing consent already stood when
+ *                             the page loaded, once one of them answers or the
+ *                             probe gives up. The list is empty when none ever
+ *                             appeared.
  */
 function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 	// read() returns null when its consent manager is not on the page.
@@ -30,6 +33,16 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 			events: [ 'wp_listen_for_consent_change' ],
 			read: function () {
 				if ( typeof scope.wp_has_consent !== 'function' ) {
+					return null;
+				}
+				// With no consent type registered, wp_has_consent() answers
+				// "granted" for every visitor — its own way of saying that no
+				// cookie banner drives it. Reading that as a real answer
+				// reports consent nobody gave, so the API counts as absent.
+				var consentType = typeof scope.wp_consent_type !== 'undefined'
+					? scope.wp_consent_type
+					: scope.wp_fallback_consent_type;
+				if ( ! consentType ) {
 					return null;
 				}
 				return Boolean( scope.wp_has_consent( 'marketing' ) );
@@ -90,12 +103,33 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 
 	var found = [];
 	var reported = null;
+	var acted = false;
+
+	// Barion wants grantConsent at the moment the visitor clicks accept, and
+	// rejects an integration that sends it at page load. Consent that already
+	// stands on load is an earlier visit replayed — Cookiebot raises
+	// CookiebotOnConsentReady every time — and bp.js keeps that answer in its
+	// own cookie anyway, so the state is recorded but nothing is sent until the
+	// visitor touches the page. Capture phase, and before the adapters below,
+	// so the gesture is on record by the time the banner's handler answers.
+	// click is listed because a banner using element.click() raises no pointer
+	// event at all.
+	[ 'pointerdown', 'keydown', 'touchstart', 'click' ].forEach( function ( eventName ) {
+		doc.addEventListener( eventName, function () {
+			acted = true;
+		}, true );
+	} );
 
 	function report( granted ) {
 		if ( granted === reported ) {
 			return;
 		}
 		reported = granted;
+
+		if ( ! acted ) {
+			return;
+		}
+
 		onConsent( granted );
 	}
 
@@ -147,7 +181,7 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 
 	function detected() {
 		if ( onDetect ) {
-			onDetect( found );
+			onDetect( found, true === reported );
 		}
 	}
 

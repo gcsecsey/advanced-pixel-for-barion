@@ -35,7 +35,15 @@ Füge weder deine echte Pixel-ID noch die E-Mail-Adresse eines Kunden in ein Iss
    sanitizen und neue Globals mit `wc_barion_pixel_` präfixen.
 4. Beschreibe, wie du die Änderung getestet hast. `docs/testing-notes.md` listet die
    bp.js-Eigenheiten auf, über die man leicht stolpert.
-5. Erhöhe weder die Versionsnummer noch bearbeite das Änderungsprotokoll — Releases werden separat
+5. Führe die Prüfungen aus, die auch CI ausführt: `composer install`, dann `composer lint`
+   (PHPCS mit den WordPress Coding Standards und PHP-7.4+-Kompatibilität), `composer phpstan`,
+   `node --test` und `php tests/<datei>.php` für jeden PHP-Test. `composer lint:fix` behebt die
+   meisten Stilprobleme.
+6. Führe die Consent-Browser-Suite aus: `npm install`, `npx playwright install chromium`, dann
+   `npm run test:browser`. Sie startet WordPress in Playground und prüft, dass die Einwilligung
+   beim Klick auf „Akzeptieren“ bei Barion ankommt und niemals beim Laden der Seite — siehe
+   [`tests/playground/README.md`](../../../tests/playground/README.md).
+7. Erhöhe weder die Versionsnummer noch bearbeite das Änderungsprotokoll — Releases werden separat
    getaggt.
 
 ## Übersetzungen

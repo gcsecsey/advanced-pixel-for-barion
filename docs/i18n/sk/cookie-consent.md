@@ -4,101 +4,98 @@
 
 # Integrácia súhlasu s cookies
 
-Záväzná je tu vlastná stránka Barionu:
+Rozhodujúca je tu vlastná stránka Barionu:
 [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements).
-Nájdeš na nej aj text lišty súhlasu odporúčaný Barionom a aktuálny zoznam reklamných partnerov
-Barionu. Prečítaj si ju pred spustením do ostrej prevádzky — za súlad s predpismi zodpovedá
-obchodník, nie plugin.
+Nájdete na nej aj text cookie lišty, ktorý Barion odporúča, a aktuálny zoznam reklamných
+partnerov Barionu. Prečítajte si ju pred spustením naostro — súlad s predpismi je
+zodpovednosťou obchodníka, nie pluginu.
 
-## Čo robí plugin
+Barion uvádza `grantConsent` aj medzi udalosťami, ktoré
+[musia byť implementované](https://docs.barion.com/Implementing_the_Full_Barion_Pixel),
+než je integrácia Full Pixel schválená. Obchod, ktorý ju nikdy neodošle, nemá nárok na nižšie
+poplatky, nech je zvyšok integrácie akokoľvek úplný.
 
-Skript základného pixela sa načíta vždy a `pageView` sa odošle vždy. Barion to dokumentuje ako
-oprávnený záujem: základný pixel slúži prevencii platobných podvodov a údaje získané bez
-marketingového súhlasu sa používajú len na tento účel.
+## Čo plugin robí
+
+Skript základného pixelu sa načíta vždy a `pageView` sa vždy odošle. Barion to dokumentuje ako
+oprávnený záujem: základný pixel slúži na prevenciu platobných podvodov a údaje získané bez
+marketingového súhlasu sa používajú výhradne na to.
 
 Nad rámec toho plugin volá `bp('consent', 'grantConsent')`, keď zákazník prijme marketingové
-cookies, a `bp('consent', 'rejectConsent')`, keď ich odmietne. Barion uvádza obe ako povinné. Tvoja
-lišta preto musí ponúkať skutočnú možnosť odmietnutia — pri lište, ktorá pozná len súhlas, nemá
-plugin čo hlásiť.
+cookies, a `bp('consent', 'rejectConsent')`, keď ich odmietne. Barion uvádza oboje ako povinné.
+Vaša lišta preto musí ponúkať skutočnú možnosť odmietnutia — pri lište iba s tlačidlom prijatia
+nemá plugin čo signalizovať.
 
-Plugin hľadá správcu súhlasu v tomto poradí a zastaví sa pri prvom nájdenom:
+## Ako sa súhlas rozpoznáva
 
-1. **WP Consent API** (odporúčané) — univerzálne, funguje so všetkými hlavnými cookie pluginmi
-2. **Cookie Law Info** (záloha) — priama integrácia pre CookieYes / Cookie Law Info
-3. **Ručne** — pre vlastných správcov súhlasu
+Plugin si nevyberá jedného správcu súhlasu. Prihlasuje sa naraz ku každému signálu súhlasu,
+ktorý pozná, a odovzdáva prvú skutočnú odpoveď aj každú ďalšiu zmenu. Na poradí načítania
+nezáleží: poslucháči sú zaregistrovaní skôr, než akýkoľvek správca súhlasu existuje, takže sa
+zachytí aj lišta, ktorá sa objaví neskôr. Vracajúci sa návštevník žiadnu lištu nevidí, a teda
+nevyvolá vôbec žiadnu udalosť — preto plugin navyše každú pol sekundu hľadá správcu súhlasu,
+kým niektorý neodpovie, a desať sekúnd po načítaní stránky to vzdá.
 
----
+Tieto fungujú bez ďalšieho pluginu:
 
-## Úroveň 1: WP Consent API (odporúčané)
+| Správca súhlasu | Číta sa cez |
+|---|---|
+| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` a `wp_listen_for_consent_change`, ale až keď uňho lišta zaregistruje typ súhlasu |
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | `getCkyConsent()` a `cookieyes_consent_update` |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | `cmplz_has_consent('marketing')` a `cmplz_status_change` |
+| [Cookiebot](https://wordpress.org/plugins/cookiebot/) | `Cookiebot.consent.marketing` a `CookiebotOnAccept` / `CookiebotOnDecline` / `CookiebotOnConsentReady` |
+| Cookie Law Info 2.x, staršia lišta | cookie `cookielawinfo-checkbox-non-necessary`, znovu prečítaná po kliknutí na lištu |
+| Čokoľvek iné | funkcie voláte sami — pozri [Ručná integrácia](#ručná-integrácia) |
+
+Na všetky sa vzťahujú tri pravidlá:
+
+- **Súhlas sa odosiela, keď návštevník odpovie na lište, nikdy pri načítaní stránky.** Barion očakáva `grantConsent` v okamihu kliknutia a odmieta integráciu, ktorá ho odošle skôr, než sa návštevník čohokoľvek dotkol — z pohľadu Barionu to vyzerá ako obchod, ktorý sa nikdy nepýta. Plugin preto stav súhlasu pri načítaní prečíta, ale nechá si ho pre seba, a odosiela iba to, čo návštevník rozhodne pri tomto načítaní stránky.
+- **Pred odpoveďou návštevníka sa neodosiela nič.** Pri načítaní stránky bez marketingového súhlasu plugin mlčí, namiesto toho aby posielal `rejectConsent`. Kým nie je lišta zodpovedaná, nie je čo hlásiť.
+- **Odosielajú sa iba zmeny.** Opakovane rovnaký stav sa neodošle dvakrát, čo je dôležité, pretože jedno kliknutie môže doraziť dvoma adaptérmi súčasne.
+
+Vracajúci sa návštevník, ktorý súhlasil pri skoršej návšteve, teda nevyvolá nič — a to je
+správne: bp.js ukladá odpoveď do vlastnej cookie `BarionMarketingConsent`, Barion ju teda už má.
+Práve opakované odosielanie pri každom načítaní stránky bolo tým, prečo bola integrácia
+odmietnutá. Ak chcete vidieť `grantConsent` v akcii, najprv zmažte cookies, aby sa lišta
+spýtala znovu.
+
+## WP Consent API — stále odporúčané
 
 [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) je štandard WordPressu na
-odovzdávanie súhlasu medzi pluginmi. Barion Pixel sa registruje v kategórii `marketing`.
+odovzdávanie súhlasu medzi pluginmi a Barion Pixel sa registruje v jeho kategórii `marketing`.
+Je to **samostatný plugin** — nie je súčasťou WordPressu ani vašej cookie lišty.
+[Návrh na začlenenie do jadra](https://make.wordpress.org/core/2024/12/04/lets-reconsider-adopting-the-wp-consent-api/)
+je otvorený, ale nebol prijatý.
 
-### Ako to funguje
+Nainštalujte ho, ak vaša cookie lišta nie je v tabuľke vyššie. Väčšina líšt WP Consent API
+podporuje, ale len kým je tento plugin aktívny: CookieYes napríklad načíta svoj most len vtedy,
+keď existuje trieda `WP_CONSENT_API`. Bez nej tieto lišty neodovzdajú nič a plugin sa musí
+spoľahnúť na priame integrácie.
 
-Po udalosti `DOMContentLoaded` plugin overí, či existuje funkcia `wp_has_consent()`. Ak áno:
-
-1. Ak je súhlas `marketing` už udelený, `grantConsent` sa odošle okamžite.
-2. Odvtedy plugin počúva udalosť `wp_listen_for_consent_change` a pri každej zmene odosiela `grantConsent` alebo `rejectConsent`.
-
-Všimni si, čo v zozname *nie je*: pri načítaní stránky, kde marketingový súhlas chýba, plugin
-mlčí, namiesto toho aby odoslal `rejectConsent`. Kým zákazník na lištu neodpovedal, nie je čo
-hlásiť — a odpoveď príde cez udalosť zmeny.
-
-### Podporované cookie pluginy
-
-Automaticky funguje každý plugin, ktorý implementuje WP Consent API:
-
-| Plugin | Aktívne inštalácie | Poznámka |
-|--------|--------------------|----------|
-| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5M+ | WP Consent API zabudované |
-| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ | Spoluautor WP Consent API |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ | Kompatibilné s WP Consent API |
-| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ | Kompatibilné s WP Consent API |
-| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ | Kompatibilné s WP Consent API |
-
-### Nastavenie
-
-1. Nainštaluj a aktivuj [WP Consent API](https://wordpress.org/plugins/wp-consent-api/).
-2. Nainštaluj a nastav svoj cookie plugin.
-3. Nainštaluj a nastav Advanced Pixel for Barion.
-
-Nič ďalšie netreba — súhlas sa rieši automaticky.
+| Plugin | Aktívne inštalácie |
+|--------|----------------|
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5 mil.+ |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1 mil.+ |
+| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1 mil.+ |
+| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300 tis.+ |
+| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100 tis.+ |
 
 ---
 
-## Úroveň 2: Cookie Law Info (záloha)
+## Ručná integrácia
 
-Použije sa, keď WP Consent API nie je k dispozícii, ale
-[Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes áno.
-
-### Ako to funguje
-
-1. Plugin overí globálny objekt `CLI` a jeho `allowedCategories`.
-2. Ak má cookie `cookielawinfo-checkbox-non-necessary` už hodnotu `yes` — vracajúci sa návštevník, ktorý súhlasil —, `grantConsent` sa odošle okamžite.
-3. Plugin sleduje kliknutia na prvky `.cli_action_button` v lište. Krátko po kliknutí cookie znovu prečíta a podľa toho odošle `grantConsent` alebo `rejectConsent`.
-
-### Nastavenie
-
-Žiadne. Nainštaluj oba pluginy a funguje to.
-
----
-
-## Úroveň 3: Ručná integrácia
-
-Pre vlastných správcov súhlasu alebo tam, kde nič z uvedeného neplatí.
+Pre vlastných správcov súhlasu, alebo keď sa nič z vyššie uvedeného nehodí.
 
 ### Metóda 1: JavaScriptové funkcie (odporúčané)
 
 ```javascript
-// Keď používateľ prijme marketingové cookies
+// When user accepts marketing cookies
 function onMarketingConsentGranted() {
     if (typeof window.wcBarionGrantConsent === 'function') {
         window.wcBarionGrantConsent();
     }
 }
 
-// Keď používateľ odmietne marketingové cookies
+// When user rejects marketing cookies
 function onMarketingConsentRejected() {
     if (typeof window.wcBarionRejectConsent === 'function') {
         window.wcBarionRejectConsent();
@@ -109,45 +106,30 @@ function onMarketingConsentRejected() {
 ### Metóda 2: Vlastné DOM udalosti
 
 ```javascript
-// Udelenie súhlasu
+// Grant consent
 document.dispatchEvent(new Event('wcBarionGrantConsent'));
 
-// Odmietnutie súhlasu
+// Reject consent
 document.dispatchEvent(new Event('wcBarionRejectConsent'));
 ```
 
 ### Metóda 3: WordPress action hook
 
 ```php
-// V tvojom plugine na správu súhlasu alebo v šablóne
+// In your consent manager plugin or theme
 add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
     <script>
-    // Sem príde tvoja vlastná logika súhlasu
+    // Your custom consent logic here
     </script>
     <?php
 }
 ```
 
-### Príklady pre konkrétnych správcov súhlasu
+### Príklad: OneTrust
 
-**Cookiebot:**
-```javascript
-window.addEventListener('CookiebotOnAccept', function() {
-    if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
-    } else {
-        window.wcBarionRejectConsent();
-    }
-});
-window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
-});
-```
-
-**OneTrust:**
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
@@ -160,47 +142,52 @@ function OptanonWrapper() {
 
 ---
 
-## Čo musíš zariadiť sám
+## Čo musíte zariadiť sami
 
-Plugin súhlas posúva ďalej. Tvoje zásady za teba nenapíše a lištu nenastaví, pričom Barion
-vyžaduje oboje. Z
-[požiadaviek Barionu](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements):
+Plugin súhlas odovzdáva. Nemôže napísať vaše zásady ani nastaviť vašu lištu, a Barion vyžaduje
+oboje. Z [požiadaviek Barionu](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements):
 
-- **Pridaj cookies Barionu do svojich zásad cookies.** `ba_vid`, `ba_vid.xxx`, `ba_sid` a `ba_sid.xxx` patria medzi nevyhnutné cookies — slúžia prevencii podvodov na základe oprávneného záujmu Barionu a súhlas nevyžadujú. `BarionMarketingConsent.xxx` a cookies mediálnych a reklamných partnerov patria medzi marketingové cookies a súhlas vyžadujú.
-- **Spomeň Barion Pixel vo svojich zásadách ochrany osobných údajov** a odkáž na [oznámenie o ochrane súkromia](https://www.barion.com/en/privacy-notice/) Barionu.
-- **Umožni zákazníkom kedykoľvek zmeniť alebo odvolať súhlas** a znovu sa ich opýtaj. Barion požaduje, aby sa lišta objavila znovu aspoň raz za 13 mesiacov, a odporúča 30 dní.
-- **Použi text lišty odporúčaný Barionom**, kde sa dá. Nájdeš ho na stránke s požiadavkami a pokrýva aj zdieľanie údajov s partnermi, ktoré s Barion Pixelom súvisí.
+- **Pridajte cookies Barionu do svojich zásad cookies.** `ba_vid`, `ba_vid.xxx`, `ba_sid` a `ba_sid.xxx` patria medzi nevyhnutné cookies — slúžia prevencii podvodov na základe oprávneného záujmu Barionu a súhlas nevyžadujú. `BarionMarketingConsent.xxx` a cookies mediálnych a reklamných partnerov patria medzi marketingové cookies a súhlas vyžadujú.
+- **Spomeňte Barion Pixel vo svojich zásadách ochrany osobných údajov** a odkážte na [informácie o ochrane súkromia](https://www.barion.com/en/privacy-notice/) Barionu.
+- **Umožnite zákazníkom kedykoľvek zmeniť alebo odvolať súhlas** a znovu sa ich spýtajte. Barion žiada, aby sa lišta objavila znovu najmenej raz za 13 mesiacov, a odporúča 30 dní.
+- **Používajte text lišty odporúčaný Barionom**, kde sa dá. Je na stránke s požiadavkami a pokrýva zdieľanie údajov s partnermi, ktoré Barion Pixel obnáša.
 
 ---
 
 ## Ako súhlas ovplyvňuje pixel
 
 | Stav | Základný pixel (bp.js) | pageView | Zber marketingových údajov |
-|------|------------------------|----------|---------------------------|
-| Pred akýmkoľvek rozhodnutím o súhlase | Načítaný | Odosiela sa (prevencia podvodov) | Nie |
-| Po `grantConsent` | Načítaný | Odosiela sa | Áno |
-| Po `rejectConsent` | Načítaný | Odosiela sa (prevencia podvodov) | Nie |
+|-------|--------------------|----------|--------------------------|
+| Pred akoukoľvek akciou súhlasu | Načítané | Odosiela sa (prevencia podvodov) | Nie |
+| Po `grantConsent` | Načítané | Odosiela sa | Áno |
+| Po `rejectConsent` | Načítané | Odosiela sa (prevencia podvodov) | Nie |
 
 ---
 
 ## Testovanie
 
-1. Zapni **režim ladenia** v Nastavenia > Barion Pixel.
-2. Otvor konzolu prehliadača (F12).
-3. Sleduj tieto správy:
+1. Zapnite **Debug Mode** v Nastavenia > Barion Pixel.
+2. Otvorte konzolu prehliadača (F12).
+3. Hľadajte tieto správy:
 
 | Správa | Význam |
-|--------|--------|
-| `Consent auto-granted via WP Consent API` | Úroveň 1, súhlas bol pri načítaní už udelený |
-| `Consent granted via WP Consent API change event` | Úroveň 1, zákazník práve súhlasil |
-| `Consent rejected via WP Consent API change event` | Úroveň 1, zákazník práve odmietol |
-| `Cookie Law Info detected, initial non-necessary cookie: …` | Prevzala úroveň 2, s prečítanou hodnotou cookie |
-| `Cookie Law Info button clicked, non-necessary cookie: …` | Úroveň 2, zákazník použil lištu |
-| `No consent manager detected…` | Úroveň 3 — nič sa nenašlo, funkcie zavolaj sám |
-| `Consent granted (grantConsent)` | `grantConsent` dorazil do bp.js (ktorákoľvek úroveň) |
-| `Consent rejected (rejectConsent)` | `rejectConsent` dorazil do bp.js (ktorákoľvek úroveň) |
+|---------|---------|
+| `Consent manager detected: …` | Uvedení správcovia boli nájdení a zapojení |
+| `No consent manager detected…` | Nič sa nenašlo — zavolajte funkcie sami |
+| `Consent granted (grantConsent)` | `grantConsent` dorazil do bp.js |
+| `Consent rejected (rejectConsent)` | `rejectConsent` dorazil do bp.js |
 
 Všetky správy majú predponu `[Barion Pixel]`.
 
-4. Otestuj na svojej lište cestu súhlasu aj odmietnutia.
+4. Otestujte na svojej lište cestu prijatia aj odmietnutia.
 5. Funkcie súhlasu možno bezpečne volať opakovane.
+
+`No consent manager detected` sa objavuje aj ako varovanie na stránke nastavení pluginu, keď
+je plugin WP Consent API neaktívny, pretože práve kvôli tejto chybe býva integrácia Full Pixel
+odmietnutá.
+
+Stránka nastavení nesie druhé varovanie pre pascu, ktorá sa za tým skrýva: WP Consent API je
+aktívne, ale žiadna cookie lišta sa uňho nezaregistrovala. Samo o sebe API odpovedá „udelené“
+pre každého, pretože nenastavený typ súhlasu je jeho spôsob, ako povedať, že ho neriadi žiadna
+lišta. Nainštalovať ho vedľa lišty, ktorá ho nepodporuje, preto nič neprepojí — len to spôsobí,
+že každý návštevník vyzerá, akoby súhlasil. V tomto stave ho plugin ignoruje.

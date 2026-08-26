@@ -82,15 +82,21 @@
 					window.wcBarionRejectConsent();
 				}
 			},
-			function (found) {
+			function (found, alreadyGranted) {
 				if (!debug) {
 					return;
 				}
-				if (found.length) {
-					console.log('[Barion Pixel] Consent manager detected: ' + found.join(', '));
-				} else {
+				if (!found.length) {
 					console.warn(
-						'[Barion Pixel] No consent manager detected. grantConsent is only sent if your banner calls window.wcBarionGrantConsent(). The WP Consent API plugin wires this automatically.'
+						'[Barion Pixel] No consent manager detected. grantConsent is only sent if your banner calls window.wcBarionGrantConsent(). The WP Consent API plugin wires this up, but only for a cookie banner that registers with it.'
+					);
+					return;
+				}
+
+				console.log('[Barion Pixel] Consent manager detected: ' + found.join(', '));
+				if (alreadyGranted) {
+					console.log(
+						'[Barion Pixel] Marketing consent already stood when this page loaded, so nothing was sent. Barion asks for grantConsent at the moment the visitor accepts the banner, and bp.js remembers the consent from then on. Clear your cookies to see it fire.'
 					);
 				}
 			}

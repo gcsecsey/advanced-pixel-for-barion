@@ -6,10 +6,25 @@ enqueued, and a cookie banner the visitor actually clicks. They exist because
 the reported failure — `grantConsent` never reaching Barion — depended on script
 load order and on the visitor's history, neither of which a unit test reproduces.
 
-No browser automation is needed. The harness runs itself and prints the result
-into the page.
+The assertions live in the harness page itself, so it works both ways: `npm run
+test:browser` drives it headless for CI, and opening the URLs in any browser
+gives the same result on screen.
 
 ## Run them
+
+```bash
+npm install
+npx playwright install chromium   # once
+npm run test:browser
+```
+
+`run.mjs` boots Playground, opens both harness pages in headless Chromium, waits
+for them to finish, prints every scenario and exits non-zero if any failed. This
+is what CI runs — see `.github/workflows/test.yml`.
+
+## Run them by hand
+
+The assertions live in the harness page, so a browser and a server are enough:
 
 ```bash
 npx @wp-playground/cli@latest server --port=9411 \
@@ -28,6 +43,19 @@ Then open both pages and read the first line of each:
 Each page loads every scenario in an iframe, clicks the banner, and compares the
 `bp('consent', ...)` calls the page made against the expected ones. The JSON
 below the summary line has the per-scenario detail and the plugin's debug log.
+
+## What they guard
+
+Barion wants `grantConsent` at the moment the visitor clicks accept, and rejects
+an integration that sends it at page load. That rule is invisible to a unit test:
+it depends on whether a gesture reached the page before the banner answered. The
+`click: null` scenarios all expect `[]` for this reason — they load a page as a
+returning visitor who already consented, and assert that nothing is sent.
+
+Before changing the consent adapters, break them on purpose and check these fail.
+Removing the gesture gate in `assets/js/barion-consent.js` should fail exactly
+three scenarios: the two returning-visitor ones and `Real WPCA optin - returning,
+allowed`.
 
 ## How the fixtures work
 

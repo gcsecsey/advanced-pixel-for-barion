@@ -2,103 +2,100 @@
 >
 > [English version](../../cookie-consent.md)
 
-# Integracija soglasja s piškotki
+# Integracija soglasja za piškotke
 
-Tu je merodajna Barionova lastna stran:
+Merodajna je tu Barionova lastna stran:
 [Barion Pixel consent management requirements](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements).
-Na njej sta tudi besedilo pasice za soglasje, ki ga Barion priporoča, in aktualen seznam Barionovih
-oglaševalskih partnerjev. Preberi jo pred zagonom v živo — za skladnost odgovarja trgovec, ne
-vtičnik.
+Na njej je tudi besedilo pasice za piškotke, ki ga Barion priporoča, in aktualen seznam
+Barionovih oglaševalskih partnerjev. Preberi jo pred zagonom v živo — skladnost je odgovornost
+trgovca, ne vtičnika.
 
-## Kaj vtičnik naredi
+Barion navaja `grantConsent` tudi med dogodki, ki jih je
+[treba implementirati](https://docs.barion.com/Implementing_the_Full_Barion_Pixel),
+preden je integracija Full Pixel odobrena. Trgovina, ki ga nikoli ne pošlje, ni upravičena do
+nižjih provizij, ne glede na to, kako popoln je preostanek integracije.
 
-Skripta osnovnega piksla se vedno naloži in `pageView` se vedno pošlje. Barion to dokumentira kot
-zakoniti interes: osnovni piksel je namenjen preprečevanju plačilnih goljufij, podatki, zbrani brez
-trženjskega soglasja, pa se uporabljajo samo za to.
+## Kaj vtičnik dela
 
-Poleg tega vtičnik pokliče `bp('consent', 'grantConsent')`, ko kupec sprejme trženjske piškotke, in
-`bp('consent', 'rejectConsent')`, ko jih zavrne. Barion oba navaja kot obvezna. Tvoja pasica mora
-zato ponujati resnično možnost zavrnitve — pri pasici, ki pozna samo sprejem, vtičnik nima česa
-sporočiti.
+Skripta osnovnega piksla se vedno naloži in `pageView` se vedno sproži. Barion to dokumentira
+kot zakoniti interes: osnovni piksel obstaja zaradi preprečevanja plačilnih goljufij, podatki,
+zbrani brez trženjskega soglasja, pa se uporabljajo samo za to.
 
-Vtičnik išče upravitelja soglasja v tem vrstnem redu in se ustavi pri prvem najdenem:
+Poleg tega vtičnik pokliče `bp('consent', 'grantConsent')`, ko kupec sprejme trženjske piškotke,
+in `bp('consent', 'rejectConsent')`, ko jih zavrne. Barion navaja oboje kot obvezno. Tvoja
+pasica mora zato ponujati resnično možnost zavrnitve — pri pasici samo z gumbom za sprejem
+vtičnik nima česa sporočiti.
 
-1. **WP Consent API** (priporočeno) — univerzalno, deluje z vsemi večjimi vtičniki za piškotke
-2. **Cookie Law Info** (rezerva) — neposredna integracija za CookieYes / Cookie Law Info
-3. **Ročno** — za lastne upravitelje soglasja
+## Kako se soglasje zazna
 
----
+Vtičnik ne izbere enega upravitelja soglasij. Hkrati se naroči na vsak signal soglasja, ki ga
+pozna, in posreduje prvi resnični odgovor ter vsako naslednjo spremembo. Vrstni red nalaganja
+ni pomemben: poslušalci so registrirani, preden kateri koli upravitelj soglasij obstaja, tako da
+je zajeta tudi pasica, ki se pojavi pozneje. Vračajoči se obiskovalec ne vidi pasice in zato ne
+sproži nobenega dogodka — zato vtičnik vsake pol sekunde tudi išče upravitelja soglasij, dokler
+kateri ne odgovori, in odneha deset sekund po nalaganju strani.
 
-## Raven 1: WP Consent API (priporočeno)
+Ti delujejo brez dodatnega vtičnika:
+
+| Upravitelj soglasij | Bere se prek |
+|---|---|
+| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` in `wp_listen_for_consent_change`, vendar šele, ko pri njem pasica registrira vrsto soglasja |
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | `getCkyConsent()` in `cookieyes_consent_update` |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | `cmplz_has_consent('marketing')` in `cmplz_status_change` |
+| [Cookiebot](https://wordpress.org/plugins/cookiebot/) | `Cookiebot.consent.marketing` in `CookiebotOnAccept` / `CookiebotOnDecline` / `CookiebotOnConsentReady` |
+| Cookie Law Info 2.x, stara pasica | piškotek `cookielawinfo-checkbox-non-necessary`, znova prebran po kliku na pasico |
+| Karkoli drugega | funkcije pokličeš sam — glej [Ročna integracija](#ročna-integracija) |
+
+Za vse veljajo tri pravila:
+
+- **Soglasje se pošlje, ko obiskovalec odgovori na pasici, nikoli ob nalaganju strani.** Barion pričakuje `grantConsent` v trenutku klika in zavrne integracijo, ki ga pošlje, preden se je obiskovalec česa dotaknil — z Barionove strani je to videti kot trgovina, ki nikoli ne vpraša. Vtičnik zato stanje soglasja ob nalaganju prebere, a ga obdrži zase, in pošlje samo tisto, kar obiskovalec odloči ob tem nalaganju strani.
+- **Pred obiskovalčevim odgovorom se ne pošlje nič.** Ob nalaganju strani brez trženjskega soglasja vtičnik molči, namesto da bi pošiljal `rejectConsent`. Dokler pasica ni odgovorjena, ni česa sporočiti.
+- **Pošiljajo se samo spremembe.** Ponovljeno enako stanje se ne pošlje dvakrat, kar je pomembno, ker lahko en klik prispe hkrati po dveh adapterjih.
+
+Vračajoči se obiskovalec, ki je sprejel ob prejšnjem obisku, zato ne sproži ničesar — in to je
+pravilno: bp.js shrani odgovor v svoj piškotek `BarionMarketingConsent`, Barion ga torej že ima.
+Prav ponovno pošiljanje ob vsakem nalaganju strani je bilo tisto, zaradi česar je bila
+integracija zavrnjena. Če želiš videti `grantConsent` v akciji, najprej pobriši piškotke, da
+pasica znova vpraša.
+
+## WP Consent API — še vedno priporočeno
 
 [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) je standard WordPressa za
-posredovanje soglasja med vtičniki. Barion Pixel se registrira v kategoriji `marketing`.
+posredovanje soglasja med vtičniki, Barion Pixel pa se registrira v njegovi kategoriji
+`marketing`. To je **ločen vtičnik** — ni del WordPressa in ni del tvoje pasice za piškotke.
+[Predlog za vključitev v jedro](https://make.wordpress.org/core/2024/12/04/lets-reconsider-adopting-the-wp-consent-api/)
+je odprt, a ni sprejet.
 
-### Kako deluje
+Namesti ga, kadar tvoje pasice za piškotke ni v zgornji tabeli. Večina pasic podpira WP Consent
+API, a le dokler je ta vtičnik aktiven: CookieYes na primer naloži svoj most samo, če obstaja
+razred `WP_CONSENT_API`. Brez njega te pasice ne posredujejo ničesar in vtičnik se mora opreti
+na neposredne integracije.
 
-Po dogodku `DOMContentLoaded` vtičnik preveri, ali obstaja funkcija `wp_has_consent()`. Če obstaja:
-
-1. Če je soglasje `marketing` že dano, se `grantConsent` pošlje takoj.
-2. Od tedaj vtičnik posluša `wp_listen_for_consent_change` in ob vsaki spremembi pošlje `grantConsent` ali `rejectConsent`.
-
-Bodi pozoren, česa na seznamu *ni*: ob nalaganju strani, kjer trženjskega soglasja ni, vtičnik
-molči, namesto da bi poslal `rejectConsent`. Dokler kupec na pasico ni odgovoril, ni česa
-sporočiti — odgovor pa pride prek dogodka spremembe.
-
-### Podprti vtičniki za piškotke
-
-Samodejno deluje vsak vtičnik, ki implementira WP Consent API:
-
-| Vtičnik | Aktivnih namestitev | Opomba |
-|---------|---------------------|--------|
-| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5M+ | WP Consent API vgrajen |
-| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ | Soavtor WP Consent API |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ | Združljiv z WP Consent API |
-| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ | Združljiv z WP Consent API |
-| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ | Združljiv z WP Consent API |
-
-### Nastavitev
-
-1. Namesti in aktiviraj [WP Consent API](https://wordpress.org/plugins/wp-consent-api/).
-2. Namesti in nastavi svoj vtičnik za soglasje s piškotki.
-3. Namesti in nastavi Advanced Pixel for Barion.
-
-Nič drugega — soglasje se obravnava samodejno.
+| Vtičnik | Aktivne namestitve |
+|--------|----------------|
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1,5 mio.+ |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1 mio.+ |
+| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1 mio.+ |
+| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300 tis.+ |
+| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100 tis.+ |
 
 ---
 
-## Raven 2: Cookie Law Info (rezerva)
+## Ročna integracija
 
-Uporabi se, ko WP Consent API ni na voljo,
-[Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes pa je.
+Za lastne upravitelje soglasij ali kadar nič od zgornjega ne velja.
 
-### Kako deluje
-
-1. Vtičnik preveri globalni objekt `CLI` in njegov `allowedCategories`.
-2. Če ima piškotek `cookielawinfo-checkbox-non-necessary` že vrednost `yes` — vračajoči se obiskovalec, ki je sprejel — se `grantConsent` pošlje takoj.
-3. Spremljajo se kliki na elemente `.cli_action_button` v pasici. Kmalu po kliku vtičnik znova prebere piškotek in glede na to pošlje `grantConsent` ali `rejectConsent`.
-
-### Nastavitev
-
-Nobene. Namesti oba vtičnika in deluje.
-
----
-
-## Raven 3: Ročna integracija
-
-Za lastne upravitelje soglasja ali tam, kjer nič od zgornjega ne velja.
-
-### Način 1: Funkcije JavaScript (priporočeno)
+### 1. način: JavaScript funkcije (priporočeno)
 
 ```javascript
-// Ko uporabnik sprejme trženjske piškotke
+// When user accepts marketing cookies
 function onMarketingConsentGranted() {
     if (typeof window.wcBarionGrantConsent === 'function') {
         window.wcBarionGrantConsent();
     }
 }
 
-// Ko uporabnik zavrne trženjske piškotke
+// When user rejects marketing cookies
 function onMarketingConsentRejected() {
     if (typeof window.wcBarionRejectConsent === 'function') {
         window.wcBarionRejectConsent();
@@ -106,48 +103,33 @@ function onMarketingConsentRejected() {
 }
 ```
 
-### Način 2: Lastni dogodki DOM
+### 2. način: Lastni DOM dogodki
 
 ```javascript
-// Podelitev soglasja
+// Grant consent
 document.dispatchEvent(new Event('wcBarionGrantConsent'));
 
-// Zavrnitev soglasja
+// Reject consent
 document.dispatchEvent(new Event('wcBarionRejectConsent'));
 ```
 
-### Način 3: WordPressov action hook
+### 3. način: WordPress action hook
 
 ```php
-// V tvojem vtičniku za upravljanje soglasja ali v temi
+// In your consent manager plugin or theme
 add_action('wc_barion_pixel_footer_scripts', 'my_barion_consent_handler');
 
 function my_barion_consent_handler() {
     ?>
     <script>
-    // Sem gre tvoja lastna logika soglasja
+    // Your custom consent logic here
     </script>
     <?php
 }
 ```
 
-### Primeri za posamezne upravitelje soglasja
+### Primer: OneTrust
 
-**Cookiebot:**
-```javascript
-window.addEventListener('CookiebotOnAccept', function() {
-    if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
-    } else {
-        window.wcBarionRejectConsent();
-    }
-});
-window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
-});
-```
-
-**OneTrust:**
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
@@ -162,45 +144,51 @@ function OptanonWrapper() {
 
 ## Kaj moraš urediti sam
 
-Vtičnik soglasje posreduje naprej. Tvojih pravilnikov ne bo napisal in pasice ne bo nastavil,
+Vtičnik posreduje soglasje. Ne more napisati tvojih pravilnikov niti nastaviti tvoje pasice,
 Barion pa zahteva oboje. Iz
 [Barionovih zahtev](https://docs.barion.com/Barion_Pixel_Consent_Management_requirements):
 
-- **Dodaj Barionove piškotke v svoj pravilnik o piškotkih.** `ba_vid`, `ba_vid.xxx`, `ba_sid` in `ba_sid.xxx` sodijo med nujne piškotke — služijo preprečevanju goljufij na podlagi Barionovega zakonitega interesa in ne zahtevajo soglasja. `BarionMarketingConsent.xxx` ter piškotki medijskih in oglaševalskih partnerjev sodijo med trženjske piškotke in soglasje zahtevajo.
+- **Dodaj Barionove piškotke v svoj pravilnik o piškotkih.** `ba_vid`, `ba_vid.xxx`, `ba_sid` in `ba_sid.xxx` sodijo med nujne piškotke — služijo preprečevanju goljufij na podlagi Barionovega zakonitega interesa in ne potrebujejo soglasja. `BarionMarketingConsent.xxx` ter piškotki medijskih in oglaševalskih partnerjev sodijo med trženjske piškotke in soglasje potrebujejo.
 - **Omeni Barion Pixel v svojem pravilniku o zasebnosti** in poveži Barionovo [obvestilo o zasebnosti](https://www.barion.com/en/privacy-notice/).
-- **Kupcem omogoči, da soglasje kadar koli spremenijo ali prekličejo**, in jih znova vprašaj. Barion zahteva, da se pasica znova pojavi vsaj vsakih 13 mesecev, priporoča pa 30 dni.
-- **Uporabi besedilo pasice, ki ga priporoča Barion**, kjer se le da. Na strani z zahtevami je in pokriva tudi deljenje podatkov s partnerji, ki ga Barion Pixel prinaša.
+- **Omogoči kupcem, da kadar koli spremenijo ali prekličejo soglasje**, in jih znova vprašaj. Barion zahteva, da se pasica znova pojavi vsaj vsakih 13 mesecev, priporoča pa 30 dni.
+- **Uporabi besedilo pasice, ki ga priporoča Barion**, kjer je le mogoče. Je na strani z zahtevami in pokriva deljenje podatkov s partnerji, ki ga Barion Pixel prinaša.
 
 ---
 
 ## Kako soglasje vpliva na piksel
 
 | Stanje | Osnovni piksel (bp.js) | pageView | Zbiranje trženjskih podatkov |
-|--------|------------------------|----------|------------------------------|
-| Pred kakršno koli odločitvijo o soglasju | Naložen | Se pošlje (preprečevanje goljufij) | Ne |
-| Po `grantConsent` | Naložen | Se pošlje | Da |
-| Po `rejectConsent` | Naložen | Se pošlje (preprečevanje goljufij) | Ne |
+|-------|--------------------|----------|--------------------------|
+| Pred kakršnim koli dejanjem soglasja | Naložen | Se sproži (preprečevanje goljufij) | Ne |
+| Po `grantConsent` | Naložen | Se sproži | Da |
+| Po `rejectConsent` | Naložen | Se sproži (preprečevanje goljufij) | Ne |
 
 ---
 
 ## Testiranje
 
-1. Vklopi **način za odpravljanje napak** v Nastavitve > Barion Pixel.
+1. Vklopi **Debug Mode** v Nastavitve > Barion Pixel.
 2. Odpri konzolo brskalnika (F12).
-3. Spremljaj ta sporočila:
+3. Poišči ta sporočila:
 
 | Sporočilo | Pomen |
-|-----------|-------|
-| `Consent auto-granted via WP Consent API` | Raven 1, soglasje je ob nalaganju že obstajalo |
-| `Consent granted via WP Consent API change event` | Raven 1, kupec je pravkar sprejel |
-| `Consent rejected via WP Consent API change event` | Raven 1, kupec je pravkar zavrnil |
-| `Cookie Law Info detected, initial non-necessary cookie: …` | Prevzela je raven 2, s prebrano vrednostjo piškotka |
-| `Cookie Law Info button clicked, non-necessary cookie: …` | Raven 2, kupec je uporabil pasico |
-| `No consent manager detected…` | Raven 3 — nič ni bilo najdeno, funkcije pokliči sam |
-| `Consent granted (grantConsent)` | `grantConsent` je prišel do bp.js (katera koli raven) |
-| `Consent rejected (rejectConsent)` | `rejectConsent` je prišel do bp.js (katera koli raven) |
+|---------|---------|
+| `Consent manager detected: …` | Navedeni upravitelji so bili najdeni in povezani |
+| `No consent manager detected…` | Nič ni bilo najdeno — funkcije pokliči sam |
+| `Consent granted (grantConsent)` | `grantConsent` je prišel do bp.js |
+| `Consent rejected (rejectConsent)` | `rejectConsent` je prišel do bp.js |
 
 Vsa sporočila imajo predpono `[Barion Pixel]`.
 
 4. Na svoji pasici preizkusi pot sprejema in pot zavrnitve.
 5. Funkcije soglasja je varno klicati večkrat.
+
+`No consent manager detected` se kot opozorilo pojavi tudi na strani z nastavitvami vtičnika,
+kadar vtičnik WP Consent API ni aktiven, saj je to napaka, zaradi katere je integracija Full
+Pixel zavrnjena.
+
+Stran z nastavitvami nosi drugo opozorilo za past za tem: WP Consent API je aktiven, a pri njem
+ni registrirana nobena pasica za piškotke. Sam po sebi API vsem odgovarja „dano“, ker je
+nenastavljena vrsta soglasja njegov način, da pove, da ga ne poganja nobena pasica. Namestitev
+poleg pasice, ki ga ne podpira, zato ničesar ne poveže — doseže samo to, da je videti, kot da je
+vsak obiskovalec soglašal. V tem stanju ga vtičnik prezre.

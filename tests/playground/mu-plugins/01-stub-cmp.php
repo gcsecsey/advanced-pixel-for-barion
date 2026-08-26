@@ -11,9 +11,8 @@
  *             &prior=1  visitor already accepted before this page load
  */
 // The stub scenarios cover sites WITHOUT the WP Consent API plugin, which is
-// the reported failure. Left enqueued it would answer first, and on a site with
-// no consent type configured wp_has_consent() returns true, so the page would
-// grant consent before the visitor touched the banner.
+// the reported failure. Left enqueued it would answer alongside the stub and
+// blur which adapter produced the result.
 // wp_print_scripts fires for the head and the footer, just before either is
 // printed, so this also catches a dependant enqueued after wp_enqueue_scripts.
 add_action('wp_print_scripts', function () {
@@ -81,6 +80,10 @@ add_action('wp_footer', function () {
             },
             wpca: {
                 define: function () {
+                    // A CMP bridging into the WP Consent API always registers a
+                    // consent type. Without one the API reports consent for
+                    // everybody, which is how it says no banner is driving it.
+                    window.wp_consent_type = 'optin';
                     window.wp_has_consent = function ( category ) {
                         return 'marketing' === category ? state : true;
                     };

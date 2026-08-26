@@ -34,7 +34,15 @@ Nevkládejte do issue své skutečné Pixel ID ani e-mailovou adresu zákazníka
    sanitizace veškerého vstupu a předpona `wc_barion_pixel_` u nových globálních symbolů.
 4. Popište, jak jste změnu otestovali. `docs/testing-notes.md` uvádí zvláštnosti bp.js, na kterých
    je snadné se spálit.
-5. Nezvyšujte číslo verze a neupravujte changelog — vydání se označují zvlášť.
+5. Spusťte kontroly, které spouští i CI: `composer install`, pak `composer lint` (PHPCS se
+   standardy WordPressu a kompatibilitou s PHP 7.4+), `composer phpstan`, `node --test` a
+   `php tests/<soubor>.php` pro každý PHP test. `composer lint:fix` opraví většinu stylových
+   nálezů.
+6. Spusťte prohlížečovou sadu pro souhlas: `npm install`, `npx playwright install chromium`, pak
+   `npm run test:browser`. Nastartuje WordPress v Playgroundu a ověří, že souhlas dorazí do
+   Barionu při kliknutí na přijetí a nikdy při načtení stránky — viz
+   [`tests/playground/README.md`](../../../tests/playground/README.md).
+7. Nezvyšujte číslo verze a neupravujte changelog — vydání se označují zvlášť.
 
 ## Překlady
 
