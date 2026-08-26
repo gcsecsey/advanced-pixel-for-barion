@@ -39,7 +39,7 @@ Nu lipi în issue ID-ul tău real de Pixel sau adresa de e-mail a unui client.
    cu standardele de codare WordPress și compatibilitate PHP 7.4+), `composer phpstan`,
    `node --test` și `php tests/<fișier>.php` pentru fiecare test PHP. `composer lint:fix` repară
    majoritatea problemelor de stil.
-6. Rulează suita de browser pentru consimțământ: `npm install`, `npx playwright install chromium`,
+6. Rulează suita de browser pentru consimțământ: `npm install`, `npx playwright install --with-deps chromium`,
    apoi `npm run test:browser`. Pornește WordPress în Playground și verifică faptul că
    consimțământul ajunge la Barion la clicul pe acceptare și niciodată la încărcarea paginii — vezi
    [`tests/playground/README.md`](../../../tests/playground/README.md).

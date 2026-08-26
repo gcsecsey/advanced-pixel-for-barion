@@ -38,7 +38,7 @@ Nevkladaj do issue svoje skutočné Pixel ID ani e-mailovú adresu zákazníka.
    štandardmi WordPressu a kompatibilitou s PHP 7.4+), `composer phpstan`, `node --test` a
    `php tests/<súbor>.php` pre každý PHP test. `composer lint:fix` opraví väčšinu štýlových
    nálezov.
-6. Spusti prehliadačovú sadu pre súhlas: `npm install`, `npx playwright install chromium`, potom
+6. Spusti prehliadačovú sadu pre súhlas: `npm install`, `npx playwright install --with-deps chromium`, potom
    `npm run test:browser`. Naštartuje WordPress v Playgrounde a overí, že súhlas dorazí do
    Barionu pri kliknutí na prijatie a nikdy pri načítaní stránky — pozri
    [`tests/playground/README.md`](../../../tests/playground/README.md).

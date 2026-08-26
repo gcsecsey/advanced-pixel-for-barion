@@ -39,7 +39,7 @@ Füge weder deine echte Pixel-ID noch die E-Mail-Adresse eines Kunden in ein Iss
    (PHPCS mit den WordPress Coding Standards und PHP-7.4+-Kompatibilität), `composer phpstan`,
    `node --test` und `php tests/<datei>.php` für jeden PHP-Test. `composer lint:fix` behebt die
    meisten Stilprobleme.
-6. Führe die Consent-Browser-Suite aus: `npm install`, `npx playwright install chromium`, dann
+6. Führe die Consent-Browser-Suite aus: `npm install`, `npx playwright install --with-deps chromium`, dann
    `npm run test:browser`. Sie startet WordPress in Playground und prüft, dass die Einwilligung
    beim Klick auf „Akzeptieren“ bei Barion ankommt und niemals beim Laden der Seite — siehe
    [`tests/playground/README.md`](../../../tests/playground/README.md).

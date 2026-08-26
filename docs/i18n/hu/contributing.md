@@ -40,7 +40,7 @@ Ne másold be a valódi Pixel azonosítódat vagy egy vásárló e-mail-címét 
    `composer lint` (PHPCS a WordPress kódolási szabványokkal és PHP 7.4+ kompatibilitással),
    `composer phpstan`, `node --test`, és `php tests/<fájl>.php` minden PHP teszthez.
    A `composer lint:fix` a stílushibák többségét megjavítja.
-6. Futtasd le a hozzájárulás böngészős készletét: `npm install`, `npx playwright install chromium`,
+6. Futtasd le a hozzájárulás böngészős készletét: `npm install`, `npx playwright install --with-deps chromium`,
    majd `npm run test:browser`. Ez WordPresst indít a Playgroundban, és ellenőrzi, hogy a
    hozzájárulás az elfogadás gombra kattintáskor jut el a Barionhoz, és soha nem oldalbetöltéskor —
    lásd [`tests/playground/README.md`](../../../tests/playground/README.md).

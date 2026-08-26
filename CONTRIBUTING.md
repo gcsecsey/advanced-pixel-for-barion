@@ -44,7 +44,7 @@ Do not paste your real Pixel ID or a customer's email address into an issue.
 5. Run the checks CI will run: `composer install`, then `composer lint` (PHPCS with the WordPress
    Coding Standards and PHP 7.4+ compatibility), `composer phpstan`, `node --test`, and
    `php tests/<file>.php` for each PHP test. `composer lint:fix` repairs most style issues.
-6. Run the consent browser suite: `npm install`, `npx playwright install chromium`, then
+6. Run the consent browser suite: `npm install`, `npx playwright install --with-deps chromium`, then
    `npm run test:browser`. It boots WordPress in Playground and checks that consent reaches
    Barion on the accept click and never at page load — see
    [`tests/playground/README.md`](tests/playground/README.md).

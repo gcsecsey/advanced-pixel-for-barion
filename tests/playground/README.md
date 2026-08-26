@@ -14,13 +14,13 @@ gives the same result on screen.
 
 ```bash
 npm install
-npx playwright install chromium   # once
+npx playwright install --with-deps chromium   # once
 npm run test:browser
 ```
 
 `run.mjs` boots Playground, opens both harness pages in headless Chromium, waits
 for them to finish, prints every scenario and exits non-zero if any failed. This
-is what CI runs — see `.github/workflows/test.yml`.
+is what CI runs — see `.github/workflows/ci.yml`.
 
 ## Run them by hand
 

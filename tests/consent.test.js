@@ -249,6 +249,28 @@ test( 'does not send consent that the probe alone found', () => {
 	assert.deepStrictEqual( h.granted, [] );
 } );
 
+// A gesture anywhere on the page is not an answer to the banner. A returning
+// visitor who clicks a link before a CDN-served manager has loaded used to get
+// grantConsent the moment the probe found it, which is the page-load send
+// Barion rejects.
+test( 'does not send consent found by the probe after an unrelated gesture', () => {
+	const h = harness();
+	h.act();
+	Object.assign( h.scope, wpConsentApi( true ) );
+	h.tick();
+	assert.deepStrictEqual( h.granted, [] );
+} );
+
+test( 'still sends consent when a late manager reports the visitor accepting', () => {
+	const h = harness();
+	h.act();
+	Object.assign( h.scope, wpConsentApi( false ) );
+	h.tick();
+	h.scope.wp_has_consent = () => true;
+	h.fire( 'wp_listen_for_consent_change' );
+	assert.deepStrictEqual( h.granted, [ true ] );
+} );
+
 test( 'stays silent when a late consent manager reports consent refused', () => {
 	const h = harness();
 	Object.assign( h.scope, wpConsentApi( false ) );

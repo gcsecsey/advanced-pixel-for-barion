@@ -38,7 +38,7 @@ Nemoj u prijavu da nalepiš svoj stvarni Pixel ID ni imejl adresu kupca.
    WordPressovim standardima kodiranja i kompatibilnošću sa PHP 7.4+), `composer phpstan`,
    `node --test` i `php tests/<datoteka>.php` za svaki PHP test. `composer lint:fix` popravlja
    većinu stilskih nalaza.
-6. Pokreni pregledački komplet za saglasnost: `npm install`, `npx playwright install chromium`,
+6. Pokreni pregledački komplet za saglasnost: `npm install`, `npx playwright install --with-deps chromium`,
    zatim `npm run test:browser`. Pokreće WordPress u Playgroundu i proverava da saglasnost stiže
    Barionu pri kliku na prihvatanje, a nikada pri učitavanju stranice — vidi
    [`tests/playground/README.md`](../../../tests/playground/README.md).

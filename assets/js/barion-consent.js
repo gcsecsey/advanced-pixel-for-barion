@@ -155,8 +155,8 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 		} );
 	} );
 
-	// Names every consent manager that is on the page now and reports the ones
-	// that hold consent. Returns false while none of them has answered.
+	// Names every consent manager that is on the page now and records what they
+	// hold. Returns false while none of them has answered.
 	function probe() {
 		adapters.forEach( function ( adapter ) {
 			var granted = adapter.read();
@@ -168,11 +168,15 @@ function wcBarionWireConsent( scope, doc, onConsent, onDetect ) {
 				found.push( adapter.name );
 			}
 
-			// Before the visitor answers the banner there is nothing to report,
-			// so a missing consent stays silent rather than sending
-			// rejectConsent.
+			// Finding a manager is not the visitor deciding anything. A manager
+			// that appears mid-visit is replaying an earlier visit's answer, no
+			// matter what the visitor has clicked on this page, so the state is
+			// recorded and never sent. Going through report() here would send
+			// it: an unrelated click earlier in the page load is enough to open
+			// the gate. Consent is only ever sent from a manager's own change
+			// event, below.
 			if ( granted ) {
-				report( true );
+				reported = true;
 			}
 		} );
 

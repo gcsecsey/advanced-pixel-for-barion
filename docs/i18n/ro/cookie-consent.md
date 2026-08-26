@@ -13,7 +13,7 @@ responsabilitatea comerciantului, nu a plugin-ului.
 Barion listează `grantConsent` și printre evenimentele care
 [trebuie implementate](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
 înainte ca o integrare Full Pixel să fie aprobată. Un magazin care nu îl trimite niciodată nu
-este eligibil pentru comisioanele reduse, oricât de completă ar fi restul integrării.
+este eligibil pentru comisioanele reduse, oricât de complet ar fi restul integrării.
 
 ## Ce face plugin-ul
 
