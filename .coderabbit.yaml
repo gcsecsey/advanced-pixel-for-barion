@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://docs.coderabbit.ai/schemas/coderabbit-yaml.json
+reviews:
+  path_filters:
+    # Generated translation files; regenerated with composer i18n:build.
+    - "!languages/**"
+  path_instructions:
+    - path: "**/*.php"
+      instructions: >-
+        PHPCS (WordPress standard) and PHPStan already enforce style and types
+        in CI, so skip style feedback. Focus on logic, security (escaping,
+        sanitization, capability checks, nonces), and WordPress or WooCommerce
+        API misuse. Translatable strings must be full sentences: no
+        concatenated fragments, no placeholders that hold sentence parts, and
+        a translator comment wherever a placeholder is not obvious.

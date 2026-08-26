@@ -11,6 +11,7 @@ README.md
 CONTRIBUTING.md
 AGENTS.md
 CLAUDE.md
+.coderabbit.yaml
 CONSENT_INTEGRATION.md
 vendor
 composer.json
