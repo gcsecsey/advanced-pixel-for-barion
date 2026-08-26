@@ -103,6 +103,11 @@ GPL-2.0-or-later — vezi [LICENSE](../../LICENSE) pentru detalii.
 
 ## Jurnal de modificări
 
+### 1.0.9
+- Remediat: `grantConsent` era trimis la încărcarea paginii, nu atunci când vizitatorul accepta bara de cookie-uri. Exact pentru asta respinge Barion o integrare Full Pixel: un magazin care raportează consimțământ înainte ca cineva să fi răspuns arată la fel ca unul care nu întreabă niciodată. Consimțământul se trimite acum doar pentru o decizie luată de vizitator la acea încărcare de pagină. Un vizitator care revine nu declanșează nimic, pentru că bp.js îi păstrează răspunsul în propriul cookie, iar Barion îl are deja
+- Remediat: cu plugin-ul WP Consent API activ, dar fără nicio bară de cookie-uri înregistrată la el, fiecare vizitator era raportat ca având consimțământ de marketing. Un tip de consimțământ nesetat este felul în care acel API spune că nu îl conduce nicio bară, iar plugin-ul îl citea ca pe un răspuns real. În această stare, acum îl ignoră
+- Nou: pagina de setări avertizează când WP Consent API este activ, dar nicio bară de cookie-uri nu se înregistrează la el. Instalarea lui lângă o bară care nu îl suportă nu conectează nimic, iar până acum nimic nu spunea asta
+
 ### 1.0.8
 - Remediat: `grantConsent` nu a fost trimis niciodată pe site-urile fără plugin-ul separat WP Consent API, așa că Barion nu a aprobat integrarea Full Pixel. Detectarea consimțământului încerca trei surse pe rând și se oprea la prima potrivire, iar ultima dintre ele nu înregistra niciun ascultător. CookieYes, Complianz, Cookiebot și vechiul banner Cookie Law Info sunt acum citite direct, fără plugin suplimentar
 - Remediat: `grantConsent` lipsea și pentru vizitatorii care reveneau și răspunseseră deja bannerului, precum și pe orice site al cărui manager de consimțământ se încărca după pagină. Plugin-ul caută acum un manager de consimțământ timp de zece secunde după încărcarea paginii, în loc de o singură verificare

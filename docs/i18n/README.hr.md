@@ -103,6 +103,11 @@ GPL-2.0-or-later — pogledaj [LICENSE](../../LICENSE) za detalje.
 
 ## Dnevnik promjena
 
+### 1.0.9
+- Ispravljeno: `grantConsent` se slao pri učitavanju stranice, a ne kada je posjetitelj prihvatio traku za kolačiće. Upravo zbog toga Barion odbija Full Pixel integraciju: trgovina koja javlja privolu prije nego što je itko odgovorio izgleda isto kao ona koja nikada ne pita. Privola se sada šalje samo za odluku koju posjetitelj donese pri tom učitavanju stranice. Posjetitelj koji se vraća ne pokreće ništa, jer bp.js čuva njegov odgovor u vlastitom kolačiću i Barion ga već ima
+- Ispravljeno: uz aktivan dodatak WP Consent API kod kojeg se nije registrirala nijedna traka za kolačiće, svaki je posjetitelj javljan kao da je dao marketinšku privolu. Nepostavljena vrsta privole način je na koji taj API kaže da ga ne pokreće nijedna traka, a dodatak je to čitao kao stvaran odgovor. U tom stanju ga sada zanemaruje
+- Novo: stranica postavki upozorava kada je WP Consent API aktivan, ali se kod njega ne registrira nijedna traka za kolačiće. Instalirati ga uz traku koja ga ne podržava ništa ne povezuje, a dosad to ništa nije govorilo
+
 ### 1.0.8
 - Ispravljeno: `grantConsent` se nikada nije slao na stranicama bez zasebnog dodatka WP Consent API, pa Barion nije odobrio Full Pixel integraciju. Prepoznavanje privole redom je probalo tri izvora i zaustavilo se na prvom pronađenom, a posljednji od njih nije registrirao nikakav slušatelj. CookieYes, Complianz, Cookiebot i stara traka Cookie Law Info sada se čitaju izravno, bez dodatnog dodatka
 - Ispravljeno: `grantConsent` je izostao i kod posjetitelja koji su se vratili i već odgovorili na traku, kao i na svakoj stranici čiji se upravitelj privole učitao nakon stranice. Dodatak sada traži upravitelja privole deset sekundi nakon učitavanja stranice, umjesto jedne provjere

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Advanced Pixel for Barion 1.0.8\n"
+"Project-Id-Version: Advanced Pixel for Barion 1.0.9\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/advanced-pixel-for-barion\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"

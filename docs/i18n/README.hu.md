@@ -106,6 +106,11 @@ GPL-2.0-or-later — részletekért lásd a [LICENSE](../../LICENSE) fájlt.
 
 ## Változásnapló
 
+### 1.0.9
+- Javítva: a `grantConsent` az oldal betöltésekor ment ki, nem akkor, amikor a látogató elfogadta a cookie-sávot. A Barion pontosan ezért utasítja el a Full Pixel integrációt: az a bolt, amelyik azelőtt jelent hozzájárulást, hogy bárki válaszolt volna, ugyanúgy néz ki, mint amelyik soha nem kérdez. A hozzájárulás mostantól csak arról megy el, amit a látogató azon az oldalbetöltésen dönt. A visszatérő látogató semmit nem vált ki, mert a bp.js a saját cookie-jában tárolja a válaszát, és a Barionnak már megvan
+- Javítva: ha a WP Consent API bővítmény aktív volt, de egyetlen cookie-sáv sem regisztrált nála, minden látogató úgy jelent meg, mintha megadta volna a marketing-hozzájárulást. A be nem állított hozzájárulási típussal az API éppen azt mondja, hogy nincs mögötte sáv, a bővítmény viszont valódi válaszként olvasta. Ilyen állapotban mostantól figyelmen kívül hagyja
+- Új: a beállítások oldal figyelmeztet, ha a WP Consent API aktív, de egyetlen cookie-sáv sem regisztrál nála. Ha olyan sáv mellé telepíted, amelyik nem támogatja, ezzel semmit nem kötsz össze, és eddig ezt semmi nem mondta meg
+
 ### 1.0.8
 - Javítva: a `grantConsent` soha nem ment ki azokon az oldalakon, ahol nem volt fent a külön WP Consent API bővítmény, ezért a Barion nem hagyta jóvá a Full Pixel integrációt. A hozzájárulás felismerése három forrást próbált sorban, és az elsőnél megállt, az utolsó viszont egyáltalán nem regisztrált eseményfigyelőt. A CookieYes, a Complianz, a Cookiebot és a régi Cookie Law Info sáv mostantól közvetlenül olvasható, külön bővítmény nélkül
 - Javítva: a `grantConsent` kimaradt a visszatérő látogatóknál is, akik korábban már válaszoltak a sávra, valamint minden olyan oldalon, ahol a sütikezelő az oldal betöltése után töltődött be. A bővítmény mostantól az oldal betöltése után tíz másodpercig keresi a sütikezelőt, nem csak egyszer ellenőriz

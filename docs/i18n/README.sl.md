@@ -103,6 +103,11 @@ GPL-2.0-or-later — glejte [LICENSE](../../LICENSE) za podrobnosti.
 
 ## Dnevnik sprememb
 
+### 1.0.9
+- Popravljeno: `grantConsent` se je pošiljal ob nalaganju strani, ne pa takrat, ko je obiskovalec sprejel pasico za piškotke. Prav zaradi tega Barion zavrne integracijo Full Pixel: trgovina, ki javi soglasje, preden je kdor koli odgovoril, je videti enako kot tista, ki nikoli ne vpraša. Soglasje se zdaj pošlje samo za odločitev, ki jo obiskovalec sprejme ob tem nalaganju strani. Vračajoči se obiskovalec ne sproži ničesar, ker bp.js hrani njegov odgovor v svojem piškotku in ga Barion že ima
+- Popravljeno: ob aktivnem vtičniku WP Consent API, pri katerem se ni registrirala nobena pasica za piškotke, je bil vsak obiskovalec javljen, kot da je dal trženjsko soglasje. Nenastavljena vrsta soglasja je način, kako ta API pove, da ga ne poganja nobena pasica, vtičnik pa je to bral kot resničen odgovor. V tem stanju ga zdaj prezre
+- Novo: stran z nastavitvami opozori, kadar je WP Consent API aktiven, a se pri njem ne registrira nobena pasica za piškotke. Namestitev poleg pasice, ki ga ne podpira, ničesar ne poveže, doslej pa tega ni povedalo nič
+
 ### 1.0.8
 - Popravljeno: `grantConsent` se nikoli ni poslal na straneh brez ločenega vtičnika WP Consent API, zato Barion ni odobril integracije Full Pixel. Zaznavanje privolitve je zaporedoma preizkusilo tri vire in se ustavilo pri prvem najdenem, zadnji med njimi pa ni registriral nobenega poslušalca. CookieYes, Complianz, Cookiebot in stara pasica Cookie Law Info se zdaj berejo neposredno, brez dodatnega vtičnika
 - Popravljeno: `grantConsent` je izostal tudi pri vračajočih se obiskovalcih, ki so na pasico že odgovorili, in na vsaki strani, katere upravitelj privolitev se je naložil po strani. Vtičnik zdaj išče upravitelja privolitev deset sekund po nalaganju strani, namesto enkratnega preverjanja

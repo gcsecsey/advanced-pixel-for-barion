@@ -104,6 +104,11 @@ GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
 
 ## Changelog
 
+### 1.0.9
+- Fixed: `grantConsent` was sent as the page loaded rather than when the visitor accepted the cookie banner. Barion rejects a Full Pixel integration for exactly that, because a shop reporting consent before anyone has answered looks the same as one that never asks. Consent is now sent only for a decision the visitor makes on that page load. A returning visitor triggers nothing, since bp.js keeps their answer in its own cookie and Barion already has it
+- Fixed: with the WP Consent API plugin active but no cookie banner registered against it, every visitor was reported as having granted marketing consent. An unset consent type is how that API says no banner is driving it, and the plugin read it as a real answer. It now ignores the API in that state
+- Added: the settings page warns when the WP Consent API is active but no cookie banner registers with it. Installing it next to a banner that does not support it connects nothing, and until now nothing said so
+
 ### 1.0.8
 - Fixed: `grantConsent` was never sent on a site without the separate WP Consent API plugin, so Barion refused to approve the Full Pixel integration. Consent detection tried three sources in turn and stopped at the first match, and the last of them attached no listener at all. CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are now read directly, with no extra plugin
 - Fixed: `grantConsent` was also missed for a returning visitor who had already answered the banner, and on any site whose consent manager finished loading after the page did. The plugin now keeps looking for a consent manager for ten seconds after the page loads, rather than checking once

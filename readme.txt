@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -139,6 +139,11 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Changelog ==
 
+= 1.0.9 =
+* Fix: `grantConsent` was sent as the page loaded rather than when the visitor accepted the cookie banner. Barion rejects a Full Pixel integration for exactly that, because a shop reporting consent before anyone has answered looks the same as one that never asks. Consent is now sent only for a decision the visitor makes on that page load. A returning visitor triggers nothing, since bp.js keeps their answer in its own cookie and Barion already has it.
+* Fix: with the WP Consent API plugin active but no cookie banner registered against it, every visitor was reported as having granted marketing consent. An unset consent type is how that API says no banner is driving it, and the plugin read it as a real answer. It now ignores the API in that state.
+* New: the settings page warns when the WP Consent API is active but no cookie banner registers with it. Installing it next to a banner that does not support it connects nothing, and until now nothing said so.
+
 = 1.0.8 =
 * Fix: `grantConsent` was never sent on a site without the separate WP Consent API plugin, so Barion refused to approve the Full Pixel integration. Consent detection tried three sources in turn and stopped at the first match, and the last of them attached no listener at all. CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are now read directly, with no extra plugin.
 * Fix: `grantConsent` was also missed for a returning visitor who had already answered the banner, and on any site whose consent manager finished loading after the page did. The plugin now keeps looking for a consent manager for ten seconds after the page loads, rather than checking once.
@@ -186,6 +191,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.9 =
+Required for Barion Full Pixel approval. grantConsent is now sent when the visitor accepts the cookie banner instead of at page load, which is what Barion checks for. Also stops the WP Consent API from reporting consent for visitors who never answered.
 
 = 1.0.8 =
 Important for every store that needs Barion's Full Pixel approval. grantConsent is now sent with CookieYes, Complianz, Cookiebot and Cookie Law Info without the WP Consent API plugin, and it is no longer missed for returning visitors.

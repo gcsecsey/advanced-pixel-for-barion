@@ -103,6 +103,11 @@ GPL-2.0-or-later — podrobnosti nájdeš v [LICENSE](../../LICENSE).
 
 ## Zoznam zmien
 
+### 1.0.9
+- Opravené: `grantConsent` sa odosielal pri načítaní stránky, a nie vo chvíli, keď návštevník prijal cookie lištu. Práve za to Barion odmieta integráciu Full Pixel: obchod, ktorý hlási súhlas skôr, než ktokoľvek odpovedal, vyzerá rovnako ako ten, ktorý sa nikdy nepýta. Súhlas sa teraz odosiela len za rozhodnutie, ktoré návštevník urobí pri tom načítaní stránky. Vracajúci sa návštevník nevyvolá nič, pretože bp.js si jeho odpoveď drží vo vlastnej cookie a Barion ju už má
+- Opravené: pri aktívnom plugine WP Consent API, u ktorého sa však nezaregistrovala žiadna cookie lišta, bol každý návštevník hlásený ako ten, kto marketingový súhlas udelil. Nenastavený typ súhlasu je spôsob, akým toto API hovorí, že ho neriadi žiadna lišta, plugin to však čítal ako skutočnú odpoveď. V tomto stave ho teraz ignoruje
+- Nové: stránka nastavení varuje, keď je WP Consent API aktívne, ale nezaregistrovala sa uňho žiadna cookie lišta. Nainštalovať ho vedľa lišty, ktorá ho nepodporuje, nič neprepojí, a doteraz to nikto nepovedal
+
 ### 1.0.8
 - Opravené: `grantConsent` sa nikdy neodoslal na weboch bez samostatného pluginu WP Consent API, takže Barion neschválil integráciu Full Pixel. Detekcia súhlasu skúšala tri zdroje po sebe a zastavila sa pri prvom náleze, pričom posledný z nich neregistroval žiadny poslucháč. CookieYes, Complianz, Cookiebot a staršia lišta Cookie Law Info sa teraz čítajú priamo, bez ďalšieho pluginu
 - Opravené: `grantConsent` chýbal aj u vracajúcich sa návštevníkov, ktorí už na lištu odpovedali, a na každom webe, ktorého správca súhlasu sa načítal až po stránke. Plugin teraz hľadá správcu súhlasu desať sekúnd po načítaní stránky, namiesto jedinej kontroly

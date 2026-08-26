@@ -103,6 +103,11 @@ GPL-2.0-or-later — siehe [LICENSE](../../LICENSE) für Details.
 
 ## Änderungsprotokoll
 
+### 1.0.9
+- Behoben: `grantConsent` wurde beim Laden der Seite gesendet statt dann, wenn die Besucherin den Cookie-Banner akzeptierte. Genau dafür lehnt Barion eine Full-Pixel-Integration ab, denn ein Shop, der Einwilligung meldet, bevor jemand geantwortet hat, sieht aus wie einer, der nie fragt. Die Einwilligung wird jetzt nur noch für eine Entscheidung gesendet, die bei diesem Seitenaufruf getroffen wurde. Eine wiederkehrende Besucherin löst nichts aus, weil bp.js ihre Antwort im eigenen Cookie behält und Barion sie bereits hat
+- Behoben: Bei aktivem Plugin WP Consent API, aber ohne dort registrierten Cookie-Banner, wurde jede Besucherin als einwilligend gemeldet. Ein nicht gesetzter Consent-Typ ist die Art dieser API zu sagen, dass sie von keinem Banner gesteuert wird; das Plugin las das als echte Antwort. In diesem Zustand ignoriert es die API jetzt
+- Neu: Die Einstellungsseite warnt, wenn die WP Consent API aktiv ist, sich aber kein Cookie-Banner bei ihr registriert. Sie neben einem Banner zu installieren, das sie nicht unterstützt, verbindet nichts, und bisher sagte das niemand
+
 ### 1.0.8
 - Behoben: `grantConsent` wurde auf Websites ohne das separate Plugin WP Consent API nie gesendet, weshalb Barion die Full-Pixel-Integration nicht genehmigte. Die Einwilligungserkennung probierte drei Quellen nacheinander und hielt bei der ersten Übereinstimmung an, wobei die letzte gar keinen Listener registrierte. CookieYes, Complianz, Cookiebot und das alte Cookie-Law-Info-Banner werden jetzt direkt ausgelesen, ohne zusätzliches Plugin
 - Behoben: `grantConsent` fehlte auch bei wiederkehrenden Besuchern, die das Banner bereits beantwortet hatten, sowie auf jeder Website, deren Einwilligungsmanager erst nach der Seite fertig geladen wurde. Das Plugin sucht nach dem Laden der Seite jetzt zehn Sekunden lang nach einem Einwilligungsmanager, statt nur einmal zu prüfen
