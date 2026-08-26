@@ -11,7 +11,8 @@
 		"phpcompatibility/phpcompatibility-paragonie": "^2.0@dev",
 		"phpstan/phpstan": "^2.0",
 		"szepeviktor/phpstan-wordpress": "^2.0",
-		"php-stubs/woocommerce-stubs": "^11.0"
+		"php-stubs/woocommerce-stubs": "^11.0",
+		"wp-cli/dist-archive-command": "^3.1"
 	},
 	"scripts": {
 		"lint": "phpcs",

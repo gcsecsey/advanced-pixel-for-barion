@@ -58,10 +58,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - uses: ramsey/composer-install@v3
+      # Check the zip that would ship, not the repo tree, so .distignore is
+      # verified on every PR and development files stay out of the results.
+      - run: vendor/bin/wp dist-archive . "$RUNNER_TEMP/dist.zip"
+      - run: unzip -q "$RUNNER_TEMP/dist.zip" -d "$RUNNER_TEMP/dist"
       - uses: WordPress/plugin-check-action@v1
         with:
-          # Development-only directories; .distignore keeps them out of the release.
-          exclude-directories: 'docs,tests,tools'
+          build-dir: ${{ runner.temp }}/dist/advanced-pixel-for-barion
+          # Deliberate: the plugin ships its own translations, which wp.org
+          # language packs do not cover (see the docblock at the call site).
+          ignore-codes: 'PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound'
 
   i18n:
     name: POT freshness

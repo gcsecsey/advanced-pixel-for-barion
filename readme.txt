@@ -2,7 +2,7 @@
 Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 1.0.8
 Requires PHP: 7.4
 License: GPLv2 or later
@@ -200,7 +200,7 @@ Important fix for every store. The addToCart event never fired on shop or catego
 Fixes the bundled translations, which never loaded. If you run WordPress in Hungarian, Czech, Slovak, German, Croatian, Romanian, Slovenian or Serbian, the plugin's settings screen is now translated.
 
 = 1.0.3 =
-Stops duplicate `setEncryptedEmail` events on checkout, and fixes the `Format of e-mail address or hash is invalid` error that 1.0.1 could produce — including for emails that contain `+` or use an extended TLD, which bp.js's internal regex rejected. The plugin now pre-hashes the email with SHA-1 before sending.
+Stops duplicate `setEncryptedEmail` events on checkout, and fixes the `Format of e-mail address or hash is invalid` error that 1.0.1 could produce for emails with `+` or an extended TLD. The plugin now pre-hashes the email with SHA-1 before sending.
 
 = 1.0.1 =
 Critical fix: pixel events (including setEncryptedEmail) were never sent in 1.0.0 due to a script enqueueing timing bug. All users should upgrade.
