@@ -12,5 +12,5 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// Remove plugin settings
+// Remove plugin settings.
 delete_option( 'wc_barion_pixel_settings' );
