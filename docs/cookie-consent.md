@@ -6,6 +6,11 @@ It also carries the cookie banner text Barion recommends, and the current list o
 Barion's advertising partners. Read it before you go live — compliance is the
 merchant's responsibility, not the plugin's.
 
+Barion also lists `grantConsent` among the events that
+[must be implemented](https://docs.barion.com/Implementing_the_Full_Barion_Pixel)
+before a Full Pixel integration is approved. A shop that never sends it does not
+qualify for the lower fees, however complete the rest of the integration is.
+
 ## What the plugin does
 
 The base pixel script always loads, and `pageView` always fires. Barion documents
@@ -17,76 +22,60 @@ accepts marketing cookies and `bp('consent', 'rejectConsent')` when they decline
 Barion lists both as required. Your banner therefore has to offer a real reject
 option — with an accept-only banner the plugin has nothing to signal.
 
-The plugin looks for a consent manager in this order, and stops at the first one
-it finds:
+## How consent is detected
 
-1. **WP Consent API** (recommended) — universal, works with all major cookie plugins
-2. **Cookie Law Info** (fallback) — direct integration for CookieYes / Cookie Law Info
-3. **Manual** — for custom consent managers
+The plugin does not choose one consent manager. It subscribes to every consent
+signal it knows, all at once, and forwards the first real answer and every change
+after it. Load order does not matter: the listeners are registered before any
+consent manager exists, so a banner that appears late is still caught. A
+returning visitor sees no banner and so raises no event at all, which is why the
+plugin also looks for a consent manager every half second until one answers, and
+gives up ten seconds after the page loads.
 
----
+These work with no extra plugin:
 
-## Tier 1: WP Consent API (recommended)
+| Consent manager | Read through |
+|---|---|
+| [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) | `wp_has_consent('marketing')` and `wp_listen_for_consent_change` |
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | `getCkyConsent()` and `cookieyes_consent_update` |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | `cmplz_has_consent('marketing')` and `cmplz_status_change` |
+| [Cookiebot](https://wordpress.org/plugins/cookiebot/) | `Cookiebot.consent.marketing` and `CookiebotOnAccept` / `CookiebotOnDecline` / `CookiebotOnConsentReady` |
+| Cookie Law Info 2.x, legacy banner | the `cookielawinfo-checkbox-non-necessary` cookie, re-read after a banner click |
+| Anything else | you call the functions yourself — see [Manual integration](#manual-integration) |
 
-The [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) is a WordPress
-standard for passing consent between plugins. The Barion Pixel registers under its
-`marketing` category.
+Two rules apply to all of them:
 
-### How it works
+- **Nothing is sent before the visitor answers.** On a page load with no marketing consent the plugin stays silent rather than sending `rejectConsent`. There is nothing to report until the banner is answered.
+- **Only changes are sent.** A repeated identical state is not sent twice, which matters because one click can arrive through two adapters at once.
 
-After `DOMContentLoaded` the plugin checks for the `wp_has_consent()` function. If
-it exists:
+## WP Consent API — still recommended
 
-1. If `marketing` consent is already granted, `grantConsent` fires immediately.
-2. From then on the plugin listens for `wp_listen_for_consent_change` and fires `grantConsent` or `rejectConsent` on every change.
+The [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) is the
+WordPress standard for passing consent between plugins, and the Barion Pixel
+registers under its `marketing` category. It is a **separate plugin** — not part
+of WordPress, and not part of your cookie banner. A
+[proposal to move it into core](https://make.wordpress.org/core/2024/12/04/lets-reconsider-adopting-the-wp-consent-api/)
+is open but not merged.
 
-Note what is *not* in that list: on a page load where marketing consent is absent,
-the plugin stays silent rather than sending `rejectConsent`. Before the customer
-has answered the banner there is nothing to report, and the answer arrives through
-the change event.
+Install it when your cookie banner is not in the table above. Most banners
+support the WP Consent API, but only while that plugin is active: CookieYes, for
+example, loads its bridge only when the `WP_CONSENT_API` class exists. Without it
+those banners forward nothing, and the plugin has to fall back on the direct
+integrations.
 
-### Supported cookie plugins
-
-Any plugin that implements the WP Consent API works automatically:
-
-| Plugin | Active installs | Notes |
-|--------|----------------|-------|
-| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1.5M+ | WP Consent API built-in |
-| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ | Co-creator of WP Consent API |
-| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ | WP Consent API compatible |
-| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ | WP Consent API compatible |
-| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ | WP Consent API compatible |
-
-### Setup
-
-1. Install and activate [WP Consent API](https://wordpress.org/plugins/wp-consent-api/).
-2. Install and configure your cookie consent plugin.
-3. Install and configure Advanced Pixel for Barion.
-
-Nothing else to do — consent is handled automatically.
-
----
-
-## Tier 2: Cookie Law Info (fallback)
-
-Used when the WP Consent API is not available but
-[Cookie Law Info](https://wordpress.org/plugins/cookie-law-info/) / CookieYes is.
-
-### How it works
-
-1. The plugin checks for the `CLI` global and its `allowedCategories`.
-2. If the `cookielawinfo-checkbox-non-necessary` cookie is already `yes` — a returning visitor who accepted — `grantConsent` fires immediately.
-3. Clicks on the banner's `.cli_action_button` elements are watched. Shortly after a click the plugin reads that cookie again and fires `grantConsent` or `rejectConsent` accordingly.
-
-### Setup
-
-None. Install both plugins and it works.
+| Plugin | Active installs |
+|--------|----------------|
+| [CookieYes](https://wordpress.org/plugins/cookie-law-info/) | 1.5M+ |
+| [Complianz](https://wordpress.org/plugins/complianz-gdpr/) | 1M+ |
+| [Cookie Notice by dFactory](https://wordpress.org/plugins/cookie-notice/) | 1M+ |
+| [GDPR Cookie Compliance (Moove)](https://wordpress.org/plugins/gdpr-cookie-compliance/) | 300K+ |
+| [Real Cookie Banner](https://wordpress.org/plugins/real-cookie-banner/) | 100K+ |
 
 ---
 
-## Tier 3: Manual integration
+## Manual integration
 
-For custom consent managers, or where neither of the above applies.
+For custom consent managers, or where none of the above applies.
 
 ### Method 1: JavaScript functions (recommended)
 
@@ -131,23 +120,8 @@ function my_barion_consent_handler() {
 }
 ```
 
-### Examples for specific consent managers
+### Example: OneTrust
 
-**Cookiebot:**
-```javascript
-window.addEventListener('CookiebotOnAccept', function() {
-    if (Cookiebot.consent.marketing) {
-        window.wcBarionGrantConsent();
-    } else {
-        window.wcBarionRejectConsent();
-    }
-});
-window.addEventListener('CookiebotOnDecline', function() {
-    window.wcBarionRejectConsent();
-});
-```
-
-**OneTrust:**
 ```javascript
 function OptanonWrapper() {
     if (OnetrustActiveGroups.includes('C0004')) {
@@ -191,16 +165,16 @@ banner, and Barion requires both. From
 
 | Message | Meaning |
 |---------|---------|
-| `Consent auto-granted via WP Consent API` | Tier 1, consent was already granted on load |
-| `Consent granted via WP Consent API change event` | Tier 1, customer accepted just now |
-| `Consent rejected via WP Consent API change event` | Tier 1, customer declined just now |
-| `Cookie Law Info detected, initial non-necessary cookie: …` | Tier 2 took over, with the cookie value it read |
-| `Cookie Law Info button clicked, non-necessary cookie: …` | Tier 2, customer used the banner |
-| `No consent manager detected…` | Tier 3 — nothing was found, call the functions yourself |
-| `Consent granted (grantConsent)` | `grantConsent` reached bp.js (any tier) |
-| `Consent rejected (rejectConsent)` | `rejectConsent` reached bp.js (any tier) |
+| `Consent manager detected: …` | The named managers were found and wired |
+| `No consent manager detected…` | Nothing was found — call the functions yourself |
+| `Consent granted (grantConsent)` | `grantConsent` reached bp.js |
+| `Consent rejected (rejectConsent)` | `rejectConsent` reached bp.js |
 
 All messages are prefixed with `[Barion Pixel]`.
 
 4. Test both the accept and the reject path on your banner.
 5. The consent functions are safe to call repeatedly.
+
+`No consent manager detected` also appears as a warning on the plugin's settings
+page when the WP Consent API plugin is inactive, since this is the failure that
+gets a Full Pixel integration rejected.

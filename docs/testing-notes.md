@@ -67,7 +67,7 @@ Open the console (F12 > Console) and look for `[Barion Pixel]` messages:
 ```
 [Barion Pixel] bp.js loaded by Advanced Pixel for Barion
 [Barion Pixel] Base pixel initialized with ID: BP-xxxxxxxxxx-xx
-[Barion Pixel] Consent auto-granted via WP Consent API
+[Barion Pixel] Consent manager detected: WP Consent API
 [Barion Pixel] Block surfaces detected (cart store: true, product buttons: false)
 [Barion Pixel] Event: contentView { contentType: "Product", ... }
 [Barion Pixel] Event: addToCart { contentType: "Product", ... }
@@ -168,9 +168,16 @@ with your Pixel ID. See [Compatibility](compatibility.md).
 
 ### Consent not granting
 
-- **WP Consent API**: the WP Consent API plugin has to be installed, and your cookie plugin has to support it.
-- **Cookie Law Info**: the plugin has to be active and the `CLI` global available.
-- **Manual**: call `window.wcBarionGrantConsent()` from your consent manager's callback.
+This is the failure Barion rejects a Full Pixel integration for, so check it
+first. With Debug Mode on, the console says which case you are in.
+
+- `Consent manager detected: …` but no `grantConsent` after you accept — the manager was found but reports no marketing consent. Check that your banner's marketing or advertising category is the one you accepted.
+- `No consent manager detected` — the plugin found nothing to read. This line appears ten seconds after the page loads, not immediately, because a consent manager served from a CDN can take that long to appear. CookieYes, Complianz, Cookiebot and legacy Cookie Law Info are read directly. For any other banner, install [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) or call `window.wcBarionGrantConsent()` from your banner's accept callback.
+- Nothing at all in the console — the base script did not run. A consent plugin that blocks unknown scripts may have blocked it. Barion asks for the base pixel to load regardless of consent, so add it to your blocker's allow list.
+
+The plugin stays silent on a page load where consent has not been given yet.
+That is deliberate: `rejectConsent` means the visitor said no, not that they have
+not answered.
 
 ### purchase fires on an unpaid order
 

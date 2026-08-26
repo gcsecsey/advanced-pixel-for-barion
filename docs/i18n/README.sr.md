@@ -103,6 +103,15 @@ GPL-2.0-or-later — pogledaj [LICENSE](../../LICENSE) za detalje.
 
 ## Evidencija promena
 
+### 1.0.8
+- Ispravljeno: `grantConsent` se nikada nije slao na sajtovima bez zasebnog dodatka WP Consent API, pa Barion nije odobrio Full Pixel integraciju. Prepoznavanje saglasnosti je redom probalo tri izvora i zaustavilo se na prvom pronađenom, a poslednji od njih nije registrovao nikakav slušalac. CookieYes, Complianz, Cookiebot i stara traka Cookie Law Info sada se čitaju direktno, bez dodatnog dodatka
+- Ispravljeno: `grantConsent` je izostao i kod posetilaca koji su se vratili i već odgovorili na traku, kao i na svakom sajtu čiji se upravljač saglasnosti učitao nakon stranice. Dodatak sada traži upravljača saglasnosti deset sekundi nakon učitavanja stranice, umesto jedne provere
+- Novo: stranica podešavanja upozorava kada nijedan upravljač saglasnosti nije dostupan, pa se neispravno podešavanje vidi pre nego što Barion odbije integraciju
+
+### 1.0.7
+- Ispravljeno: fatalna greška na svakom sajtu koji je dodatak koristio bez WooCommercea, ako je Pixel ID bio sačuvan, a puno praćenje uključeno. Skripta događaja u podnožju pozivala je `is_product()`, funkciju koja postoji samo dok je WooCommerce učitan, pa se stranica rušila uz `Call to undefined function is_product()`. Hookovi WooCommerce događaja sada se registruju samo kada je WooCommerce aktivan; osnovni piksel se, kako je i dokumentovano, i dalje učitava bez njega. Greška postoji od verzije 1.0.0
+- Ispravljeno: napomena o Pixel ID-u podešenom i u dodatku Barion Payment Gateway prikazivala se na engleskom u svim jezicima. Tekst je preoblikovan u ranijem izdanju, a prevodi nikada nisu ažurirani
+
 ### 1.0.6
 - Ispravljeno: `initiateCheckout` i `setEncryptedEmail` nikada se nisu slali na WooCommerce bloku Checkout, koji je od WooCommerce 8.3 podrazumevan za nove prodavnice. Dodatak je slušao samo PHP hookove klasične naplate i njeno polje `#billing_email`, a blok nema ni jedno ni drugo. Sada čita skladište podataka blokova Cart i Checkout; ponašanje klasične naplate ostaje isto
 - Ispravljeno: `addToCart` nikada se nije slao na stranicama prodavnice ni kategorija, ni u jednoj prodavnici. Skripta događaja učitavala se samo na stranicama na kojima je već čekao neki događaj, što na arhivskim stranicama nikada nije slučaj, pa osluškivači dodavanja u korpu nisu bili prisutni upravo tamo gde kupci dodaju u korpu. Greška potiče iz verzije 1.0.1

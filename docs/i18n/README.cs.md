@@ -103,6 +103,15 @@ GPL-2.0-or-later — viz [LICENSE](../../LICENSE) pro podrobnosti.
 
 ## Historie změn
 
+### 1.0.8
+- Opraveno: `grantConsent` se nikdy neodeslal na webech bez samostatného pluginu WP Consent API, takže Barion neschválil integraci Full Pixel. Detekce souhlasu zkoušela tři zdroje po sobě a zastavila se u prvního nálezu, přičemž poslední z nich neregistroval žádný posluchač. CookieYes, Complianz, Cookiebot a starší lišta Cookie Law Info se nyní čtou přímo, bez dalšího pluginu
+- Opraveno: `grantConsent` chyběl také u vracejících se návštěvníků, kteří už na lištu odpověděli, a na každém webu, jehož správce souhlasu se načetl až po stránce. Plugin nyní hledá správce souhlasu deset sekund po načtení stránky, místo jediné kontroly
+- Nové: stránka nastavení upozorní, když není dostupný žádný správce souhlasu, takže je chybné nastavení vidět dříve, než Barion integraci odmítne
+
+### 1.0.7
+- Opraveno: fatální chyba na každém webu, který plugin používal bez WooCommerce, pokud bylo vyplněno Pixel ID a zapnuté plné sledování. Skript událostí v patičce volal funkci `is_product()`, která existuje pouze při načteném WooCommerce, takže stránka spadla s chybou `Call to undefined function is_product()`. Hooky událostí WooCommerce se nyní registrují jen tehdy, když je WooCommerce aktivní; základní pixel se podle dokumentace načítá i bez něj. Chyba pochází z verze 1.0.0
+- Opraveno: poznámka o Pixel ID nastaveném také v pluginu Barion Payment Gateway se ve všech jazycích zobrazovala anglicky. Text byl v dřívějším vydání přeformulován, ale překlady se neaktualizovaly
+
 ### 1.0.6
 - Opraveno: `initiateCheckout` a `setEncryptedEmail` se nikdy neodeslaly na bloku Checkout ve WooCommerce, který je od WooCommerce 8.3 výchozí pro nové obchody. Plugin naslouchal pouze PHP hookům klasické pokladny a jejímu poli `#billing_email`, a blok nemá ani jedno. Nyní čte datové úložiště bloků Cart a Checkout; chování klasické pokladny se nemění
 - Opraveno: `addToCart` se nikdy neodeslal na stránkách obchodu ani kategorií, a to v žádném obchodě. Skript událostí se načítal jen na stránkách, kde už nějaká událost čekala ve frontě, což u výpisů nikdy neplatí, takže posluchače přidání do košíku chyběly právě tam, kde zákazníci do košíku přidávají. Chyba pochází z verze 1.0.1

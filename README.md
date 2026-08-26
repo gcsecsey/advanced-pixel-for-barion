@@ -27,8 +27,7 @@ Barion Pixel integration for WooCommerce with full e-commerce event tracking, co
   - `initiateCheckout`: Fired when checkout begins
   - `purchase`: Fired on successful order completion (with duplicate prevention)
   - `setEncryptedEmail`: Sends billing email to Barion on purchase (encrypted by bp.js)
-- **WP Consent API Integration**: Universal cookie consent support — works with CookieYes, Complianz, Real Cookie Banner, GDPR Cookie Compliance, Cookie Notice, and more
-- **Cookie Law Info Fallback**: Direct integration for sites using CookieYes/Cookie Law Info
+- **Cookie Consent Integration**: Sends `grantConsent` and `rejectConsent` automatically. CookieYes, Complianz, Cookiebot and Cookie Law Info are read directly, with the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) covering everything else
 - **Admin Settings Panel**: Easy configuration through WordPress admin
 - **Debug Mode**: Console logging for testing and development
 - **bp.js Double-Load Detection**: Safely coexists with other plugins that load bp.js (e.g., Barion Payment Gateway)
@@ -86,14 +85,14 @@ Barion's own guides for setting up the pixel. The plugin's **Enable Full Pixel T
 - **WooCommerce**: Required for full event tracking (base pixel works without it)
 - **Barion Payment Gateway** ([woocommerce-barion](https://github.com/szelpe/woocommerce-barion)): Coexists perfectly — that plugin handles payments, this one handles pixel tracking
 - **Page caching**: Fully compatible (addToCart uses client-side JS)
-- **Cookie plugins**: Any WP Consent API compatible plugin works automatically
+- **Cookie plugins**: CookieYes, Complianz, Cookiebot and Cookie Law Info work on their own. Any WP Consent API compatible plugin works once that plugin is active
 
 ## Requirements
 
 - WordPress 5.0 or higher
 - PHP 7.4 or higher
 - WooCommerce 5.0+ (for full event tracking)
-- Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) for universal cookie consent support
+- Optional: [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) — needed only when your cookie banner is not one of the four read directly
 
 ## Contributing
 
@@ -104,6 +103,15 @@ Bug reports, pull requests and translations are welcome — see [CONTRIBUTING.md
 GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
 
 ## Changelog
+
+### 1.0.8
+- Fixed: `grantConsent` was never sent on a site without the separate WP Consent API plugin, so Barion refused to approve the Full Pixel integration. Consent detection tried three sources in turn and stopped at the first match, and the last of them attached no listener at all. CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are now read directly, with no extra plugin
+- Fixed: `grantConsent` was also missed for a returning visitor who had already answered the banner, and on any site whose consent manager finished loading after the page did. The plugin now keeps looking for a consent manager for ten seconds after the page loads, rather than checking once
+- Added: the settings page warns when no consent manager can be reached, so a broken consent setup is visible before Barion refuses the integration rather than after
+
+### 1.0.7
+- Fixed: a fatal error on any site that runs the plugin without WooCommerce, once a Pixel ID was saved and Full Tracking was on. The footer event script called `is_product()`, a function that only exists while WooCommerce is loaded, so the page died with `Call to undefined function is_product()`. The WooCommerce event hooks are now registered only when WooCommerce is active; the base pixel still loads without it, as documented. This dates back to 1.0.0
+- Fixed: the note about a Pixel ID also being set in the Barion Payment Gateway plugin was shown in English in every language. It was reworded in an earlier release and the translations were never updated to match
 
 ### 1.0.6
 - Fixed: `initiateCheckout` and `setEncryptedEmail` never fired on the WooCommerce Checkout block, which has been the default for new stores since WooCommerce 8.3. The plugin only listened for the classic checkout's PHP hooks and its `#billing_email` field, and the block has neither. It now reads the Cart and Checkout blocks' data store; classic checkout behaviour is unchanged

@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.0.6
+Stable tag: 1.0.8
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -28,15 +28,14 @@ Full Tracking is also one of the conditions of Barion's discounted "Advanced" ga
 
 = Cookie Consent =
 
-The plugin integrates with the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), supporting all major cookie consent plugins:
+Barion requires a grantConsent event before it approves a Full Pixel integration. The plugin sends it automatically, and reads these consent managers directly, with no extra plugin:
 
 * CookieYes
 * Complianz
-* Real Cookie Banner
-* GDPR Cookie Compliance (Moove)
-* Cookie Notice by dFactory
+* Cookiebot
+* Cookie Law Info (legacy banner)
 
-Direct fallback integration with Cookie Law Info is also included.
+For every other cookie banner, install the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) plugin. It is the WordPress standard for passing consent between plugins, and Real Cookie Banner, GDPR Cookie Compliance (Moove) and Cookie Notice by dFactory all support it. You can also wire your banner up by hand in a few lines.
 
 = Supported Languages =
 
@@ -58,7 +57,7 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 
 * Base Pixel with automatic pageView tracking
 * Full e-commerce event tracking with all required fields
-* WP Consent API integration for universal cookie consent support
+* Automatic grantConsent and rejectConsent, required for Barion's Full Pixel approval
 * Client-side add-to-cart tracking (compatible with page caching)
 * Variable product support (tracks variation prices)
 * Duplicate purchase prevention
@@ -80,8 +79,8 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 
 = Optional =
 
-* [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) for universal cookie consent support
-* Any WP Consent API compatible cookie plugin (CookieYes, Complianz, etc.)
+* [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), if your cookie banner is not read directly
+* A cookie consent banner — Barion requires one before it approves a Full Pixel integration
 
 == Frequently Asked Questions ==
 
@@ -95,7 +94,7 @@ No. The [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) i
 
 = Which cookie consent plugins are supported? =
 
-All plugins that implement the WP Consent API standard: CookieYes, Complianz, Real Cookie Banner, GDPR Cookie Compliance (Moove), Cookie Notice by dFactory, and others. Direct fallback integration with Cookie Law Info is also built in.
+CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are read directly, with no extra plugin. Every other banner works through the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) plugin, including Real Cookie Banner, GDPR Cookie Compliance (Moove) and Cookie Notice by dFactory. Turn on Debug Mode to see which one the plugin found.
 
 = What is the difference between Base Pixel and Full Tracking? =
 
@@ -136,9 +135,18 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 2. Product page — Debug Mode logs `contentView` when the page loads, and `addToCart` when the customer adds the product to the cart.
 3. Checkout page — `initiateCheckout` carries the cart contents and the revenue, and `setEncryptedEmail` sends the SHA-1 hashed billing email.
 4. Order received page — `purchase` reports the completed order with its contents and revenue.
-5. Events wait for consent. The plugin reads the WP Consent API, so any compatible cookie banner controls the tracking.
+5. Events wait for consent. Accept marketing cookies in your banner and Debug Mode logs `Consent granted (grantConsent)`.
 
 == Changelog ==
+
+= 1.0.8 =
+* Fix: `grantConsent` was never sent on a site without the separate WP Consent API plugin, so Barion refused to approve the Full Pixel integration. Consent detection tried three sources in turn and stopped at the first match, and the last of them attached no listener at all. CookieYes, Complianz, Cookiebot and the legacy Cookie Law Info banner are now read directly, with no extra plugin.
+* Fix: `grantConsent` was also missed for a returning visitor who had already answered the banner, and on any site whose consent manager finished loading after the page did. The plugin now keeps looking for a consent manager for ten seconds after the page loads, rather than checking once.
+* New: the settings page warns when no consent manager can be reached, so a broken consent setup is visible before Barion refuses the integration rather than after.
+
+= 1.0.7 =
+* Fix: a fatal error on any site that runs the plugin without WooCommerce, once a Pixel ID was saved and Full Tracking was on. The footer event script called `is_product()`, a function that only exists while WooCommerce is loaded, so the page died with `Call to undefined function is_product()`. The WooCommerce event hooks are now registered only when WooCommerce is active. The base pixel still loads without WooCommerce, as documented. This dates back to 1.0.0.
+* Fix: the note about a Pixel ID also being set in the Barion Payment Gateway plugin was shown in English in every language. It was reworded in an earlier release and the translations were never updated to match.
 
 = 1.0.6 =
 * Fix: `initiateCheckout` and `setEncryptedEmail` never fired on the WooCommerce Checkout block, which has been the default for new stores since WooCommerce 8.3. The plugin only listened for the classic checkout's PHP hooks and its `#billing_email` field, and the block has neither. It now reads the Cart and Checkout blocks' data store. Classic checkout behaviour is unchanged.
@@ -178,6 +186,12 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.8 =
+Important for every store that needs Barion's Full Pixel approval. grantConsent is now sent with CookieYes, Complianz, Cookiebot and Cookie Law Info without the WP Consent API plugin, and it is no longer missed for returning visitors.
+
+= 1.0.7 =
+Fixes a fatal error on sites that run the plugin without WooCommerce. Stores that have WooCommerce active are unaffected.
 
 = 1.0.6 =
 Important fix for every store. The addToCart event never fired on shop or category pages. Checkout and email events were also missing on the block checkout. All of them are sent now.

@@ -5,7 +5,7 @@
  * Description: Barion Pixel integration for WooCommerce with full e-commerce event tracking, cookie consent support, and WP Consent API compatibility.
  * Author: Gergely Csecsey
  * Author URI: https://github.com/gcsecsey
- * Version: 1.0.6
+ * Version: 1.0.8
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * WC requires at least: 5.0
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'WC_BARION_PIXEL_VERSION', '1.0.6' );
+define( 'WC_BARION_PIXEL_VERSION', '1.0.8' );
 define( 'WC_BARION_PIXEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WC_BARION_PIXEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -99,8 +99,9 @@ class WC_Barion_Pixel {
 			// Enqueue scripts.
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_base_script' ), 1 );
 			add_action( 'wp_footer', array( $this, 'output_footer_action' ), 999 );
-			// WooCommerce event hooks (only if full tracking is enabled).
-			if ( $this->is_full_tracking_enabled() ) {
+			// Every callback below calls WooCommerce functions, so none of them
+			// may be registered on a site without WooCommerce.
+			if ( $this->is_full_tracking_enabled() && class_exists( 'WooCommerce' ) ) {
 				add_action( 'woocommerce_after_single_product', array( $this, 'track_content_view' ) );
 				add_action( 'woocommerce_thankyou', array( $this, 'track_purchase' ), 10, 1 );
 				add_action( 'woocommerce_thankyou', array( $this, 'track_set_encrypted_email' ), 10, 1 );
@@ -230,6 +231,19 @@ class WC_Barion_Pixel {
 	public function render_section_description() {
 		echo '<p>' . esc_html__( 'Configure your Barion Pixel integration. The Base Pixel will be loaded on all pages when a Pixel ID is provided. Full tracking includes e-commerce events like product views, add to cart, checkout, and purchase.', 'advanced-pixel-for-barion' ) . '</p>';
 
+		// Barion rejects a Full Pixel integration that never sends grantConsent,
+		// and the merchant has no way to see that from here. Without the WP
+		// Consent API only the banners the plugin knows by name are bridged.
+		if ( ! function_exists( 'wp_has_consent' ) ) {
+			echo '<div class="notice notice-warning inline"><p>';
+			echo esc_html__( 'The WP Consent API plugin is not active. Consent is still forwarded automatically for CookieYes, Complianz, Cookiebot and Cookie Law Info.', 'advanced-pixel-for-barion' );
+			echo ' ';
+			echo esc_html__( 'With any other cookie banner you must call window.wcBarionGrantConsent() yourself. Barion does not approve a Full Pixel integration that never sends grantConsent.', 'advanced-pixel-for-barion' );
+			echo ' <a href="https://wordpress.org/plugins/wp-consent-api/" target="_blank" rel="noopener noreferrer">';
+			echo esc_html__( 'Install the WP Consent API plugin', 'advanced-pixel-for-barion' );
+			echo '</a></p></div>';
+		}
+
 		$barion_settings = get_option( 'woocommerce_barion_settings', array() );
 		if ( ! empty( $barion_settings['barion_pixel_id'] ) && ! empty( $this->options['pixel_id'] ) ) {
 			echo '<p>' . esc_html__( 'The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place.', 'advanced-pixel-for-barion' ) . '</p>';
@@ -298,9 +312,16 @@ class WC_Barion_Pixel {
 	 */
 	public function enqueue_base_script() {
 		wp_enqueue_script(
+			'wc-barion-consent',
+			WC_BARION_PIXEL_URL . 'assets/js/barion-consent.js',
+			array(),
+			WC_BARION_PIXEL_VERSION,
+			false
+		);
+		wp_enqueue_script(
 			'wc-barion-pixel-base',
 			WC_BARION_PIXEL_URL . 'assets/js/barion-pixel-base.js',
-			array(),
+			array( 'wc-barion-consent' ),
 			WC_BARION_PIXEL_VERSION,
 			false
 		);
@@ -356,6 +377,8 @@ class WC_Barion_Pixel {
 	/**
 	 * Enqueue events script with all collected data (WordPress wp_footer hook callback)
 	 *
+	 * Only hooked when WooCommerce is active, so WooCommerce functions are safe to call.
+	 *
 	 * @return void
 	 */
 	public function enqueue_events_script() {
@@ -375,8 +398,7 @@ class WC_Barion_Pixel {
 		// Detect checkout (excluding the order-received endpoint) so JS can listen
 		// for email field changes and fire setEncryptedEmail at email entry time,
 		// as the Pixel API reference requires (https://docs.barion.com/Barion-Pixel-API-referencia).
-		$is_checkout = function_exists( 'is_checkout' ) && is_checkout()
-			&& ! ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) );
+		$is_checkout = is_checkout() && ! is_wc_endpoint_url( 'order-received' );
 
 		// Pre-fill billing email for logged-in users so setEncryptedEmail fires immediately on checkout load.
 		$logged_in_email = '';
@@ -399,9 +421,7 @@ class WC_Barion_Pixel {
 		// Add to cart happens on shop and archive pages, not only where an event
 		// is already queued. Without this the addToCart listeners never load on
 		// the pages that actually fire them.
-		$can_add_to_cart = $has_block_store
-			|| ( function_exists( 'is_woocommerce' ) && is_woocommerce() )
-			|| ( function_exists( 'is_cart' ) && is_cart() );
+		$can_add_to_cart = $has_block_store || is_woocommerce() || is_cart();
 
 		// Only enqueue if there's something to do.
 		if ( empty( $this->events ) && null === $single_product && null === $this->encrypted_email
@@ -438,7 +458,7 @@ class WC_Barion_Pixel {
 			'wc-barion-pixel-events',
 			'wcBarionPixelEvents',
 			array(
-				'currency'      => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'HUF',
+				'currency'      => get_woocommerce_currency(),
 				'debug'         => $this->is_debug_mode(),
 				'events'        => $this->events,
 				'singleProduct' => $single_product,
@@ -446,7 +466,7 @@ class WC_Barion_Pixel {
 				'isCheckout'    => $is_checkout,
 				'loggedInEmail' => $logged_in_email,
 				// Built with rest_url() so it survives plain permalinks and a custom REST prefix.
-				'cartApiUrl'    => function_exists( 'rest_url' ) ? rest_url( 'wc/store/v1/cart' ) : '',
+				'cartApiUrl'    => rest_url( 'wc/store/v1/cart' ),
 			)
 		);
 	}

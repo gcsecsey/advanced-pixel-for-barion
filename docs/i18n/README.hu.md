@@ -106,6 +106,15 @@ GPL-2.0-or-later — részletekért lásd a [LICENSE](../../LICENSE) fájlt.
 
 ## Változásnapló
 
+### 1.0.8
+- Javítva: a `grantConsent` soha nem ment ki azokon az oldalakon, ahol nem volt fent a külön WP Consent API bővítmény, ezért a Barion nem hagyta jóvá a Full Pixel integrációt. A hozzájárulás felismerése három forrást próbált sorban, és az elsőnél megállt, az utolsó viszont egyáltalán nem regisztrált eseményfigyelőt. A CookieYes, a Complianz, a Cookiebot és a régi Cookie Law Info sáv mostantól közvetlenül olvasható, külön bővítmény nélkül
+- Javítva: a `grantConsent` kimaradt a visszatérő látogatóknál is, akik korábban már válaszoltak a sávra, valamint minden olyan oldalon, ahol a sütikezelő az oldal betöltése után töltődött be. A bővítmény mostantól az oldal betöltése után tíz másodpercig keresi a sütikezelőt, nem csak egyszer ellenőriz
+- Új: a beállítások oldal figyelmeztet, ha egyetlen sütikezelő sem érhető el, így a hibás beállítás már azelőtt látszik, hogy a Barion elutasítaná az integrációt
+
+### 1.0.7
+- Javítva: végzetes hiba minden olyan oldalon, amely WooCommerce nélkül futtatta a bővítményt, ha be volt állítva Pixel ID és be volt kapcsolva a teljes követés. A lábléc eseményszkriptje az `is_product()` függvényt hívta, amely csak betöltött WooCommerce mellett létezik, így az oldal `Call to undefined function is_product()` hibával leállt. A WooCommerce eseménykampói mostantól csak akkor kerülnek regisztrálásra, ha a WooCommerce aktív; az alap pixel a dokumentáció szerint továbbra is betöltődik nélküle. A hiba az 1.0.0 óta állt fenn
+- Javítva: a Barion Payment Gateway bővítményben is beállított Pixel azonosítóról szóló üzenet minden nyelven angolul jelent meg. A szöveget egy korábbi kiadás átfogalmazta, a fordítások viszont nem követték
+
 ### 1.0.6
 - Javítva: az `initiateCheckout` és a `setEncryptedEmail` soha nem indult el a WooCommerce Checkout blokkon, amely a WooCommerce 8.3 óta az új boltok alapértelmezése. A bővítmény csak a klasszikus pénztár PHP hookjaira és a `#billing_email` mezőjére figyelt, a blokknak viszont egyik sincs. Mostantól a Cart és a Checkout blokk adattárát olvassa; a klasszikus pénztár működése változatlan
 - Javítva: az `addToCart` soha nem indult el a bolt- és kategóriaoldalakon, egyetlen boltban sem. Az eseményszkript csak azokon az oldalakon töltődött be, ahol már várakozott esemény a sorban — archívumoldalon ez soha nem teljesül —, így a kosárba helyezést figyelő kód épp ott hiányzott, ahol a vásárlók ténylegesen kosárba tesznek. A hiba az 1.0.1 óta állt fenn

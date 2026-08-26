@@ -103,6 +103,15 @@ GPL-2.0-or-later — siehe [LICENSE](../../LICENSE) für Details.
 
 ## Änderungsprotokoll
 
+### 1.0.8
+- Behoben: `grantConsent` wurde auf Websites ohne das separate Plugin WP Consent API nie gesendet, weshalb Barion die Full-Pixel-Integration nicht genehmigte. Die Einwilligungserkennung probierte drei Quellen nacheinander und hielt bei der ersten Übereinstimmung an, wobei die letzte gar keinen Listener registrierte. CookieYes, Complianz, Cookiebot und das alte Cookie-Law-Info-Banner werden jetzt direkt ausgelesen, ohne zusätzliches Plugin
+- Behoben: `grantConsent` fehlte auch bei wiederkehrenden Besuchern, die das Banner bereits beantwortet hatten, sowie auf jeder Website, deren Einwilligungsmanager erst nach der Seite fertig geladen wurde. Das Plugin sucht nach dem Laden der Seite jetzt zehn Sekunden lang nach einem Einwilligungsmanager, statt nur einmal zu prüfen
+- Neu: die Einstellungsseite warnt, wenn kein Einwilligungsmanager erreichbar ist, sodass eine defekte Einwilligungskonfiguration sichtbar wird, bevor Barion die Integration ablehnt
+
+### 1.0.7
+- Behoben: ein schwerwiegender Fehler auf jeder Website, die das Plugin ohne WooCommerce betrieb, sobald eine Pixel-ID gespeichert und das vollständige Tracking aktiviert war. Das Ereignisskript im Footer rief `is_product()` auf, eine Funktion, die es nur bei geladenem WooCommerce gibt, sodass die Seite mit `Call to undefined function is_product()` abbrach. Die WooCommerce-Ereignis-Hooks werden jetzt nur noch registriert, wenn WooCommerce aktiv ist; das Basis-Pixel lädt wie dokumentiert auch ohne WooCommerce. Der Fehler besteht seit 1.0.0
+- Behoben: der Hinweis auf eine ebenfalls im Barion-Payment-Gateway-Plugin gesetzte Pixel-ID erschien in allen Sprachen auf Englisch. Der Text wurde in einer früheren Version neu formuliert, die Übersetzungen wurden nie nachgezogen
+
 ### 1.0.6
 - Behoben: `initiateCheckout` und `setEncryptedEmail` wurden im WooCommerce-Checkout-Block nie ausgelöst, der seit WooCommerce 8.3 die Voreinstellung für neue Shops ist. Das Plugin horchte nur auf die PHP-Hooks der klassischen Kasse und deren Feld `#billing_email`, und der Block hat beides nicht. Es liest jetzt den Datenspeicher der Cart- und Checkout-Blöcke; das Verhalten der klassischen Kasse bleibt unverändert
 - Behoben: `addToCart` wurde auf Shop- und Kategorieseiten nie ausgelöst, in keinem Shop. Das Event-Skript wurde nur auf Seiten geladen, auf denen bereits ein Event in der Warteschlange stand — auf Archivseiten nie. Die Add-to-Cart-Listener fehlten also genau dort, wo Kunden tatsächlich in den Warenkorb legen. Der Fehler stammt aus 1.0.1
