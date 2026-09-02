@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * Headless runner for the consent browser tests.
+ * Headless runner for the Playground browser tests.
  *
- * The assertions live in the harness page itself (mu-plugins/02-harness.php),
- * which is what makes it usable by hand as well: start the server, open the two
- * URLs, read the summary line. This file is the same thing without a human —
- * it boots Playground, opens both pages in headless Chromium, waits for the
- * harness to finish, and turns the result into an exit code for CI.
+ * The assertions live in the harness pages themselves
+ * (barion-test-harness/inc/runner.php), which is what makes them usable by hand
+ * as well: start the server, open the URLs, read the summary. This file is the
+ * same thing without a human — it boots Playground, opens every harness page in
+ * headless Chromium, waits for each to finish, and turns the result into an
+ * exit code for CI.
  */
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -17,7 +18,7 @@ const REPO = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..
 const PORT = Number( process.env.BARION_TEST_PORT || 9411 );
 const BASE = `http://127.0.0.1:${ PORT }`;
 
-// The whole run takes about 70s on a warm developer machine. A CI runner
+// The whole run takes a few minutes on a warm developer machine. A CI runner
 // downloads WordPress, WooCommerce and wp-consent-api first and works through
 // the scenarios slower, so both ceilings are set well above that rather than
 // close to it — a timeout here reads as a consent bug and is worth avoiding.
@@ -25,8 +26,9 @@ const BOOT_TIMEOUT_MS = 300000;
 const HARNESS_TIMEOUT_MS = 300000;
 
 const PAGES = [
-	{ url: `${ BASE }/?barion-harness=1`, name: 'stub consent managers' },
-	{ url: `${ BASE }/?barion-harness=real`, name: 'real wp-consent-api plugin' }
+	{ url: `${ BASE }/?barion-harness=1`, name: 'consent — stub consent managers' },
+	{ url: `${ BASE }/?barion-harness=real`, name: 'consent — real wp-consent-api plugin' },
+	{ url: `${ BASE }/?barion-harness=events`, name: 'e-commerce payloads' }
 ];
 
 function startServer() {
@@ -37,7 +39,9 @@ function startServer() {
 			'server',
 			`--port=${ PORT }`,
 			'--mount-dir', REPO, '/wordpress/wp-content/plugins/advanced-pixel-for-barion',
-			'--mount-dir', path.join( REPO, 'tests/playground/mu-plugins' ), '/wordpress/wp-content/mu-plugins',
+			// A plugin, not mu-plugins, so this is the same layout a Playground
+			// PR preview installs with one git:directory step.
+			'--mount-dir', path.join( REPO, 'tests/playground/barion-test-harness' ), '/wordpress/wp-content/plugins/barion-test-harness',
 			`--blueprint=${ path.join( REPO, 'tests/playground/blueprint.json' ) }`
 		],
 		// Own process group, so the whole Playground tree dies with one kill.
@@ -80,17 +84,19 @@ async function runPage( browser, { url, name } ) {
 	const results = await page.evaluate( () => window.__results );
 	await context.close();
 
-	console.log( `\n${ name } — ${ url }` );
+	// Buffered rather than printed as it goes, so concurrent pages do not
+	// interleave their output.
+	const lines = [ `\n${ name } — ${ url }` ];
 	for ( const r of results ) {
-		console.log( `  ${ r.pass ? 'ok  ' : 'FAIL' }  ${ r.name } -> ${ JSON.stringify( r.got ) }` );
+		lines.push( `  ${ r.pass ? 'ok  ' : 'FAIL' }  ${ r.name } -> ${ JSON.stringify( r.got ) }` );
 		if ( ! r.pass ) {
-			console.log( `        expected ${ JSON.stringify( r.expected ) }` );
+			lines.push( `        ${ r.why }` );
 			for ( const line of r.log || [] ) {
-				console.log( `        ${ line }` );
+				lines.push( `        ${ line }` );
 			}
 		}
 	}
-	return results;
+	return { results, lines };
 }
 
 const server = startServer();
@@ -101,10 +107,14 @@ try {
 	await waitForServer( server );
 	const browser = await chromium.launch();
 	try {
-		for ( const target of PAGES ) {
-			const results = await runPage( browser, target );
-			total += results.length;
-			failed += results.filter( ( r ) => ! r.pass ).length;
+		// Concurrent: each page gets its own browser context, so cookies and the
+		// WooCommerce cart session stay separate, and the pages spend most of
+		// their time waiting rather than working.
+		const pages = await Promise.all( PAGES.map( ( target ) => runPage( browser, target ) ) );
+		for ( const page of pages ) {
+			console.log( page.lines.join( '\n' ) );
+			total += page.results.length;
+			failed += page.results.filter( ( r ) => ! r.pass ).length;
 		}
 	} finally {
 		await browser.close();

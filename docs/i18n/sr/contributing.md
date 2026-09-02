@@ -38,10 +38,11 @@ Nemoj u prijavu da nalepiš svoj stvarni Pixel ID ni imejl adresu kupca.
    WordPressovim standardima kodiranja i kompatibilnošću sa PHP 7.4+), `composer phpstan`,
    `node --test` i `php tests/<datoteka>.php` za svaki PHP test. `composer lint:fix` popravlja
    većinu stilskih nalaza.
-6. Pokreni pregledački komplet za saglasnost: `npm install`, `npx playwright install --with-deps chromium`,
-   zatim `npm run test:browser`. Pokreće WordPress u Playgroundu i proverava da saglasnost stiže
-   Barionu pri kliku na prihvatanje, a nikada pri učitavanju stranice — vidi
-   [`tests/playground/README.md`](../../../tests/playground/README.md).
+6. Pokreni pregledački komplet: `npm install`, `npx playwright install --with-deps chromium`,
+   zatim `npm run test:browser`. Pokreće WordPress u Playgroundu i proverava dve stvari do kojih
+   jedinični test ne dopire: da saglasnost stiže Barionu pri kliku na prihvatanje, a nikada pri
+   učitavanju stranice, i da svaki e-commerce podatkovni paket nosi ključeve koje bp.js zahteva —
+   vidi [`tests/playground/README.md`](../../../tests/playground/README.md).
 7. Nemoj da podižeš broj verzije niti da uređuješ evidenciju promena — izdanja se označavaju
    zasebno.
 
@@ -64,17 +65,20 @@ Ako si u PHP izvoru promenio prevodivu nisku, prvo regeneriši šablon komandom
 
 ## Testiranje izmene
 
-Najbrži put je [WordPress Playground](https://playground.wordpress.net/). Repozitorijum sadrži
-blueprint koji pokreće WooCommerce prodavnicu sa primerima proizvoda, demo trakom za saglasnost i
-već uključenim režimom za otklanjanje grešaka:
+Otvori pull request i upotrebi na njemu dugme **Preview in WordPress Playground**. Pokreće
+WooCommerce prodavnicu sa tvojom granom, instaliranim test kompletom i uključenim režimom za
+otklanjanje grešaka, i otvara se na spisku svih scenarija. Dodaj `?barion-panel=1` bilo kojoj
+stranici prodavnice za živu tablu koja prikazuje svaki poziv piksela i kada se dogodio.
+
+Pull request sa forka ne dobija dugme jer u njega workflow ne sme da piše. Pokreni isti komplet
+lokalno — vidi [`tests/playground/README.md`](../../../tests/playground/README.md), čime to možeš da
+uradiš i bez otvaranja pull requesta.
+
+Za izdatu verziju umesto grane:
 
 ```sh
 npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
 ```
-
-Blueprint instalira objavljenu verziju sa WordPress.org-a. Za testiranje sopstvene radne kopije
-zameni korak `installPlugin` lokalnim montiranjem, ili instaliraj dodatak na bilo koji WordPress
-sajt i uključi režim za otklanjanje grešaka.
 
 ## Licenca
 

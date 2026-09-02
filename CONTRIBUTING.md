@@ -44,9 +44,10 @@ Do not paste your real Pixel ID or a customer's email address into an issue.
 5. Run the checks CI will run: `composer install`, then `composer lint` (PHPCS with the WordPress
    Coding Standards and PHP 7.4+ compatibility), `composer phpstan`, `node --test`, and
    `php tests/<file>.php` for each PHP test. `composer lint:fix` repairs most style issues.
-6. Run the consent browser suite: `npm install`, `npx playwright install --with-deps chromium`, then
-   `npm run test:browser`. It boots WordPress in Playground and checks that consent reaches
-   Barion on the accept click and never at page load — see
+6. Run the browser suite: `npm install`, `npx playwright install --with-deps chromium`, then
+   `npm run test:browser`. It boots WordPress in Playground and checks two things a unit test
+   cannot reach: that consent reaches Barion on the accept click and never at page load, and that
+   every e-commerce payload carries the keys bp.js demands — see
    [`tests/playground/README.md`](tests/playground/README.md).
 7. Do not bump the version number or edit the changelog — releases are tagged separately.
 
@@ -68,17 +69,20 @@ If you changed a translatable string in the PHP source, regenerate the template 
 
 ## Testing your change
 
-The quickest way is [WordPress Playground](https://playground.wordpress.net/). The repository
-contains a blueprint that boots a WooCommerce store with sample products, a demo consent banner and
-debug mode already on:
+Open your pull request and use the **Preview in WordPress Playground** button on it. That boots a
+WooCommerce store running your branch, with the test harness installed and debug mode on, and lands
+on an index of every scenario. Add `?barion-panel=1` to any shop page for a live panel showing each
+pixel call and when it fired.
+
+A pull request from a fork gets no button, because the workflow may not write to it. Run the same
+harness locally instead — see [`tests/playground/README.md`](tests/playground/README.md), which is
+also how to do this without opening a pull request at all.
+
+For the released version rather than a branch:
 
 ```sh
 npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
 ```
-
-The blueprint installs the released version from WordPress.org. To test your working copy instead,
-replace that `installPlugin` step with a local mount, or install the plugin into any WordPress site
-and enable Debug Mode.
 
 ## License
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Barion test stub consent managers
+ * Stub consent managers.
  *
  * Emulates the CMPs the plugin adapts to. CookieYes and Cookiebot need paid
  * accounts and a remote CDN script, so they cannot be installed in Playground;
@@ -10,6 +10,8 @@
  *             &late=1   define the CMP 600ms after DOMContentLoaded
  *             &prior=1  visitor already accepted before this page load
  */
+
+defined( 'ABSPATH' ) || exit;
 // The stub scenarios cover sites WITHOUT the WP Consent API plugin, which is
 // the reported failure. Left enqueued it would answer alongside the stub and
 // blur which adapter produced the result.

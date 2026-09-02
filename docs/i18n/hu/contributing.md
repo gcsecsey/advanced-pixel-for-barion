@@ -40,10 +40,12 @@ Ne másold be a valódi Pixel azonosítódat vagy egy vásárló e-mail-címét 
    `composer lint` (PHPCS a WordPress kódolási szabványokkal és PHP 7.4+ kompatibilitással),
    `composer phpstan`, `node --test`, és `php tests/<fájl>.php` minden PHP teszthez.
    A `composer lint:fix` a stílushibák többségét megjavítja.
-6. Futtasd le a hozzájárulás böngészős készletét: `npm install`, `npx playwright install --with-deps chromium`,
-   majd `npm run test:browser`. Ez WordPresst indít a Playgroundban, és ellenőrzi, hogy a
-   hozzájárulás az elfogadás gombra kattintáskor jut el a Barionhoz, és soha nem oldalbetöltéskor —
-   lásd [`tests/playground/README.md`](../../../tests/playground/README.md).
+6. Futtasd le a böngészős készletet: `npm install`, `npx playwright install --with-deps chromium`,
+   majd `npm run test:browser`. Ez WordPresst indít a Playgroundban, és két olyan dolgot ellenőriz,
+   amelyet egységteszt nem ér el: hogy a hozzájárulás az elfogadás gombra kattintáskor jut el a
+   Barionhoz és soha nem oldalbetöltéskor, és hogy minden e-kereskedelmi adatcsomag tartalmazza a
+   bp.js által megkövetelt kulcsokat — lásd
+   [`tests/playground/README.md`](../../../tests/playground/README.md).
 7. Ne emeld a verziószámot, és ne szerkeszd a változásnaplót — a kiadásokat külön címkézzük.
 
 ## Fordítások
@@ -65,17 +67,21 @@ generáld újra a sablont.
 
 ## A változtatás tesztelése
 
-A leggyorsabb út a [WordPress Playground](https://playground.wordpress.net/). A tárolóban van egy
-blueprint, amely mintatermékekkel, bemutató hozzájárulási sávval és bekapcsolt hibakeresési móddal
-indít egy WooCommerce boltot:
+Nyisd meg a pull requestet, és használd rajta a **Preview in WordPress Playground** gombot. Ez egy
+WooCommerce boltot indít az ágaddal, telepített tesztkészlettel és bekapcsolt hibakeresési móddal,
+és az összes forgatókönyv jegyzékén nyílik meg. Bármelyik boltoldalhoz add hozzá a
+`?barion-panel=1` paramétert egy élő panelért, amely megmutatja az egyes pixelhívásokat és azok
+időpontját.
+
+Forkból nyitott pull request nem kap gombot, mert a workflow nem írhat bele. Futtasd ugyanazt a
+készletet helyben — lásd a [`tests/playground/README.md`](../../../tests/playground/README.md)
+fájlt, amivel pull request nyitása nélkül is megteheted.
+
+A kiadott verzióhoz az ág helyett:
 
 ```sh
 npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
 ```
-
-A blueprint a WordPress.org-on kiadott verziót telepíti. A saját munkapéldányod teszteléséhez
-cseréld le az `installPlugin` lépést helyi csatolásra, vagy telepítsd a bővítményt bármelyik
-WordPress oldalra, és kapcsold be a Hibakeresési módot.
 
 ## Licenc
 

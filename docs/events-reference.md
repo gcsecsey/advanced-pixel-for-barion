@@ -98,14 +98,15 @@ price WooCommerce displays before a variation is chosen.
 survives page caching. There are three, and which one runs depends on how the
 store renders its buttons:
 
-1. **Classic AJAX add to cart** (shop and archive pages). Listens for WooCommerce's jQuery `added_to_cart` event and reads the button's `data-product_id`, `data-product_name`, `data-product_price` and `data-quantity` attributes.
+1. **Classic AJAX add to cart** (shop and archive pages). Listens for WooCommerce's jQuery `added_to_cart` event. The button gives the product and the quantity, through `data-product_id` and `data-quantity`. It does **not** carry a price — WooCommerce renders no `data-product_price` — so the price comes from the [Store API](https://developer.woocommerce.com/docs/apis/store-api/) line the add just created.
 2. **Classic single product page.** Intercepts the `form.cart` submit. Product data is embedded in the footer; for a variable product the selected variation's `display_price` is read from WooCommerce's jQuery `product_variations` data.
 3. **Block surfaces** (Product Collection buttons, Cart block). These run on the Interactivity API and dispatch neither the jQuery event nor a useful payload, so the plugin diffs the [Store API](https://developer.woocommerce.com/docs/apis/store-api/) cart against its last known state and reports whatever was added. Quantity edits inside the Cart block do not fire `wc-blocks_added_to_cart`, so they are excluded automatically.
 
 **Event fields:** the item fields above, plus `step: 1`.
 
-`quantity` is what the customer actually added. `unitPrice` comes from the button
-data, the selected variation, or the Store API item, in that order of paths.
+`quantity` is what the customer actually added. `unitPrice` comes from the Store
+API line on both classic AJAX and block surfaces, and from the selected variation
+on the single product page — never from button markup, which does not carry it.
 
 ---
 

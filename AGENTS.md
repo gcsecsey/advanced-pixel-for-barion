@@ -14,14 +14,24 @@ POT file — run `composer i18n:pot` after changing a translatable string.
 Tests are dependency-free on purpose: `node:test` for JS, plain PHP scripts with
 WordPress stubs in `tests/`. Keep them that way.
 
-`tests/playground/` is the one exception, and it earns it. Consent depends on script
-load order and on whether a real click reached the page before the banner answered —
-neither is reproducible in a stub, and getting it wrong is what Barion rejects an
-integration for. So it runs the plugin in real WordPress via Playground and drives a
-real banner in headless Chromium: `npm install`, `npx playwright install chromium`,
-then `npm run test:browser`. CI gates on it (the `consent-browser` job). Everything
-under `tests/*.js` and `tests/*.php` stays dependency-free — do not let the browser
-suite's dependencies leak into them, and keep `package.json` scoped to it.
+`tests/playground/` is the one exception, and it earns it. Two rules are out of a
+stub's reach. Consent depends on script load order and on whether a real click reached
+the page before the banner answered, which is what Barion rejects an integration for.
+Payloads depend on what WooCommerce actually renders: bp.js demands keys the event
+reference does not state (`totalItemPrice` is rejected on `contentView` and required
+inside `contents`), and a price read from the wrong place is a number bp.js accepts and
+Barion misreads. So the suite runs the plugin in real WordPress via Playground and
+drives a real banner, a real product and a real order in headless Chromium:
+`npm install`, `npx playwright install --with-deps chromium`, then
+`npm run test:browser`. CI gates
+on it (the `browser` job). Everything under `tests/*.js` and `tests/*.php` stays
+dependency-free — do not let the browser suite's dependencies leak into them, and keep
+`package.json` scoped to it.
+
+A pull request opened from a branch of this repository also gets a **Preview in WordPress
+Playground** button (`.github/workflows/playground-preview.yml`), which boots the same harness from
+the PR's own branch. Fork pull requests get none, because the workflow may not write to them.
+`tests/playground/README.md` explains the pages and the live event panel.
 
 ## Where to look
 

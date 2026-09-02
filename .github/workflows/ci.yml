@@ -91,12 +91,12 @@ jobs:
       # -I skips the timestamp header, which changes on every regeneration.
       - run: git diff -I'^"POT-Creation-Date' --exit-code languages/advanced-pixel-for-barion.pot
 
-  consent-browser:
-    name: Consent in a real browser
+  browser:
+    name: Consent and events in a real browser
     runs-on: ubuntu-latest
-    # About 70s locally; the ceiling is a backstop against a hung Playground
+    # A few minutes locally; the ceiling is a backstop against a hung Playground
     # boot, not a target.
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       # This is the only job that runs third-party install scripts (npm ci) and
       # fetches a browser, so it is the one where leaving the token in
@@ -112,8 +112,10 @@ jobs:
       # Chromium only. The harness is not browser-specific, and the other two
       # engines double the install time for nothing.
       - run: npx playwright install --with-deps chromium
-      # Boots WordPress in Playground and runs both harness pages, which assert
-      # that consent reaches Barion on the accept click and never at page load.
-      # A unit test cannot cover that: it depends on script load order and on
-      # whether a real gesture reached the page first.
+      # Boots WordPress in Playground and runs every harness page. Two rules
+      # live here because a unit test cannot reach them: consent must arrive on
+      # the accept click and never at page load, which depends on script load
+      # order and on whether a real gesture reached the page first; and the
+      # e-commerce payloads must carry the keys and the prices bp.js and Barion
+      # expect, which depends on what WooCommerce renders on the page.
       - run: npm run test:browser

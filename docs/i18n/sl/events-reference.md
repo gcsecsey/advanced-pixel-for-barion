@@ -99,14 +99,15 @@ prikaže pred izbiro različice.
 preživi medpomnjenje strani. Poti so tri, katera se uporabi pa je odvisno od tega, kako trgovina
 izriše svoje gumbe:
 
-1. **Klasično AJAX dodajanje v košarico** (strani trgovine in arhivov). Posluša WooCommercov dogodek jQuery `added_to_cart` in bere atribute gumba `data-product_id`, `data-product_name`, `data-product_price` in `data-quantity`.
+1. **Klasično AJAX dodajanje v košarico** (strani trgovine in arhivov). Posluša WooCommercov dogodek jQuery `added_to_cart`. Gumb da izdelek in količino prek `data-product_id` in `data-quantity`. Cene **ne nosi** — WooCommerce ne izriše nobenega `data-product_price` — zato cena pride iz postavke [Store API](https://developer.woocommerce.com/docs/apis/store-api/), ki jo je dodajanje pravkar ustvarilo.
 2. **Klasična stran izdelka.** Prestreže pošiljanje `form.cart`. Podatki o izdelku so vgrajeni v nogo; pri spremenljivem izdelku se `display_price` izbrane različice prebere iz WooCommercovih podatkov jQuery `product_variations`.
 3. **Blokovne površine** (gumbi bloka Product Collection, blok Cart). Te tečejo na Interactivity API in ne pošljejo ne dogodka jQuery ne uporabnih podatkov, zato vtičnik primerja košarico iz [Store API](https://developer.woocommerce.com/docs/apis/store-api/) z zadnjim znanim stanjem in javi razliko. Sprememba količine v bloku Cart ne sproži `wc-blocks_added_to_cart`, zato je samodejno izvzeta.
 
 **Polja dogodka:** zgornja polja postavke in `step: 1`.
 
-`quantity` je tisto, kar je kupec dejansko dodal. `unitPrice` pride, odvisno od poti, iz podatkov
-gumba, iz izbrane različice ali iz postavke Store API.
+`quantity` je tisto, kar je kupec dejansko dodal. `unitPrice` pride iz postavke Store API pri
+klasičnem AJAX-u in pri blokovnih površinah ter iz izbrane različice na strani izdelka — nikoli iz
+oznak gumba, ki je ne nosijo.
 
 ---
 

@@ -101,14 +101,15 @@ WooCommerce vor der Auswahl einer Variante anzeigt.
 Seiten-Caching übersteht. Es gibt drei, und welcher greift, hängt davon ab, wie der Shop seine
 Buttons rendert:
 
-1. **Klassisches AJAX-In-den-Warenkorb** (Shop- und Archivseiten). Horcht auf WooCommerces jQuery-Event `added_to_cart` und liest die Button-Attribute `data-product_id`, `data-product_name`, `data-product_price` und `data-quantity`.
+1. **Klassisches AJAX-In-den-Warenkorb** (Shop- und Archivseiten). Horcht auf WooCommerces jQuery-Event `added_to_cart`. Der Button liefert Produkt und Menge über `data-product_id` und `data-quantity`. Einen Preis trägt er **nicht** — WooCommerce rendert kein `data-product_price` — deshalb kommt der Preis aus der [Store-API](https://developer.woocommerce.com/docs/apis/store-api/)-Zeile, die das Hinzufügen gerade erzeugt hat.
 2. **Klassische Produktseite.** Fängt den Submit von `form.cart` ab. Die Produktdaten stecken im Footer; bei einem variablen Produkt wird der `display_price` der gewählten Variante aus WooCommerces jQuery-Daten `product_variations` gelesen.
 3. **Block-Oberflächen** (Product-Collection-Buttons, Cart-Block). Diese laufen über die Interactivity API und liefern weder das jQuery-Event noch brauchbare Daten, deshalb vergleicht das Plugin den Warenkorb der [Store API](https://developer.woocommerce.com/docs/apis/store-api/) mit dem zuletzt bekannten Stand und meldet die Differenz. Mengenänderungen im Cart-Block lösen `wc-blocks_added_to_cart` nicht aus und bleiben damit automatisch außen vor.
 
 **Event-Felder:** die Artikelfelder von oben, plus `step: 1`.
 
-`quantity` ist das, was der Kunde tatsächlich hinzugefügt hat. `unitPrice` stammt je nach Weg aus
-den Button-Daten, der gewählten Variante oder dem Store-API-Artikel.
+`quantity` ist das, was der Kunde tatsächlich hinzugefügt hat. `unitPrice` stammt sowohl beim
+klassischen AJAX als auch bei den Block-Oberflächen aus der Store-API-Zeile und auf der
+Produktseite aus der gewählten Variante — nie aus dem Button-Markup, das ihn nicht enthält.
 
 ---
 

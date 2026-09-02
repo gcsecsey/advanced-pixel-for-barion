@@ -112,6 +112,7 @@ Führe sie sowohl in einem klassischen als auch in einem Block-Shop aus — beid
 
 1. Klicke auf der Shop-Seite auf „In den Warenkorb“.
 2. `[Barion Pixel] Event: addToCart` erscheint, mit `totalItemPrice` und `step: 1`.
+3. `unitPrice` entspricht dem Preis des Produkts. Der Button trägt keinen Preis, dieser kommt also aus der Store-API. Ein fehlendes `addToCart`-Event bedeutet, dass die Abfrage fehlgeschlagen ist; eine `0` ist kein Fehlersignal, denn ein kostenloses Produkt kostet zu Recht nichts.
 
 **Produktseite, Formular-Submit:**
 

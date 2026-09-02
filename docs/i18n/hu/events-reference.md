@@ -100,14 +100,15 @@ variáció kiválasztása előtt mutat.
 **Kiváltó:** maga a kosárba helyezés. Minden útvonal kliensoldali, így az esemény túléli az
 oldal gyorsítótárazását. Három útvonal van, és az fut, amelyik a bolt gombjaihoz illik:
 
-1. **Klasszikus AJAX kosárba helyezés** (bolt- és archívumoldalak). A WooCommerce jQuery `added_to_cart` eseményére figyel, és a gomb `data-product_id`, `data-product_name`, `data-product_price` és `data-quantity` attribútumait olvassa.
+1. **Klasszikus AJAX kosárba helyezés** (bolt- és archívumoldalak). A WooCommerce jQuery `added_to_cart` eseményére figyel. A gomb a terméket és a mennyiséget adja meg, a `data-product_id` és a `data-quantity` attribútummal. Árat **nem** hordoz — a WooCommerce nem ír ki `data-product_price` attribútumot —, ezért az ár a [Store API](https://developer.woocommerce.com/docs/apis/store-api/) most létrehozott kosártételéből származik.
 2. **Klasszikus termékoldal.** Elkapja a `form.cart` beküldését. A termékadatok a láblécbe vannak beágyazva; változó terméknél a kiválasztott variáció `display_price` értékét a WooCommerce jQuery `product_variations` adatából olvassa.
 3. **Blokkfelületek** (Product Collection gombok, Cart blokk). Ezek az Interactivity API-n futnak, és sem a jQuery eseményt, sem használható adatot nem küldenek, ezért a bővítmény a [Store API](https://developer.woocommerce.com/docs/apis/store-api/) kosarát hasonlítja össze a legutóbb ismert állapottal, és a különbséget jelenti. A Cart blokkban végzett mennyiségmódosítás nem indítja a `wc-blocks_added_to_cart` eseményt, így az automatikusan kimarad.
 
 **Esemény mezői:** a fenti tételmezők, valamint `step: 1`.
 
-A `quantity` az, amennyit a vásárló ténylegesen betett. A `unitPrice` a gomb adataiból, a
-kiválasztott variációból vagy a Store API tételéből származik, az útvonaltól függően.
+A `quantity` az, amennyit a vásárló ténylegesen betett. A `unitPrice` a Store API tételéből
+származik a klasszikus AJAX és a blokkos felületek esetén is, a termékoldalon pedig a kiválasztott
+variációból — soha nem a gomb jelöléséből, amely nem tartalmazza.
 
 ---
 
