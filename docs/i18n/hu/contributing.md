@@ -73,7 +73,9 @@ WooCommerce boltot indít az ágaddal, telepített tesztkészlettel és bekapcso
 `?barion-panel=1` paramétert egy élő panelért, amely megmutatja az egyes pixelhívásokat és azok
 időpontját.
 
-Ugyanez helyben: lásd a [`tests/playground/README.md`](../../../tests/playground/README.md) fájlt.
+Forkból nyitott pull request nem kap gombot, mert a workflow nem írhat bele. Futtasd ugyanazt a
+készletet helyben — lásd a [`tests/playground/README.md`](../../../tests/playground/README.md)
+fájlt, amivel pull request nyitása nélkül is megteheted.
 
 A kiadott verzióhoz az ág helyett:
 

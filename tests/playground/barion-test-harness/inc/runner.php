@@ -245,13 +245,16 @@ async function runConsent( s ) {
 
 	var got = read();
 	var pass = JSON.stringify( got ) === JSON.stringify( s.expect );
+	// Read before the frame goes: the log belongs to a document that removing
+	// the iframe discards.
+	var log = pixelLog( win );
 	frame.remove();
 	return {
 		name: s.name,
 		got: got,
 		pass: pass,
 		why: pass ? '' : 'expected ' + JSON.stringify( s.expect ) + ', got ' + JSON.stringify( got ),
-		log: pixelLog( win )
+		log: log
 	};
 }
 
@@ -369,13 +372,14 @@ async function runEvent( s ) {
 		if ( ! sent() ) { problems.push( 'setEncryptedEmail was not sent' ); }
 	}
 
+	var log = pixelLog( win );
 	frame.remove();
 	return {
 		name: s.name,
 		got: names,
 		pass: 0 === problems.length,
 		why: problems.join( '; ' ),
-		log: pixelLog( win )
+		log: log
 	};
 }
 

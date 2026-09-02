@@ -69,7 +69,9 @@ WooCommerce s tvojo vejo, nameščenim testnim kompletom in vklopljenim načinom
 odpre na kazalu vseh scenarijev. Katerikoli strani trgovine dodaj `?barion-panel=1` za živo ploščo,
 ki prikazuje vsak klic piksla in kdaj se je zgodil.
 
-Isto lokalno: glej [`tests/playground/README.md`](../../../tests/playground/README.md).
+Pull request iz vilice ne dobi gumba, ker vanj potek dela ne sme pisati. Isti komplet poženi
+lokalno — glej [`tests/playground/README.md`](../../../tests/playground/README.md), s čimer to lahko
+narediš tudi brez odpiranja pull requesta.
 
 Za izdano različico namesto veje:
 

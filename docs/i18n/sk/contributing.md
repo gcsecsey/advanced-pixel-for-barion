@@ -69,7 +69,9 @@ WooCommerce obchod s tvojou vetvou, nainštalovanou testovacou sadou a zapnutým
 otvorí sa na prehľade všetkých scenárov. Pripoj `?barion-panel=1` k ľubovoľnej stránke obchodu a
 uvidíš živý panel s každým volaním pixela a jeho časom.
 
-To isté lokálne: pozri [`tests/playground/README.md`](../../../tests/playground/README.md).
+Pull request z forku tlačidlo nedostane, pretože doň workflow nesmie zapisovať. Spusti tú istú sadu
+lokálne — pozri [`tests/playground/README.md`](../../../tests/playground/README.md), čo je zároveň
+spôsob, ako to urobiť bez otvorenia pull requestu.
 
 Pre vydanú verziu namiesto vetvy:
 

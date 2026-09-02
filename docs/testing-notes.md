@@ -109,7 +109,7 @@ different code paths for `addToCart`, `initiateCheckout` and `setEncryptedEmail`
 
 1. Click "Add to cart" on the shop page.
 2. `[Barion Pixel] Event: addToCart` appears, with `totalItemPrice` and `step: 1`.
-3. `unitPrice` is the real price, not `0`. The button carries no price, so this comes from the Store API; a `0` means that request failed.
+3. `unitPrice` matches the product's price. The button carries no price, so this comes from the Store API. A missing `addToCart` event means that lookup failed; `0` is not the failure signal, because a free product legitimately costs nothing.
 
 **Single product page, form submit:**
 

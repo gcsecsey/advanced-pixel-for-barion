@@ -72,7 +72,10 @@ startet einen WooCommerce-Shop mit deinem Branch, installiertem Test-Harness und
 Debug-Modus und landet auf einer Übersicht aller Szenarien. Hänge `?barion-panel=1` an eine
 beliebige Shop-Seite an, um ein Live-Panel mit jedem Pixel-Aufruf und dessen Zeitpunkt zu sehen.
 
-Dasselbe lokal: siehe [`tests/playground/README.md`](../../../tests/playground/README.md).
+Ein Pull Request aus einem Fork bekommt keine Schaltfläche, weil der Workflow nicht in ihn
+schreiben darf. Führe dieselbe Suite stattdessen lokal aus — siehe
+[`tests/playground/README.md`](../../../tests/playground/README.md), womit das auch ganz ohne Pull
+Request geht.
 
 Für die veröffentlichte Version statt eines Branches:
 

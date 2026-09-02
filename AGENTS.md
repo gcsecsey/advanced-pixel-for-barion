@@ -22,14 +22,16 @@ reference does not state (`totalItemPrice` is rejected on `contentView` and requ
 inside `contents`), and a price read from the wrong place is a number bp.js accepts and
 Barion misreads. So the suite runs the plugin in real WordPress via Playground and
 drives a real banner, a real product and a real order in headless Chromium:
-`npm install`, `npx playwright install chromium`, then `npm run test:browser`. CI gates
+`npm install`, `npx playwright install --with-deps chromium`, then
+`npm run test:browser`. CI gates
 on it (the `browser` job). Everything under `tests/*.js` and `tests/*.php` stays
 dependency-free — do not let the browser suite's dependencies leak into them, and keep
 `package.json` scoped to it.
 
-Every pull request also gets a **Preview in WordPress Playground** button
-(`.github/workflows/playground-preview.yml`), which boots the same harness from the PR's
-own branch. `tests/playground/README.md` explains the pages and the live event panel.
+A pull request opened from a branch of this repository also gets a **Preview in WordPress
+Playground** button (`.github/workflows/playground-preview.yml`), which boots the same harness from
+the PR's own branch. Fork pull requests get none, because the workflow may not write to them.
+`tests/playground/README.md` explains the pages and the live event panel.
 
 ## Where to look
 

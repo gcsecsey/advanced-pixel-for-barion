@@ -74,7 +74,9 @@ WooCommerce store running your branch, with the test harness installed and debug
 on an index of every scenario. Add `?barion-panel=1` to any shop page for a live panel showing each
 pixel call and when it fired.
 
-To do the same locally, see [`tests/playground/README.md`](tests/playground/README.md).
+A pull request from a fork gets no button, because the workflow may not write to it. Run the same
+harness locally instead — see [`tests/playground/README.md`](tests/playground/README.md), which is
+also how to do this without opening a pull request at all.
 
 For the released version rather than a branch:
 

@@ -71,7 +71,9 @@ magazin WooCommerce cu ramura ta, cu suita de teste instalată și modul de depa
 deschide pe un index al tuturor scenariilor. Adaugă `?barion-panel=1` la orice pagină din magazin
 pentru un panou live care arată fiecare apel de pixel și momentul lui.
 
-La fel local: vezi [`tests/playground/README.md`](../../../tests/playground/README.md).
+Un pull request dintr-un fork nu primește buton, fiindcă workflow-ul nu are voie să scrie în el.
+Rulează aceeași suită local — vezi [`tests/playground/README.md`](../../../tests/playground/README.md),
+care este și modul de a face asta fără a deschide un pull request.
 
 Pentru versiunea publicată în locul unei ramuri:
 

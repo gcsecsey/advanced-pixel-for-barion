@@ -69,7 +69,9 @@ WooCommerce obchod s vaší větví, nainstalovanou testovací sadou a zapnutým
 se na přehledu všech scénářů. Připojte `?barion-panel=1` k libovolné stránce obchodu a uvidíte živý
 panel s každým voláním pixelu a jeho časem.
 
-Totéž lokálně: viz [`tests/playground/README.md`](../../../tests/playground/README.md).
+Pull request z forku tlačítko nedostane, protože do něj workflow nesmí zapisovat. Spusťte stejnou
+sadu lokálně — viz [`tests/playground/README.md`](../../../tests/playground/README.md), což je také
+způsob, jak to udělat bez otevření pull requestu.
 
 Pro vydanou verzi místo větve:
 

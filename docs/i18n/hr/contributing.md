@@ -69,7 +69,9 @@ WooCommerce trgovinu s tvojom granom, instaliranim testnim kompletom i uključen
 otklanjanje pogrešaka, i otvara se na popisu svih scenarija. Dodaj `?barion-panel=1` bilo kojoj
 stranici trgovine za živu ploču koja pokazuje svaki poziv piksela i kada se dogodio.
 
-Isto lokalno: vidi [`tests/playground/README.md`](../../../tests/playground/README.md).
+Pull request s forka ne dobiva gumb jer u njega workflow ne smije pisati. Pokreni isti komplet
+lokalno — vidi [`tests/playground/README.md`](../../../tests/playground/README.md), čime to možeš
+napraviti i bez otvaranja pull requesta.
 
 Za izdanu verziju umjesto grane:
 
