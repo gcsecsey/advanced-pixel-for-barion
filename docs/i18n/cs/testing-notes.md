@@ -108,6 +108,7 @@ Projděte jej v klasickém i blokovém obchodě — pro `addToCart`, `initiateCh
 
 1. Na stránce obchodu klikněte na „Do košíku“.
 2. Objeví se `[Barion Pixel] Event: addToCart` s `totalItemPrice` a `step: 1`.
+3. `unitPrice` je skutečná cena, ne `0`. Tlačítko cenu nenese, takže pochází ze Store API; `0` znamená, že tento požadavek selhal.
 
 **Stránka produktu, odeslání formuláře:**
 

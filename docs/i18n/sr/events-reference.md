@@ -98,14 +98,15 @@ prikazuje pre izbora varijacije.
 **Okidač:** samo dodavanje u korpu. Svi putevi su na strani klijenta, pa događaj preživi keširanje
 stranica. Ima ih tri, a koji se koristi zavisi od toga kako prodavnica iscrtava svoje dugmiće:
 
-1. **Klasično AJAX dodavanje u korpu** (stranice prodavnice i arhiva). Osluškuje WooCommerceov jQuery događaj `added_to_cart` i čita atribute dugmeta `data-product_id`, `data-product_name`, `data-product_price` i `data-quantity`.
+1. **Klasično AJAX dodavanje u korpu** (stranice prodavnice i arhiva). Osluškuje WooCommerceov jQuery događaj `added_to_cart`. Dugme daje proizvod i količinu preko `data-product_id` i `data-quantity`. Cenu **ne nosi** — WooCommerce ne prikazuje `data-product_price` — pa cena dolazi iz stavke [Store API-ja](https://developer.woocommerce.com/docs/apis/store-api/) koju je dodavanje upravo stvorilo.
 2. **Klasična stranica proizvoda.** Presreće slanje `form.cart`. Podaci o proizvodu ugrađeni su u podnožje; kod varijabilnog proizvoda `display_price` izabrane varijacije čita se iz WooCommerceovih jQuery podataka `product_variations`.
 3. **Blokovske površine** (dugmići bloka Product Collection, blok Cart). One rade na Interactivity API-ju i ne šalju ni jQuery događaj ni upotrebljive podatke, pa dodatak upoređuje korpu iz [Store API-ja](https://developer.woocommerce.com/docs/apis/store-api/) sa poslednjim poznatim stanjem i javlja razliku. Promena količine u bloku Cart ne pokreće `wc-blocks_added_to_cart`, pa se automatski izostavlja.
 
 **Polja događaja:** gornja polja stavke i `step: 1`.
 
-`quantity` je ono što je kupac zaista dodao. `unitPrice` dolazi, zavisno od puta, iz podataka
-dugmeta, iz izabrane varijacije ili iz stavke Store API-ja.
+`quantity` je ono što je kupac zaista dodao. `unitPrice` dolazi iz stavke Store API-ja i kod
+klasičnog AJAX-a i kod blokovskih površina, a iz izabrane varijacije na stranici proizvoda — nikada
+iz oznaka dugmeta, koje je ne nose.
 
 ---
 

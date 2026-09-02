@@ -113,6 +113,7 @@ complet diferite pentru `addToCart`, `initiateCheckout` și `setEncryptedEmail`.
 
 1. Pe pagina magazinului, apasă „Adaugă în coș”.
 2. Apare `[Barion Pixel] Event: addToCart`, cu `totalItemPrice` și `step: 1`.
+3. `unitPrice` este prețul real, nu `0`. Butonul nu poartă un preț, deci acesta vine din Store API; un `0` înseamnă că acea cerere a eșuat.
 
 **Pagina de produs, trimiterea formularului:**
 

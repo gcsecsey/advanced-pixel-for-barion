@@ -109,6 +109,7 @@ Prođi ga i u klasičnoj i u blokovskoj trgovini — za `addToCart`, `initiateCh
 
 1. Na stranici trgovine klikni „Dodaj u košaricu“.
 2. Pojavi se `[Barion Pixel] Event: addToCart`, s `totalItemPrice` i `step: 1`.
+3. `unitPrice` je stvarna cijena, a ne `0`. Gumb ne nosi cijenu, pa ona dolazi iz Store API-ja; `0` znači da taj zahtjev nije uspio.
 
 **Stranica proizvoda, slanje obrasca:**
 

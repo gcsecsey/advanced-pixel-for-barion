@@ -1,6 +1,6 @@
 {
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-  "landingPage": "/",
+  "landingPage": "/?barion-harness=index",
   "preferredVersions": {
     "php": "8.3",
     "wp": "latest"
@@ -28,10 +28,20 @@
       }
     },
     {
+      "step": "installTheme",
+      "themeData": {
+        "resource": "wordpress.org/themes",
+        "slug": "storefront"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
       "step": "setSiteOptions",
       "options": {
         "wc_barion_pixel_settings": {
-          "pixel_id": "BP-TEST0000000-00",
+          "pixel_id": "BP-0000000000-00",
           "enable_full_tracking": true,
           "debug_mode": true
         }
@@ -40,6 +50,10 @@
     {
       "step": "activatePlugin",
       "pluginPath": "/wordpress/wp-content/plugins/advanced-pixel-for-barion"
+    },
+    {
+      "step": "activatePlugin",
+      "pluginPath": "/wordpress/wp-content/plugins/barion-test-harness"
     }
   ]
 }

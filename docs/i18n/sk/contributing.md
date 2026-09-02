@@ -38,9 +38,10 @@ Nevkladaj do issue svoje skutočné Pixel ID ani e-mailovú adresu zákazníka.
    štandardmi WordPressu a kompatibilitou s PHP 7.4+), `composer phpstan`, `node --test` a
    `php tests/<súbor>.php` pre každý PHP test. `composer lint:fix` opraví väčšinu štýlových
    nálezov.
-6. Spusti prehliadačovú sadu pre súhlas: `npm install`, `npx playwright install --with-deps chromium`, potom
-   `npm run test:browser`. Naštartuje WordPress v Playgrounde a overí, že súhlas dorazí do
-   Barionu pri kliknutí na prijatie a nikdy pri načítaní stránky — pozri
+6. Spusti prehliadačovú sadu: `npm install`, `npx playwright install --with-deps chromium`, potom
+   `npm run test:browser`. Naštartuje WordPress v Playgrounde a overí dve veci, na ktoré jednotkový
+   test nedosiahne: že súhlas dorazí do Barionu pri kliknutí na prijatie a nikdy pri načítaní
+   stránky, a že každé e-commerce dáta nesú kľúče, ktoré bp.js vyžaduje — pozri
    [`tests/playground/README.md`](../../../tests/playground/README.md).
 7. Nezvyšuj číslo verzie a neupravuj changelog — vydania sa označujú zvlášť.
 
@@ -63,17 +64,18 @@ Ak si zmenil prekladaný reťazec v zdrojovom PHP kóde, vygeneruj najprv šabl�
 
 ## Testovanie zmeny
 
-Najrýchlejšia cesta je [WordPress Playground](https://playground.wordpress.net/). Repozitár
-obsahuje blueprint, ktorý naštartuje WooCommerce obchod s ukážkovými produktmi, demo lištou súhlasu
-a už zapnutým režimom ladenia:
+Otvor pull request a použi na ňom tlačidlo **Preview in WordPress Playground**. Naštartuje
+WooCommerce obchod s tvojou vetvou, nainštalovanou testovacou sadou a zapnutým režimom ladenia a
+otvorí sa na prehľade všetkých scenárov. Pripoj `?barion-panel=1` k ľubovoľnej stránke obchodu a
+uvidíš živý panel s každým volaním pixela a jeho časom.
+
+To isté lokálne: pozri [`tests/playground/README.md`](../../../tests/playground/README.md).
+
+Pre vydanú verziu namiesto vetvy:
 
 ```sh
 npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
 ```
-
-Blueprint inštaluje vydanú verziu z WordPress.org. Ak chceš testovať svoju pracovnú kópiu, nahraď
-krok `installPlugin` lokálnym pripojením, alebo plugin nainštaluj na ľubovoľnú stránku WordPress a
-zapni režim ladenia.
 
 ## Licencia
 

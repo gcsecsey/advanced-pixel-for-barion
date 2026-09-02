@@ -38,10 +38,11 @@ Nemoj u prijavu zalijepiti svoj stvarni Pixel ID ni adresu e-pošte kupca.
    WordPressovim standardima kodiranja i kompatibilnošću s PHP 7.4+), `composer phpstan`,
    `node --test` i `php tests/<datoteka>.php` za svaki PHP test. `composer lint:fix` popravlja
    većinu stilskih nalaza.
-6. Pokreni preglednički komplet za pristanak: `npm install`, `npx playwright install --with-deps chromium`,
-   zatim `npm run test:browser`. Pokreće WordPress u Playgroundu i provjerava da pristanak stiže
-   Barionu pri kliku na prihvaćanje, a nikada pri učitavanju stranice — vidi
-   [`tests/playground/README.md`](../../../tests/playground/README.md).
+6. Pokreni preglednički komplet: `npm install`, `npx playwright install --with-deps chromium`,
+   zatim `npm run test:browser`. Pokreće WordPress u Playgroundu i provjerava dvije stvari do kojih
+   jedinični test ne dopire: da pristanak stiže Barionu pri kliku na prihvaćanje, a nikada pri
+   učitavanju stranice, i da svaki e-commerce podatkovni paket nosi ključeve koje bp.js zahtijeva —
+   vidi [`tests/playground/README.md`](../../../tests/playground/README.md).
 7. Nemoj podizati broj verzije ni uređivati dnevnik promjena — izdanja se označavaju zasebno.
 
 ## Prijevodi
@@ -63,17 +64,18 @@ Ako si u PHP izvoru promijenio prevodivi niz, prvo regeneriraj predložak naredb
 
 ## Testiranje promjene
 
-Najbrži je put [WordPress Playground](https://playground.wordpress.net/). Repozitorij sadrži
-blueprint koji pokreće WooCommerce trgovinu s primjerima proizvoda, demo trakom za pristanak i već
-uključenim načinom za otklanjanje pogrešaka:
+Otvori pull request i upotrijebi na njemu gumb **Preview in WordPress Playground**. Pokreće
+WooCommerce trgovinu s tvojom granom, instaliranim testnim kompletom i uključenim načinom za
+otklanjanje pogrešaka, i otvara se na popisu svih scenarija. Dodaj `?barion-panel=1` bilo kojoj
+stranici trgovine za živu ploču koja pokazuje svaki poziv piksela i kada se dogodio.
+
+Isto lokalno: vidi [`tests/playground/README.md`](../../../tests/playground/README.md).
+
+Za izdanu verziju umjesto grane:
 
 ```sh
 npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
 ```
-
-Blueprint instalira objavljenu verziju s WordPress.orga. Za testiranje vlastite radne kopije
-zamijeni korak `installPlugin` lokalnim montiranjem, ili instaliraj dodatak na bilo koju WordPress
-stranicu i uključi način za otklanjanje pogrešaka.
 
 ## Licenca
 
