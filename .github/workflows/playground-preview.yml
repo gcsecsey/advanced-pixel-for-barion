@@ -1,0 +1,61 @@
+name: Playground preview
+
+on:
+  pull_request:
+
+# Only the preview job needs to write, and only to the pull request body.
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: playground-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Preview in WordPress Playground
+    runs-on: ubuntu-latest
+    # A fork pull request gets a read-only GITHUB_TOKEN, so the button cannot be
+    # published. pull_request_target would have the permission but would preview
+    # the base branch's blueprint, which defeats the point.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build the preview blueprint
+        id: blueprint
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.clone_url }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        # Built here rather than by the action for two reasons: the action does
+        # not interpolate a custom `blueprint` input, and its own auto-blueprint
+        # pairs the *base* repository URL with the *head* ref, which is wrong for
+        # a fork. The site setup comes from the same blueprint.json the local and
+        # CI runs use, so the two cannot drift; only the install differs.
+        # Steps are kept by name rather than dropping activatePlugin by name, so
+        # a step added to blueprint.json later fails loudly here instead of
+        # vanishing from the preview. activatePlugin covers the local mounts;
+        # installPlugin activates, so it is not carried over.
+        run: |
+          blueprint=$(jq -c --arg url "$HEAD_REPO" --arg ref "$HEAD_REF" '
+            .steps = ([ .steps[] | select( .step | IN( "installPlugin", "installTheme", "setSiteOptions" ) ) ] + [
+              {
+                step: "installPlugin",
+                pluginData: { resource: "git:directory", url: $url, ref: $ref, path: "/" },
+                options: { activate: true }
+              },
+              {
+                step: "installPlugin",
+                pluginData: { resource: "git:directory", url: $url, ref: $ref, path: "tests/playground/barion-test-harness" },
+                options: { activate: true }
+              }
+            ])' tests/playground/blueprint.json)
+          echo "json=$blueprint" >> "$GITHUB_OUTPUT"
+
+      - uses: WordPress/action-wp-playground-pr-preview@v3
+        with:
+          blueprint: ${{ steps.blueprint.outputs.json }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -100,14 +100,15 @@ WooCommerce înainte de alegerea unei variații.
 evenimentul supraviețuiește cache-ului de pagini. Sunt trei, iar cea folosită depinde de felul în
 care magazinul își randează butoanele:
 
-1. **Adăugare AJAX clasică în coș** (paginile de magazin și de arhivă). Ascultă evenimentul jQuery `added_to_cart` din WooCommerce și citește atributele butonului `data-product_id`, `data-product_name`, `data-product_price` și `data-quantity`.
+1. **Adăugare AJAX clasică în coș** (paginile de magazin și de arhivă). Ascultă evenimentul jQuery `added_to_cart` din WooCommerce. Butonul oferă produsul și cantitatea, prin `data-product_id` și `data-quantity`. **Nu** poartă un preț — WooCommerce nu redă niciun `data-product_price` — așa că prețul vine din linia [Store API](https://developer.woocommerce.com/docs/apis/store-api/) creată chiar de adăugare.
 2. **Pagina de produs clasică.** Interceptează trimiterea `form.cart`. Datele produsului sunt încorporate în subsol; la un produs variabil, `display_price` al variației alese este citit din datele jQuery `product_variations` ale WooCommerce.
 3. **Suprafețe cu blocuri** (butoanele blocului Product Collection, blocul Cart). Acestea rulează pe Interactivity API și nu emit nici evenimentul jQuery, nici date utile, așa că plugin-ul compară coșul din [Store API](https://developer.woocommerce.com/docs/apis/store-api/) cu ultima stare cunoscută și raportează diferența. Modificările de cantitate din blocul Cart nu declanșează `wc-blocks_added_to_cart`, deci sunt excluse automat.
 
 **Câmpurile evenimentului:** câmpurile de articol de mai sus, plus `step: 1`.
 
-`quantity` este ce a adăugat efectiv clientul. `unitPrice` provine, în funcție de cale, din datele
-butonului, din variația aleasă sau din articolul Store API.
+`quantity` este ce a adăugat efectiv clientul. `unitPrice` provine din linia Store API atât la AJAX-ul
+clasic, cât și la suprafețele de blocuri, și din variația aleasă pe pagina produsului — niciodată din
+marcajul butonului, care nu îl conține.
 
 ---
 

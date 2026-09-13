@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Barion test real WP Consent API banner
- *
  * Drives the real wp-consent-api plugin instead of a stub. A CMP that bridges
  * into the WP Consent API does exactly this: it sets window.wp_consent_type
  * and calls wp_set_consent() when the visitor answers.
  *
  * Query args: ?real=1 &ctype=optin|optout|none
  */
+
+defined( 'ABSPATH' ) || exit;
 add_action('wp_head', function () {
     if (empty($_GET['real'])) {
         return;

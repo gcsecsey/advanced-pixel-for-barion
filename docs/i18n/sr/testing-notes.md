@@ -109,6 +109,7 @@ Prođi je i u klasičnoj i u blokovskoj prodavnici — za `addToCart`, `initiate
 
 1. Na stranici prodavnice klikni „Dodaj u korpu“.
 2. Pojavi se `[Barion Pixel] Event: addToCart`, sa `totalItemPrice` i `step: 1`.
+3. `unitPrice` odgovara ceni proizvoda. Dugme ne nosi cenu, pa ona dolazi iz Store API-ja. Izostanak događaja `addToCart` znači da upit nije uspeo; `0` nije signal greške, jer besplatan proizvod zaista ništa ne košta.
 
 **Stranica proizvoda, slanje forme:**
 

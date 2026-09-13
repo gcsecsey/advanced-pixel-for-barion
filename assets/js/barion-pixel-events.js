@@ -136,8 +136,22 @@
 
 	// --- addToCart tracking ---
 
-	function fireAddToCart(data) {
+	// Owns the whole payload so the three add-to-cart paths only have to answer
+	// what was added. They disagreed before: one read a price from a data
+	// attribute WooCommerce does not render and reported every add as worth 0.
+	function fireAddToCart(item) {
 		if (typeof bp === 'undefined') return;
+		var data = {
+			contentType: 'Product',
+			currency: currency,
+			id: String(item.id),
+			name: item.name,
+			quantity: item.quantity,
+			unit: 'pcs',
+			unitPrice: item.unitPrice,
+			totalItemPrice: item.unitPrice * item.quantity,
+			step: 1,
+		};
 		bp('track', 'addToCart', data);
 		if (debug) {
 			console.log('[Barion Pixel] Event: addToCart', data);
@@ -145,28 +159,61 @@
 	}
 
 	// AJAX add to cart (shop/archive pages)
+	//
+	// The button gives the product and the quantity but not the price:
+	// WooCommerce renders no data-product_price at all, and reading one reported
+	// every archive add as worth 0. The Store API line the add just created has
+	// the real price, after discounts, in the store's own minor units.
 	if (typeof jQuery !== 'undefined') {
 		jQuery(document.body).on('added_to_cart', function (e, fragments, cartHash, $button) {
 			if (!$button || !$button.length) return;
 			var id = String($button.data('product_id') || '');
-			var name =
+			var qty = parseInt($button.data('quantity') || 1, 10);
+			var loopName =
 				$button.data('product_name') ||
 				$button.closest('.product').find('.woocommerce-loop-product__title').text() ||
 				'';
-			var price = parseFloat($button.data('product_price') || 0);
-			var qty = parseInt($button.data('quantity') || 1, 10);
 
-			fireAddToCart({
-				contentType: 'Product',
-				currency: currency,
-				id: id,
-				name: name,
-				quantity: qty,
-				unit: 'pcs',
-				unitPrice: price,
-				totalItemPrice: price * qty,
-				step: 1,
-			});
+			// added_to_cart fires once WooCommerce's AJAX response is back, so
+			// the line already exists server-side.
+			fetchCartItems()
+				.then(function (items) {
+					// A page can carry both surfaces (a classic archive with a
+					// Mini Cart block). Move the block path's baseline forward
+					// with what was just fetched, or its next diff replays this
+					// add as if it were new.
+					if (!addInFlight) {
+						knownItems = items;
+					}
+
+					var line = null;
+					for (var i = 0; i < items.length; i++) {
+						if (String(items[i].id) === id) {
+							line = items[i];
+							break;
+						}
+					}
+					if (!line) {
+						if (debug) {
+							console.warn('[Barion Pixel] addToCart skipped: product ' + id + ' not found in the cart');
+						}
+						return;
+					}
+
+					fireAddToCart({
+						id: id,
+						name: line.name || loopName,
+						quantity: qty,
+						unitPrice: wcBarionUnitPrice(line.prices),
+					});
+				})
+				.catch(function () {
+					// Same choice the block path makes: drop the event rather
+					// than report a price we could not read.
+					if (debug) {
+						console.warn('[Barion Pixel] addToCart skipped: the Store API did not answer');
+					}
+				});
 		});
 	}
 
@@ -201,15 +248,10 @@
 				}
 
 				fireAddToCart({
-					contentType: 'Product',
-					currency: currency,
 					id: productData.id,
 					name: productData.name,
 					quantity: qty,
-					unit: 'pcs',
 					unitPrice: productData.price,
-					totalItemPrice: productData.price * qty,
-					step: 1,
 				});
 			});
 		});
@@ -279,17 +321,7 @@
 				knownItems = items;
 				addInFlight = false;
 				for (var i = 0; i < added.length; i++) {
-					fireAddToCart({
-						contentType: 'Product',
-						currency: currency,
-						id: added[i].id,
-						name: added[i].name,
-						quantity: added[i].quantity,
-						unit: 'pcs',
-						unitPrice: added[i].unitPrice,
-						totalItemPrice: added[i].unitPrice * added[i].quantity,
-						step: 1,
-					});
+					fireAddToCart(added[i]);
 				}
 			})
 			.catch(function () {

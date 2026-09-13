@@ -113,6 +113,7 @@ Futtasd le klasszikus és blokkos boltban is — a kettő teljesen eltérő kód
 
 1. Kattints a „Kosárba” gombra a bolt oldalán.
 2. Megjelenik a `[Barion Pixel] Event: addToCart` üzenet `totalItemPrice` és `step: 1` értékkel.
+3. A `unitPrice` megegyezik a termék árával. A gomb nem hordoz árat, ezért ez a Store API-ból jön. Ha nincs `addToCart` esemény, akkor a lekérdezés hiúsult meg; a `0` nem hibajelzés, mert egy ingyenes termék valóban semmibe sem kerül.
 
 **Termékoldal, űrlapbeküldés:**
 

@@ -39,9 +39,11 @@ Füge weder deine echte Pixel-ID noch die E-Mail-Adresse eines Kunden in ein Iss
    (PHPCS mit den WordPress Coding Standards und PHP-7.4+-Kompatibilität), `composer phpstan`,
    `node --test` und `php tests/<datei>.php` für jeden PHP-Test. `composer lint:fix` behebt die
    meisten Stilprobleme.
-6. Führe die Consent-Browser-Suite aus: `npm install`, `npx playwright install --with-deps chromium`, dann
-   `npm run test:browser`. Sie startet WordPress in Playground und prüft, dass die Einwilligung
-   beim Klick auf „Akzeptieren“ bei Barion ankommt und niemals beim Laden der Seite — siehe
+6. Führe die Browser-Suite aus: `npm install`, `npx playwright install --with-deps chromium`, dann
+   `npm run test:browser`. Sie startet WordPress in Playground und prüft zwei Dinge, die ein
+   Unit-Test nicht erreicht: dass die Einwilligung beim Klick auf „Akzeptieren“ bei Barion ankommt
+   und niemals beim Laden der Seite, und dass jede E-Commerce-Nutzlast die von bp.js geforderten
+   Schlüssel enthält — siehe
    [`tests/playground/README.md`](../../../tests/playground/README.md).
 7. Erhöhe weder die Versionsnummer noch bearbeite das Änderungsprotokoll — Releases werden separat
    getaggt.
@@ -65,17 +67,21 @@ Wenn du einen übersetzbaren String im PHP-Quelltext geändert hast, erzeuge zue
 
 ## Deine Änderung testen
 
-Am schnellsten geht es mit [WordPress Playground](https://playground.wordpress.net/). Das Repository
-enthält einen Blueprint, der einen WooCommerce-Shop mit Beispielprodukten, einem Demo-Consent-Banner
-und bereits aktiviertem Debug-Modus startet:
+Öffne deinen Pull Request und nutze dort die Schaltfläche **Preview in WordPress Playground**. Sie
+startet einen WooCommerce-Shop mit deinem Branch, installiertem Test-Harness und aktiviertem
+Debug-Modus und landet auf einer Übersicht aller Szenarien. Hänge `?barion-panel=1` an eine
+beliebige Shop-Seite an, um ein Live-Panel mit jedem Pixel-Aufruf und dessen Zeitpunkt zu sehen.
+
+Ein Pull Request aus einem Fork bekommt keine Schaltfläche, weil der Workflow nicht in ihn
+schreiben darf. Führe dieselbe Suite stattdessen lokal aus — siehe
+[`tests/playground/README.md`](../../../tests/playground/README.md), womit das auch ganz ohne Pull
+Request geht.
+
+Für die veröffentlichte Version statt eines Branches:
 
 ```sh
 npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
 ```
-
-Der Blueprint installiert die veröffentlichte Version von WordPress.org. Um stattdessen deine
-Arbeitskopie zu testen, ersetze den Schritt `installPlugin` durch ein lokales Mount, oder
-installiere das Plugin in einer beliebigen WordPress-Installation und aktiviere den Debug-Modus.
 
 ## Lizenz
 

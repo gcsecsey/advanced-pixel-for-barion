@@ -110,6 +110,7 @@ Opravi ga v klasični in v blokovni trgovini — za `addToCart`, `initiateChecko
 
 1. Na strani trgovine klikni „Dodaj v košarico“.
 2. Pojavi se `[Barion Pixel] Event: addToCart`, s `totalItemPrice` in `step: 1`.
+3. `unitPrice` ustreza ceni izdelka. Gumb cene ne nosi, zato pride iz Store API. Manjkajoč dogodek `addToCart` pomeni, da poizvedba ni uspela; `0` ni znak napake, saj brezplačen izdelek res nič ne stane.
 
 **Stran izdelka, pošiljanje obrazca:**
 

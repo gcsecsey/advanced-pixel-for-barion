@@ -98,14 +98,15 @@ zobrazuje pred výberom variantu.
 **Spúšťač:** samotné pridanie do košíka. Všetky cesty sú na strane klienta, aby udalosť prežila
 ukladanie stránok do cache. Cesty sú tri a záleží na tom, ako obchod vykresľuje svoje tlačidlá:
 
-1. **Klasické AJAX pridanie do košíka** (stránky obchodu a výpisov). Počúva jQuery udalosť `added_to_cart` z WooCommerce a číta atribúty tlačidla `data-product_id`, `data-product_name`, `data-product_price` a `data-quantity`.
+1. **Klasické AJAX pridanie do košíka** (stránky obchodu a výpisov). Počúva jQuery udalosť `added_to_cart` z WooCommerce. Tlačidlo dáva produkt a množstvo cez `data-product_id` a `data-quantity`. Cenu **nenesie** — WooCommerce žiadne `data-product_price` nevykresľuje — takže cena pochádza z položky [Store API](https://developer.woocommerce.com/docs/apis/store-api/), ktorú pridanie práve vytvorilo.
 2. **Klasická stránka produktu.** Zachytí odoslanie `form.cart`. Údaje produktu sú vložené v pätičke; pri variabilnom produkte sa `display_price` zvoleného variantu číta z jQuery údajov `product_variations` WooCommerce.
 3. **Blokové plochy** (tlačidlá bloku Product Collection, blok Cart). Tie bežia na Interactivity API a neodosielajú ani jQuery udalosť, ani použiteľné údaje, takže plugin porovná košík zo [Store API](https://developer.woocommerce.com/docs/apis/store-api/) s posledným známym stavom a nahlási rozdiel. Zmena množstva v bloku Cart udalosť `wc-blocks_added_to_cart` nespúšťa, takže sa automaticky nezapočíta.
 
 **Polia udalosti:** vyššie uvedené polia položky plus `step: 1`.
 
-`quantity` je to, čo zákazník naozaj pridal. `unitPrice` pochádza podľa cesty z údajov tlačidla,
-zo zvoleného variantu alebo z položky Store API.
+`quantity` je to, čo zákazník naozaj pridal. `unitPrice` pochádza z položky Store API pri klasickom
+AJAXe aj pri blokových plochách a zo zvoleného variantu na stránke produktu — nikdy zo značiek
+tlačidla, ktoré cenu nenesú.
 
 ---
 

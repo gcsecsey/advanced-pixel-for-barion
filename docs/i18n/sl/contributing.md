@@ -38,9 +38,10 @@ V prijavo ne prilepi svojega pravega Pixel ID-ja ali kupčevega e-poštnega nasl
    standardi kodiranja WordPressa in združljivostjo s PHP 7.4+), `composer phpstan`, `node --test`
    in `php tests/<datoteka>.php` za vsak PHP test. `composer lint:fix` popravi večino slogovnih
    najdb.
-6. Poženi brskalniški komplet za soglasje: `npm install`, `npx playwright install --with-deps chromium`, nato
-   `npm run test:browser`. Zažene WordPress v Playgroundu in preveri, da soglasje pride do Bariona
-   ob kliku na sprejem in nikoli ob nalaganju strani — glej
+6. Poženi brskalniški komplet: `npm install`, `npx playwright install --with-deps chromium`, nato
+   `npm run test:browser`. Zažene WordPress v Playgroundu in preveri dve stvari, do katerih
+   enotski test ne seže: da soglasje pride do Bariona ob kliku na sprejem in nikoli ob nalaganju
+   strani, in da vsak e-trgovinski paket podatkov nosi ključe, ki jih zahteva bp.js — glej
    [`tests/playground/README.md`](../../../tests/playground/README.md).
 7. Ne dvigaj številke različice in ne urejaj dnevnika sprememb — izdaje se označujejo posebej.
 
@@ -63,17 +64,20 @@ jezika:
 
 ## Preizkušanje spremembe
 
-Najhitrejša pot je [WordPress Playground](https://playground.wordpress.net/). Repozitorij vsebuje
-blueprint, ki zažene trgovino WooCommerce z vzorčnimi izdelki, demo pasico za soglasje in že
-vklopljenim načinom za odpravljanje napak:
+Odpri pull request in na njem uporabi gumb **Preview in WordPress Playground**. Zažene trgovino
+WooCommerce s tvojo vejo, nameščenim testnim kompletom in vklopljenim načinom razhroščevanja, ter se
+odpre na kazalu vseh scenarijev. Katerikoli strani trgovine dodaj `?barion-panel=1` za živo ploščo,
+ki prikazuje vsak klic piksla in kdaj se je zgodil.
+
+Pull request iz vilice ne dobi gumba, ker vanj potek dela ne sme pisati. Isti komplet poženi
+lokalno — glej [`tests/playground/README.md`](../../../tests/playground/README.md), s čimer to lahko
+narediš tudi brez odpiranja pull requesta.
+
+Za izdano različico namesto veje:
 
 ```sh
 npx @wp-playground/cli server --blueprint=.wordpress-org/blueprints/blueprint.json
 ```
-
-Blueprint namesti izdano različico z WordPress.org. Če želiš preizkusiti svojo delovno kopijo,
-zamenjaj korak `installPlugin` z lokalnim priklopom ali pa vtičnik namesti na poljubno spletno mesto
-WordPress in vklopi način za odpravljanje napak.
 
 ## Licenca
 
