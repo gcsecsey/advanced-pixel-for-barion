@@ -9,8 +9,12 @@
 	var config = window.wcBarionPixelBase || {};
 	var debug = !!config.debug;
 
-	// Load bp.js if not already loaded by another plugin
-	if (typeof window.bp === 'undefined' || !window.BarionAnalyticsObject) {
+	// Load bp.js if not already loaded by another plugin. window.bp on its own
+	// settles that: the snippet Barion documents defines bp() but never sets
+	// window.BarionAnalyticsObject, so asking for both loaded a second copy on
+	// top of every plain snippet — a Google Tag Manager tag, a snippet in the
+	// theme header, a payment gateway.
+	if (typeof window.bp === 'undefined') {
 		(function (b, a, r, i, o, n, p) {
 			b['BarionAnalyticsObject'] = o;
 			b[o] =
@@ -103,9 +107,39 @@
 		);
 	}
 
+	// A second base pixel is not survivable. Two copies of bp.js leave the page
+	// with two iframes under one id, and the copy that loses that race posts
+	// its events into the other iframe before it has read the visitor's consent
+	// status. bp.js throws there, so the shop reports nothing at all. A snippet
+	// printed after this script is out of reach from here, so name it instead.
+	function wcBarionCheckForSecondPixel() {
+		var scripts;
+		var loaders = 0;
+		var i;
+
+		if (!debug) {
+			return;
+		}
+
+		scripts = document.getElementsByTagName('script');
+		for (i = 0; i < scripts.length; i++) {
+			if (scripts[i].src && scripts[i].src.indexOf('pixel.barion.com/bp.js') > -1) {
+				loaders++;
+			}
+		}
+
+		if (loaders > 1) {
+			console.warn(
+				'[Barion Pixel] Something else on this page loads a second copy of bp.js. Two copies break tracking: the events stop reaching Barion. Keep the Pixel ID here only, and clear it from your payment gateway, your Google Tag Manager tag or your theme header.'
+			);
+		}
+	}
+
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', wcBarionStartConsent);
+		document.addEventListener('DOMContentLoaded', wcBarionCheckForSecondPixel);
 	} else {
 		wcBarionStartConsent();
+		wcBarionCheckForSecondPixel();
 	}
 })();

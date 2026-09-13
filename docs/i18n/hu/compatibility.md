@@ -31,23 +31,45 @@ sablonból, a vásárláskövetés csendben leáll. Hagyd benne a sablonban.
 A Barion több módot dokumentál az alap pixel oldalra juttatására, és egy boltban könnyen
 összejöhet ezekből több is:
 
-- a szelpe által fejlesztett [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) és más Barion fizetési bővítmények, amelyekben van opcionális Pixel azonosító mező
+- a Barion saját [Barion Payment Gateway](https://barion.com/en/plugins/) bővítménye és a [szelpe által fejlesztett átjáró](https://github.com/szelpe/woocommerce-barion), amelyekben van opcionális Pixel azonosító mező
 - egy [Google Tag Manager tag](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
 - a sablon fejlécébe illesztett kódrészlet
 
-A bővítmény a `bp.js` betöltése előtt megnézi a `window.bp` és a `window.BarionAnalyticsObject`
-értékét. Ha mindkettő megvan, kihagyja a szkript betöltését, és csak a saját `init` hívását
-küldi el, így a pixel soha nem töltődik be kétszer. Hibakeresési módban ezt a
-`[Barion Pixel] bp.js already loaded by another plugin` üzenet jelzi.
+**Két alap pixel egy oldalon nem rontja a követést, hanem megszünteti.** A `bp.js` minden példánya
+saját iframe-et fűz be `id="barion_receiver"` néven, a `getElementById()` csak az elsőt adja
+vissza, és a második példány abba az első iframe-be küldi az eseményeit, mielőtt az lekérte volna a
+látogató hozzájárulási állapotát. A `bp.js` ott hibára fut
+(`Cannot read properties of undefined (reading 'approvedBase')`), és az esemény soha nem megy el.
+Élő boltban mérve: három hiba és nulla esemény egy termékoldalon.
 
-**Javaslat:** a Pixel azonosítót tartsd egy helyen. Ha Barion fizetési bővítményt is használsz,
-itt állítsd be az azonosítót, és hagyd üresen az átjáró mezőjét; ha az alap pixelt már Google Tag
-Managerrel töltöd be, vedd ki azt a taget. Az igazán kerülendő eset a két különböző Pixel
-azonosító egy oldalon — a bővítmény a dupla szkriptet el tudja kerülni, a dupla identitást nem.
+### Mit tesz ez ellen a bővítmény
+
+**A Barion Payment Gateway.** A pixelét a `wp_head` hookból, 999999-es prioritással írja ki,
+valahányszor a Pixel azonosító mezője ki van töltve — függetlenül a saját követési beállításától,
+és akkor is, ha maga az átjáró ki van kapcsolva. Ez minden után történik, amit ez a bővítmény be
+tud sorolni, így semmilyen JavaScript ellenőrzés nem láthatja. Ezért ez a bővítmény alkalmazza az
+átjáró saját `woocommerce_barion_disable_tracking` szűrőjét, és maga szolgálja ki az alap pixelt,
+de csak addig, amíg itt be van állítva Pixel azonosító. Annak a szűrőnek nincs más felhasználója az
+átjáróban, és az átjáró az alap pixelt valósítja meg, azon túl semmit, így semmi nem vész el. Ha
+egy oldal azt szeretné, hogy a pixel az átjárónál maradjon, `remove_filter()` hívással kiveheti a
+szűrőt, és inkább itt törölje a Pixel azonosítót.
+
+**Minden más.** A `bp.js` betöltése előtt a bővítmény megnézi a `window.bp` értékét. Ha bármelyik
+másik forrás már definiálta, kihagyja a szkript betöltését, és csak az `init` hívást küldi el.
+Hibakeresési módban ezt a `[Barion Pixel] bp.js already loaded by another plugin` üzenet jelzi.
+
+Az a kódrészlet, amelyik *ez után* a bővítmény után fut — egy Google Tag Manager tag, egy
+kódrészlet a sablon fejlécében —, elérhetetlen: bármit tesz ez a bővítmény, újra betölti a
+`bp.js`-t. Hibakeresési módban ez az eset az oldal betöltése után derül ki, és a bővítmény
+figyelmeztet, hogy valami más egy második `bp.js` példányt tölt be.
+
+**Javaslat:** a Pixel azonosítót tartsd egy helyen, itt. Töröld az átjáró mezőjét, és vedd ki a
+Google Tag Manager taget vagy a sablonba illesztett kódrészletet. Az igazán kerülendő eset a két
+különböző Pixel azonosító egy oldalon — a bővítmény a dupla szkriptet el tudja kerülni, a dupla
+identitást nem.
 
 Ha a Barion Payment Gateway bővítményben is be van állítva Pixel azonosító, a beállítási oldal
-tájékoztató értesítést jelenít meg. Mindkét bővítmény tovább működik: az a fizetéseket kezeli,
-ez a követést.
+jelzi ezt. Mindkét bővítmény tovább működik: az a fizetéseket kezeli, ez a követést.
 
 ---
 

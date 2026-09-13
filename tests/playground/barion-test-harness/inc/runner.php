@@ -205,6 +205,12 @@ function consentCalls( win ) {
 		.map( function ( c ) { return c[ 1 ]; } );
 }
 
+// One init per base pixel on the page. More than one means more than one copy
+// of bp.js, which drops every event rather than duplicating it.
+function initCalls( win ) {
+	return calls( win ).filter( function ( c ) { return 'init' === c[ 0 ]; } ).length;
+}
+
 async function runConsent( s ) {
 	document.cookie = 'wp_consent_marketing=;path=/;max-age=0';
 	if ( s.cookie ) { document.cookie = 'wp_consent_marketing=' + s.cookie + ';path=/'; }
@@ -244,7 +250,14 @@ async function runConsent( s ) {
 	}
 
 	var got = read();
-	var pass = JSON.stringify( got ) === JSON.stringify( s.expect );
+	var expected = s.expect;
+	// A scenario that counts base pixels reports both numbers, so a failure
+	// says which half went wrong.
+	if ( null !== s.pixelInits ) {
+		got = { consent: got, pixelInits: initCalls( win ) };
+		expected = { consent: s.expect, pixelInits: s.pixelInits };
+	}
+	var pass = JSON.stringify( got ) === JSON.stringify( expected );
 	// Read before the frame goes: the log belongs to a document that removing
 	// the iframe discards.
 	var log = pixelLog( win );
@@ -253,7 +266,7 @@ async function runConsent( s ) {
 		name: s.name,
 		got: got,
 		pass: pass,
-		why: pass ? '' : 'expected ' + JSON.stringify( s.expect ) + ', got ' + JSON.stringify( got ),
+		why: pass ? '' : 'expected ' + JSON.stringify( expected ) + ', got ' + JSON.stringify( got ),
 		log: log
 	};
 }

@@ -40,7 +40,8 @@ add_action(
 			};
 		} );
 
-		// Defining both is what makes the base script skip loading bp.js.
+		// Defining window.bp is what makes the base script skip loading bp.js.
+		// BarionAnalyticsObject is what the real bp.js sets alongside it.
 		window.BarionAnalyticsObject = 'bp';
 		window.bp = function () {
 			window.__bpCalls.push( {

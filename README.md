@@ -30,7 +30,7 @@ Barion Pixel integration for WooCommerce with full e-commerce event tracking, co
 - **Cookie Consent Integration**: Sends `grantConsent` and `rejectConsent` automatically. CookieYes, Complianz, Cookiebot and Cookie Law Info are read directly, with the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) covering everything else
 - **Admin Settings Panel**: Easy configuration through WordPress admin
 - **Debug Mode**: Console logging for testing and development
-- **bp.js Double-Load Detection**: Safely coexists with other plugins that load bp.js (e.g., Barion Payment Gateway)
+- **Single Base Pixel**: Two copies of bp.js on one page stop events from reaching Barion. The plugin skips its own script load when another source got there first, and switches the Barion Payment Gateway's pixel off while a Pixel ID is configured here
 
 ## Installation
 
@@ -83,7 +83,7 @@ Barion's own guides for setting up the pixel. The plugin's **Enable Full Pixel T
 ## Compatibility
 
 - **WooCommerce**: Required for full event tracking (base pixel works without it)
-- **Barion Payment Gateway** ([woocommerce-barion](https://github.com/szelpe/woocommerce-barion)): Coexists perfectly — that plugin handles payments, this one handles pixel tracking
+- **Barion Payment Gateway**: Coexists — that plugin handles payments and implements the Base Pixel, this one adds the Full Pixel events and takes the Base Pixel over. Clear the Pixel ID in the gateway settings, see [Compatibility](docs/compatibility.md)
 - **Page caching**: Fully compatible (addToCart uses client-side JS)
 - **Cookie plugins**: CookieYes, Complianz, Cookiebot and Cookie Law Info work on their own. Any WP Consent API compatible plugin works once that plugin is active
 

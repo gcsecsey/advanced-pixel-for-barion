@@ -29,7 +29,7 @@ Integrácia Barion Pixel pre WooCommerce s kompletným sledovaním e-commerce ud
 - **Záložná integrácia Cookie Law Info**: Priama integrácia pre weby používajúce CookieYes/Cookie Law Info
 - **Panel nastavení administrátora**: Jednoduchá konfigurácia cez správu WordPress
 - **Režim ladenia**: Zaznamenávanie do konzoly pre testovanie a vývoj
-- **Detekcia dvojitého načítania bp.js**: Bezpečne koexistuje s inými pluginmi, ktoré načítavajú bp.js (napr. Barion Payment Gateway)
+- **Jediný základný pixel**: Dve kópie bp.js na jednej stránke zastavia doručovanie udalostí do Barionu. Plugin preskočí vlastné načítanie skriptu, ak bol iný zdroj skôr, a kým je Pixel ID nastavené tu, vypne pixel pluginu Barion Payment Gateway
 
 ## Inštalácia
 
@@ -82,7 +82,7 @@ Vlastné príručky Barionu k nastaveniu pixela (v angličtine). Voľba **Enable
 ## Kompatibilita
 
 - **WooCommerce**: Vyžaduje sa pre úplné sledovanie udalostí (základný pixel funguje aj bez neho)
-- **Barion Payment Gateway** ([woocommerce-barion](https://github.com/szelpe/woocommerce-barion)): Dokonale koexistuje — tento plugin spracúva platby, tento sleduje pixel
+- **Barion Payment Gateway**: Koexistuje — ten plugin sa stará o platby a implementuje základný pixel, tento pridáva udalosti Full Pixelu a základný pixel preberá. Vymaž Pixel ID v nastaveniach brány, pozri [Kompatibilita](sk/compatibility.md)
 - **Ukladanie stránok do cache**: Plne kompatibilné (addToCart používa JavaScript na strane klienta)
 - **Pluginy na cookies**: Automaticky funguje každý plugin kompatibilný s WP Consent API
 

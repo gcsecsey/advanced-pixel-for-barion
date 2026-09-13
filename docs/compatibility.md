@@ -28,24 +28,48 @@ purchase tracking. Keep it in the template.
 Barion documents several ways to get the base pixel onto a page, and a store can
 easily end up with more than one of them:
 
-- the [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) by szelpe, and other Barion gateway plugins, which have an optional Pixel ID field
+- the [Barion Payment Gateway](https://barion.com/en/plugins/) by Barion, and the [gateway by szelpe](https://github.com/szelpe/woocommerce-barion), which have an optional Pixel ID field
 - a [Google Tag Manager tag](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
 - a snippet pasted into the theme header
 
-The plugin checks for `window.bp` and `window.BarionAnalyticsObject` before
-loading `bp.js`. If both are already there it skips the script load and only sends
-its own `init` call, so the pixel is never loaded twice. In debug mode this logs
-`[Barion Pixel] bp.js already loaded by another plugin`.
+**Two base pixels on one page do not degrade tracking, they end it.** Each copy of
+`bp.js` appends its own iframe under `id="barion_receiver"`, `getElementById()`
+returns only the first, and the second copy posts its events into that first
+iframe before it has fetched the visitor's consent status. `bp.js` throws there
+(`Cannot read properties of undefined (reading 'approvedBase')`) and the event is
+never sent. Measured on a live shop: three throws and zero events on a product
+page.
 
-**Recommendation:** keep the Pixel ID in one place. If you also run a Barion
-payment gateway, configure the ID here and leave the gateway's field empty; if you
-already load the base pixel through Google Tag Manager, remove that tag. Two
-different Pixel IDs on one page is the case worth avoiding — the plugin can
-suppress a duplicate script, but not a duplicate identity.
+### What the plugin does about it
+
+**The Barion Payment Gateway.** Its pixel prints from `wp_head` at priority
+999999 whenever its Pixel ID field is filled — whatever its own tracking setting
+says, and even with the gateway itself switched off. That is after everything
+this plugin can enqueue, so no JavaScript check can see it. This plugin therefore
+applies the gateway's own `woocommerce_barion_disable_tracking` filter and serves
+the Base Pixel itself, but only while a Pixel ID is configured here. That filter
+has no other consumer in the gateway, and the gateway implements the Base Pixel
+and nothing beyond it, so nothing is lost. A site that wants the gateway to keep
+the pixel can `remove_filter()` it and clear the Pixel ID here instead.
+
+**Everything else.** Before loading `bp.js` the plugin checks `window.bp`. If any
+other source defined it first, the script load is skipped and only the `init`
+call goes out. In debug mode this logs `[Barion Pixel] bp.js already loaded by
+another plugin`.
+
+A snippet that runs *after* this plugin — a Google Tag Manager tag, a snippet in
+the theme header — is out of reach: it loads `bp.js` again whatever this plugin
+does. Debug mode catches that case after the page loads and warns that something
+else loads a second copy of `bp.js`.
+
+**Recommendation:** keep the Pixel ID in one place, here. Clear the gateway's
+field and remove any Google Tag Manager tag or theme snippet. Two different Pixel
+IDs on one page is the case worth avoiding — the plugin can suppress a duplicate
+script, but not a duplicate identity.
 
 When the Barion Payment Gateway also has a Pixel ID configured, the settings page
-shows an informational notice. Both plugins keep working either way: that one
-handles payments, this one handles tracking.
+says so. Both plugins keep working either way: that one handles payments, this
+one handles tracking.
 
 ---
 

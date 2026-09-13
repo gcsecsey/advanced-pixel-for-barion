@@ -96,6 +96,16 @@ class WC_Barion_Pixel {
 
 		// Only load tracking if pixel ID is set.
 		if ( ! empty( $this->options['pixel_id'] ) ) {
+			// The Barion Payment Gateway prints its own base pixel from wp_head
+			// at priority 999999 whenever its Pixel ID field is filled, after
+			// everything this plugin can enqueue and whatever its own tracking
+			// setting says. Two copies of bp.js do not merely duplicate events,
+			// they stop all of them (see docs/compatibility.md), and only this
+			// filter — the one that plugin exposes — is early enough to prevent
+			// it. A site that wants the gateway to keep the pixel can
+			// remove_filter() this and clear the Pixel ID here instead.
+			add_filter( 'woocommerce_barion_disable_tracking', '__return_true' );
+
 			// Enqueue scripts.
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_base_script' ), 1 );
 			add_action( 'wp_footer', array( $this, 'output_footer_action' ), 999 );
@@ -256,7 +266,9 @@ class WC_Barion_Pixel {
 
 		$barion_settings = get_option( 'woocommerce_barion_settings', array() );
 		if ( ! empty( $barion_settings['barion_pixel_id'] ) && ! empty( $this->options['pixel_id'] ) ) {
-			echo '<p>' . esc_html__( 'The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place.', 'advanced-pixel-for-barion' ) . '</p>';
+			echo '<div class="notice notice-info inline"><p>';
+			echo esc_html__( 'The Barion Payment Gateway plugin also has a Pixel ID configured. That would put a second copy of the base pixel script on every page, which stops your events from reaching Barion, so this plugin switches that copy off. Remove the Pixel ID from the payment gateway settings to keep your configuration in one place.', 'advanced-pixel-for-barion' );
+			echo '</p></div>';
 		}
 	}
 

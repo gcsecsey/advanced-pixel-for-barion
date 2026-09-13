@@ -87,9 +87,9 @@ msgstr "Dodatak WP Consent API je aktivan, ali nijedna kolačić traka nije se k
 msgid "The plugin therefore ignores it. Connect your cookie banner to the WP Consent API, or call window.wcBarionGrantConsent() from the accept button of your banner and window.wcBarionRejectConsent() from its reject button."
 msgstr "Dodatak ga stoga zanemaruje. Poveži svoju kolačić traku s WP Consent API-jem ili pozovi window.wcBarionGrantConsent() s gumba za prihvaćanje svoje trake i window.wcBarionRejectConsent() s njezina gumba za odbijanje."
 
-#: advanced-pixel-for-barion.php:259
-msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
-msgstr "Dodatak Barion Payment Gateway također ima konfiguriran Pixel ID. Oba dodatka radit će ispravno zajedno — skripta osnovnog Pixela učitat će se samo jednom. Možeš ukloniti Pixel ID iz postavki platnog pristupnika kako bi konfiguraciju držao na jednom mjestu."
+#: advanced-pixel-for-barion.php:270
+msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. That would put a second copy of the base pixel script on every page, which stops your events from reaching Barion, so this plugin switches that copy off. Remove the Pixel ID from the payment gateway settings to keep your configuration in one place."
+msgstr "Dodatak Barion Payment Gateway također ima konfiguriran Pixel ID. To bi na svaku stranicu stavilo drugu kopiju skripte osnovnog Pixela, zbog koje tvoji događaji više ne bi stizali do Bariona, pa ovaj dodatak tu kopiju isključuje. Ukloni Pixel ID iz postavki platnog pristupnika kako bi konfiguraciju držao na jednom mjestu."
 
 #: advanced-pixel-for-barion.php:277
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"

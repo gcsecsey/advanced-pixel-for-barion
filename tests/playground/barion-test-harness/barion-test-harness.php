@@ -19,6 +19,7 @@ error_reporting( E_ALL );
 require_once __DIR__ . '/inc/recorder.php';
 require_once __DIR__ . '/inc/stub-cmp.php';
 require_once __DIR__ . '/inc/real-wpca.php';
+require_once __DIR__ . '/inc/gateway-pixel.php';
 require_once __DIR__ . '/inc/store.php';
 require_once __DIR__ . '/inc/scenarios.php';
 require_once __DIR__ . '/inc/panel.php';

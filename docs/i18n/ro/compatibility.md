@@ -31,24 +31,45 @@ din șablon, urmărirea achizițiilor se oprește fără niciun semn. Păstreaz�
 Barion documentează mai multe moduri de a aduce pixelul de bază într-o pagină, iar un magazin poate
 ajunge ușor cu mai multe dintre ele deodată:
 
-- [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) creat de szelpe și alte plugin-uri de plată Barion, care au un câmp opțional pentru ID Pixel
+- [Barion Payment Gateway](https://barion.com/en/plugins/) de la Barion și [gateway-ul creat de szelpe](https://github.com/szelpe/woocommerce-barion), care au un câmp opțional pentru ID Pixel
 - un [tag Google Tag Manager](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
 - un fragment lipit în header-ul temei
 
-Plugin-ul verifică `window.bp` și `window.BarionAnalyticsObject` înainte să încarce `bp.js`. Dacă
-ambele sunt deja acolo, omite încărcarea scriptului și trimite doar propriul apel `init`, astfel
-încât pixelul nu se încarcă niciodată de două ori. În modul depanare, acest lucru apare ca
-`[Barion Pixel] bp.js already loaded by another plugin`.
+**Doi pixeli de bază pe o pagină nu înrăutățesc urmărirea, ci o opresc.** Fiecare copie a `bp.js`
+adaugă propriul iframe cu `id="barion_receiver"`, `getElementById()` îl returnează doar pe primul,
+iar a doua copie își trimite evenimentele chiar în acel prim iframe, înainte ca el să fi preluat
+starea consimțământului vizitatorului. `bp.js` aruncă acolo o eroare
+(`Cannot read properties of undefined (reading 'approvedBase')`), iar evenimentul nu este trimis
+niciodată. Măsurat pe un magazin live: trei erori și zero evenimente pe o pagină de produs.
 
-**Recomandare:** păstrează ID-ul Pixel într-un singur loc. Dacă folosești și un gateway de plată
-Barion, configurează ID-ul aici și lasă câmpul gateway-ului gol; dacă încarci deja pixelul de bază
-prin Google Tag Manager, elimină acel tag. Cazul de evitat cu adevărat este acela cu două ID-uri
-Pixel diferite pe aceeași pagină — un script duplicat poate fi suprimat de plugin, o identitate
-duplicată nu.
+### Ce face plugin-ul în această privință
 
-Când și Barion Payment Gateway are un ID Pixel configurat, pagina de setări afișează o notificare
-informativă. Ambele plugin-uri funcționează oricum mai departe: acela gestionează plățile, acesta
-urmărirea.
+**Barion Payment Gateway.** Își afișează pixelul din `wp_head` cu prioritatea 999999 ori de câte
+ori câmpul său pentru ID Pixel este completat — indiferent de propria setare de urmărire și chiar
+cu gateway-ul însuși dezactivat. Asta se întâmplă după tot ce poate încărca acest plugin, așa că
+nicio verificare din JavaScript nu îl poate vedea. De aceea, acest plugin aplică filtrul propriu al
+gateway-ului, `woocommerce_barion_disable_tracking`, și servește el însuși pixelul de bază, dar
+doar cât timp există un ID Pixel configurat aici. Acel filtru nu are alt consumator în gateway, iar
+gateway-ul implementează pixelul de bază și nimic peste el, deci nu se pierde nimic. Un site care
+vrea ca pixelul să rămână la gateway îl poate elimina cu `remove_filter()` și să șteargă în schimb
+ID-ul Pixel de aici.
+
+**Tot restul.** Înainte să încarce `bp.js`, plugin-ul verifică `window.bp`. Dacă orice altă sursă
+l-a definit prima, omite încărcarea scriptului și trimite doar apelul `init`. În modul depanare,
+acest lucru apare ca `[Barion Pixel] bp.js already loaded by another plugin`.
+
+Un fragment care rulează *după* acest plugin — un tag Google Tag Manager, un fragment în header-ul
+temei — este în afara razei de acțiune: încarcă `bp.js` din nou, orice ar face acest plugin. În
+modul depanare, cazul este detectat după încărcarea paginii, iar plugin-ul avertizează că altceva
+încarcă a doua copie a `bp.js`.
+
+**Recomandare:** păstrează ID-ul Pixel într-un singur loc, aici. Golește câmpul gateway-ului și
+elimină orice tag Google Tag Manager sau fragment din temă. Cazul de evitat cu adevărat este acela
+cu două ID-uri Pixel diferite pe aceeași pagină — un script duplicat poate fi suprimat de plugin, o
+identitate duplicată nu.
+
+Când și Barion Payment Gateway are un ID Pixel configurat, pagina de setări semnalează acest lucru.
+Ambele plugin-uri funcționează oricum mai departe: acela gestionează plățile, acesta urmărirea.
 
 ---
 

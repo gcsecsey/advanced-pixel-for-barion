@@ -87,9 +87,9 @@ msgstr "Plugin WP Consent API je aktivní, ale žádná cookie lišta se u něj 
 msgid "The plugin therefore ignores it. Connect your cookie banner to the WP Consent API, or call window.wcBarionGrantConsent() from the accept button of your banner and window.wcBarionRejectConsent() from its reject button."
 msgstr "Plugin jej proto ignoruje. Propojte svou cookie lištu s WP Consent API, nebo volejte window.wcBarionGrantConsent() z tlačítka souhlasu své lišty a window.wcBarionRejectConsent() z jejího tlačítka odmítnutí."
 
-#: advanced-pixel-for-barion.php:259
-msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
-msgstr "Plugin Barion Payment Gateway má také nakonfigurované ID Pixelu. Oba pluginy budou správně fungovat společně — skript základního pixelu se načte pouze jednou. Můžeš odebrat ID Pixelu z nastavení platební brány, aby byla konfigurace na jednom místě."
+#: advanced-pixel-for-barion.php:270
+msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. That would put a second copy of the base pixel script on every page, which stops your events from reaching Barion, so this plugin switches that copy off. Remove the Pixel ID from the payment gateway settings to keep your configuration in one place."
+msgstr "Plugin Barion Payment Gateway má také nakonfigurované ID Pixelu. Ten by na každou stránku vložil druhou kopii skriptu základního pixelu, kvůli které by tvoje události přestaly docházet do Barionu, takže tento plugin druhou kopii vypíná. Odeber ID Pixelu z nastavení platební brány, aby byla konfigurace na jednom místě."
 
 #: advanced-pixel-for-barion.php:277
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"

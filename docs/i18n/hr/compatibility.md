@@ -30,22 +30,44 @@ predloška, praćenje kupnji tiho prestaje. Ostavi ga u predlošku.
 Barion dokumentira nekoliko načina da osnovni pixel dođe na stranicu, a u jednoj se trgovini lako
 skupi više njih:
 
-- [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) od szelpe i drugi Barionovi platni dodaci koji imaju neobavezno polje Pixel ID
+- [Barion Payment Gateway](https://barion.com/en/plugins/) od Bariona i [pristupnik od szelpe](https://github.com/szelpe/woocommerce-barion), koji imaju neobavezno polje Pixel ID
 - [oznaka u Google Tag Manageru](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
 - isječak zalijepljen u zaglavlje teme
 
-Dodatak prije učitavanja `bp.js` provjerava `window.bp` i `window.BarionAnalyticsObject`. Ako su
-oba već tu, preskače učitavanje skripte i šalje samo vlastiti poziv `init`, pa se pixel nikad ne
-učita dvaput. U načinu za otklanjanje pogrešaka to javlja poruka
-`[Barion Pixel] bp.js already loaded by another plugin`.
+**Dva osnovna pixela na jednoj stranici ne pogoršavaju praćenje, nego ga prekidaju.** Svaka kopija
+`bp.js` dodaje vlastiti iframe pod `id="barion_receiver"`, `getElementById()` vraća samo prvi, a
+druga kopija šalje svoje događaje u taj prvi iframe prije nego što je dohvatio status pristanka
+posjetitelja. `bp.js` ondje baca pogrešku
+(`Cannot read properties of undefined (reading 'approvedBase')`) i događaj se nikad ne pošalje.
+Izmjereno na živoj trgovini: tri pogreške i nula događaja na stranici proizvoda.
 
-**Preporuka:** drži Pixel ID na jednom mjestu. Ako koristiš i Barionov platni pristupnik, postavi
-ID ovdje i ostavi njegovo polje praznim; ako osnovni pixel već učitavaš preko Google Tag Managera,
-ukloni tu oznaku. Ono što doista treba izbjeći su dva različita Pixel ID-a na jednoj stranici —
-dvostruku skriptu dodatak može spriječiti, dvostruki identitet ne.
+### Što dodatak poduzima
 
-Kada i Barion Payment Gateway ima podešen Pixel ID, stranica postavki prikazuje informativnu
-obavijest. Oba dodatka svejedno nastavljaju raditi: onaj obrađuje plaćanja, ovaj praćenje.
+**Barion Payment Gateway.** Svoj pixel ispisuje iz `wp_head` s prioritetom 999999 kad god mu je
+polje Pixel ID popunjeno — bez obzira na njegovu vlastitu postavku praćenja, pa čak i kad je sam
+pristupnik isključen. To je nakon svega što ovaj dodatak može staviti u red, pa to nijedna provjera
+u JavaScriptu ne može vidjeti. Ovaj dodatak zato primjenjuje pristupnikov vlastiti filtar
+`woocommerce_barion_disable_tracking` i sam poslužuje osnovni pixel, ali samo dok je Pixel ID
+postavljen ovdje. Taj filtar u pristupniku nema drugog korisnika, a pristupnik implementira osnovni
+pixel i ništa više od toga, pa se ništa ne gubi. Stranica koja želi da pixel ostane na pristupniku
+može ga ukloniti s `remove_filter()` i umjesto toga ovdje obrisati Pixel ID.
+
+**Sve ostalo.** Prije učitavanja `bp.js` dodatak provjerava `window.bp`. Ako ga je neki drugi izvor
+definirao prvi, preskače učitavanje skripte i šalje samo poziv `init`. U načinu za otklanjanje
+pogrešaka to javlja poruka `[Barion Pixel] bp.js already loaded by another plugin`.
+
+Isječak koji se izvodi *nakon* ovog dodatka — oznaka u Google Tag Manageru, isječak u zaglavlju
+teme — izvan je dosega: učitat će `bp.js` ponovno, što god ovaj dodatak napravio. U načinu za
+otklanjanje pogrešaka taj se slučaj prepozna nakon učitavanja stranice i dodatak upozorava da nešto
+drugo učitava drugu kopiju `bp.js`.
+
+**Preporuka:** drži Pixel ID na jednom mjestu, ovdje. Isprazni polje u pristupniku i ukloni
+eventualnu oznaku u Google Tag Manageru ili isječak u temi. Ono što doista treba izbjeći su dva
+različita Pixel ID-a na jednoj stranici — dvostruku skriptu dodatak može spriječiti, dvostruki
+identitet ne.
+
+Kada i Barion Payment Gateway ima podešen Pixel ID, stranica postavki to javlja. Oba dodatka
+svejedno nastavljaju raditi: onaj obrađuje plaćanja, ovaj praćenje.
 
 ---
 

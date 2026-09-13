@@ -47,19 +47,22 @@ function barion_harness_pages() {
  * @param string $click  accept, decline, accept2, both, or null for no click.
  * @param array  $expect Consent calls the page should make, in order.
  * @param string $cookie  wp_consent_marketing value to set first, or null.
+ * @param int    $inits  How many init calls the page should make, or null not
+ *                       to look. Only the base pixel scenarios care.
  * @return array
  */
-function barion_harness_consent( $name, $query, $click, $expect, $cookie = null ) {
+function barion_harness_consent( $name, $query, $click, $expect, $cookie = null, $inits = null ) {
 	return array(
-		'name'   => $name,
-		'kind'   => 'consent',
-		'url'    => add_query_arg( wp_parse_args( $query ), home_url( '/' ) ),
+		'name'       => $name,
+		'kind'       => 'consent',
+		'url'        => add_query_arg( wp_parse_args( $query ), home_url( '/' ) ),
 		// A late CMP defines its globals 600ms after DOMContentLoaded, so the
 		// banner is not there to click yet.
-		'late'   => false !== strpos( $query, 'late=1' ),
-		'click'  => $click,
-		'cookie' => $cookie,
-		'expect' => $expect,
+		'late'       => false !== strpos( $query, 'late=1' ),
+		'click'      => $click,
+		'cookie'     => $cookie,
+		'expect'     => $expect,
+		'pixelInits' => $inits,
 	);
 }
 
@@ -95,6 +98,12 @@ function barion_harness_consent_scenarios() {
 		barion_harness_consent( 'Cookie Law Info legacy - decline', 'cmp=cli', 'decline', $reject ),
 		barion_harness_consent( 'No consent manager', 'cmp=none', null, array() ),
 		barion_harness_consent( 'Late CMP, returning visitor, no click', 'cmp=cookieyes&late=1&prior=1', null, array() ),
+		// The other base pixel a Barion shop usually also runs. Two of them
+		// break tracking outright, so the count is what matters here, not the
+		// consent calls. The second row is the control: without the off switch
+		// this same page really does init the pixel twice.
+		barion_harness_consent( 'Payment gateway pixel too - stays at one', 'cmp=none&gateway=1', null, array(), null, 1 ),
+		barion_harness_consent( 'Payment gateway pixel, off switch removed', 'cmp=none&gateway=1&nofilter=1', null, array(), null, 2 ),
 	);
 }
 

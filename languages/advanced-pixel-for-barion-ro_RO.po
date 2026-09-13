@@ -87,9 +87,9 @@ msgstr "Pluginul WP Consent API este activ, dar niciun banner de cookie-uri nu s
 msgid "The plugin therefore ignores it. Connect your cookie banner to the WP Consent API, or call window.wcBarionGrantConsent() from the accept button of your banner and window.wcBarionRejectConsent() from its reject button."
 msgstr "Pluginul îl ignoră de aceea. Conectează-ți bannerul de cookie-uri la WP Consent API sau apelează window.wcBarionGrantConsent() din butonul de acceptare al bannerului și window.wcBarionRejectConsent() din butonul său de respingere."
 
-#: advanced-pixel-for-barion.php:259
-msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. Both plugins will work correctly together — the base pixel script will only be loaded once. You may remove the Pixel ID from the payment gateway settings to keep configuration in one place."
-msgstr "Pluginul Barion Payment Gateway are, de asemenea, un ID Pixel configurat. Ambele pluginuri vor funcționa corect împreună — scriptul pixelului de bază va fi încărcat o singură dată. Poți elimina ID-ul Pixel din setările gateway-ului de plată pentru a păstra configurația într-un singur loc."
+#: advanced-pixel-for-barion.php:270
+msgid "The Barion Payment Gateway plugin also has a Pixel ID configured. That would put a second copy of the base pixel script on every page, which stops your events from reaching Barion, so this plugin switches that copy off. Remove the Pixel ID from the payment gateway settings to keep your configuration in one place."
+msgstr "Pluginul Barion Payment Gateway are, de asemenea, un ID Pixel configurat. Acesta ar pune pe fiecare pagină o a doua copie a scriptului pixelului de bază, din cauza căreia evenimentele tale nu ar mai ajunge la Barion, așa că acest plugin dezactivează acea copie. Elimină ID-ul Pixel din setările gateway-ului de plată pentru a păstra configurația într-un singur loc."
 
 #: advanced-pixel-for-barion.php:277
 msgid "Enter your Barion Pixel ID (e.g., BP-0000000000-00)"

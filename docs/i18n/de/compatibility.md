@@ -32,24 +32,46 @@ Template.
 Barion dokumentiert mehrere Wege, das Basis-Pixel auf eine Seite zu bekommen, und ein Shop kann
 leicht mehrere davon gleichzeitig haben:
 
-- das [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) von szelpe und andere Barion-Gateway-Plugins, die ein optionales Pixel-ID-Feld haben
+- das [Barion Payment Gateway](https://barion.com/en/plugins/) von Barion und das [Gateway von szelpe](https://github.com/szelpe/woocommerce-barion), die ein optionales Pixel-ID-Feld haben
 - ein [Google-Tag-Manager-Tag](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
 - ein Snippet im Theme-Header
 
-Das Plugin prüft `window.bp` und `window.BarionAnalyticsObject`, bevor es `bp.js` lädt. Sind beide
-schon vorhanden, überspringt es das Laden des Skripts und sendet nur seinen eigenen `init`-Aufruf,
-sodass das Pixel nie doppelt geladen wird. Im Debug-Modus erscheint dazu
-`[Barion Pixel] bp.js already loaded by another plugin`.
+**Zwei Basis-Pixel auf einer Seite verschlechtern das Tracking nicht, sie beenden es.** Jede Kopie
+von `bp.js` hängt ihr eigenes iframe mit `id="barion_receiver"` an, `getElementById()` liefert nur
+das erste zurück, und die zweite Kopie schickt ihre Events in genau dieses erste iframe, bevor es
+den Consent-Status des Besuchers geladen hat. `bp.js` wirft dort einen Fehler
+(`Cannot read properties of undefined (reading 'approvedBase')`) und das Event wird nie gesendet.
+In einem Live-Shop gemessen: drei Fehler und null Events auf einer Produktseite.
 
-**Empfehlung:** halte die Pixel-ID an einer Stelle. Wenn du auch ein Barion-Payment-Gateway
-betreibst, konfiguriere die ID hier und lasse das Feld im Gateway leer; lädst du das Basis-Pixel
-bereits über den Google Tag Manager, entferne dieses Tag. Zu vermeiden ist vor allem der Fall
-zweier unterschiedlicher Pixel-IDs auf einer Seite — ein doppeltes Skript kann das Plugin
-unterdrücken, eine doppelte Identität nicht.
+### Was das Plugin dagegen tut
 
-Wenn auch im Barion Payment Gateway eine Pixel-ID konfiguriert ist, zeigt die Einstellungsseite
-einen informativen Hinweis. Beide Plugins funktionieren so oder so weiter: jenes übernimmt die
-Zahlungen, dieses das Tracking.
+**Das Barion Payment Gateway.** Sein Pixel wird aus `wp_head` mit Priorität 999999 ausgegeben,
+sobald sein Pixel-ID-Feld gefüllt ist — unabhängig von seiner eigenen Tracking-Einstellung und
+sogar bei abgeschaltetem Gateway. Das liegt hinter allem, was dieses Plugin einreihen kann, also
+kann keine Prüfung in JavaScript es sehen. Dieses Plugin wendet deshalb den gatewayeigenen Filter
+`woocommerce_barion_disable_tracking` an und liefert das Basis-Pixel selbst aus, allerdings nur
+solange hier eine Pixel-ID konfiguriert ist. Dieser Filter hat im Gateway keinen weiteren
+Verbraucher, und das Gateway implementiert das Basis-Pixel und nichts darüber hinaus, es geht also
+nichts verloren. Eine Website, die das Pixel beim Gateway belassen will, kann ihn per
+`remove_filter()` entfernen und stattdessen die Pixel-ID hier leeren.
+
+**Alles andere.** Bevor es `bp.js` lädt, prüft das Plugin `window.bp`. Hat eine andere Quelle es
+zuerst definiert, überspringt es das Laden des Skripts und sendet nur den `init`-Aufruf. Im
+Debug-Modus erscheint dazu `[Barion Pixel] bp.js already loaded by another plugin`.
+
+Ein Snippet, das *nach* diesem Plugin läuft — ein Google-Tag-Manager-Tag, ein Snippet im
+Theme-Header —, ist außer Reichweite: Es lädt `bp.js` erneut, was dieses Plugin auch tut. Im
+Debug-Modus fällt dieser Fall nach dem Laden der Seite auf, und das Plugin warnt, dass etwas
+anderes eine zweite Kopie von `bp.js` lädt.
+
+**Empfehlung:** halte die Pixel-ID an einer Stelle, hier. Leere das Feld im Gateway und entferne
+ein etwaiges Google-Tag-Manager-Tag oder Theme-Snippet. Zu vermeiden ist vor allem der Fall zweier
+unterschiedlicher Pixel-IDs auf einer Seite — ein doppeltes Skript kann das Plugin unterdrücken,
+eine doppelte Identität nicht.
+
+Wenn auch im Barion Payment Gateway eine Pixel-ID konfiguriert ist, weist die Einstellungsseite
+darauf hin. Beide Plugins funktionieren so oder so weiter: jenes übernimmt die Zahlungen, dieses
+das Tracking.
 
 ---
 

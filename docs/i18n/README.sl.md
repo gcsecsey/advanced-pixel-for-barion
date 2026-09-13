@@ -29,7 +29,7 @@ Integracija Barion Pixel za WooCommerce s popolnim sledenjem dogodkov e-trgovine
 - **Nadomestna integracija Cookie Law Info**: Neposredna integracija za spletna mesta, ki uporabljajo CookieYes/Cookie Law Info
 - **Skrbniška plošča z nastavitvami**: Enostavna konfiguracija prek skrbniškega vmesnika WordPress
 - **Način za odpravljanje napak**: Beleženje v konzolo za testiranje in razvoj
-- **Zaznavanje dvojnega nalaganja bp.js**: Varno sobivanje z drugimi vtičniki, ki nalagajo bp.js (npr. Barion Payment Gateway)
+- **Samo en osnovni piksel**: Dve kopiji bp.js na eni strani preprečita, da bi dogodki prispeli do Bariona. Vtičnik preskoči lastno nalaganje skripte, če ga je prehitel drug vir, in izklopi piksel vtičnika Barion Payment Gateway, dokler je Pixel ID nastavljen tukaj
 
 ## Namestitev
 
@@ -82,7 +82,7 @@ Barionova lastna navodila za nastavitev piksla (v angleščini). Možnost **Enab
 ## Združljivost
 
 - **WooCommerce**: Potreben za popolno sledenje dogodkov (osnovni piksel deluje brez njega)
-- **Barion Payment Gateway** ([woocommerce-barion](https://github.com/szelpe/woocommerce-barion)): Brezkonfliktno sobivanje — ta vtičnik obravnava plačila, ta pa sledenje piksla
+- **Barion Payment Gateway**: Sobiva — tisti vtičnik obravnava plačila in implementira osnovni piksel, ta pa doda dogodke Full Pixel in prevzame osnovni piksel. Izprazni Pixel ID v nastavitvah prehoda, glej [Združljivost](sl/compatibility.md)
 - **Medpomnjenje strani**: Popolnoma združljivo (addToCart uporablja JavaScript na strani odjemalca)
 - **Vtičniki za piškotke**: Vsi vtičniki, združljivi z WP Consent API, delujejo samodejno
 

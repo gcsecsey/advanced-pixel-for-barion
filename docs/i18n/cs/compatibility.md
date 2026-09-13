@@ -30,22 +30,42 @@ sledování nákupů se tiše zastaví. Nechte ho v šabloně.
 Barion dokumentuje několik způsobů, jak dostat základní pixel na stránku, a v jednom obchodě se
 jich snadno sejde víc:
 
-- [Barion Payment Gateway](https://github.com/szelpe/woocommerce-barion) od szelpe a další platební pluginy pro Barion, které mají volitelné pole pro ID Pixelu
+- [Barion Payment Gateway](https://barion.com/en/plugins/) od Barionu a [brána od szelpe](https://github.com/szelpe/woocommerce-barion), které mají volitelné pole pro ID Pixelu
 - [tag v Google Tag Manageru](https://docs.barion.com/Implementing_the_Barion_Pixel_base_code_through_the_Google_Tag_Manager)
 - úryvek vložený do hlavičky šablony
 
-Plugin před načtením `bp.js` ověří `window.bp` a `window.BarionAnalyticsObject`. Pokud jsou obě už
-k dispozici, načtení skriptu přeskočí a odešle jen vlastní volání `init`, takže se pixel nikdy
-nenačte dvakrát. V režimu ladění to hlásí zpráva
-`[Barion Pixel] bp.js already loaded by another plugin`.
+**Dva základní pixely na jedné stránce sledování nezhorší, ale ukončí.** Každá kopie `bp.js`
+připojí vlastní iframe s `id="barion_receiver"`, `getElementById()` vrátí jen ten první a druhá
+kopie posílá své události do tohoto prvního iframu dřív, než si stihl načíst stav souhlasu
+návštěvníka. `bp.js` tam spadne s chybou
+(`Cannot read properties of undefined (reading 'approvedBase')`) a událost se nikdy neodešle.
+Změřeno na živém obchodě: tři chyby a nula událostí na stránce produktu.
 
-**Doporučení:** držte ID Pixelu na jednom místě. Pokud provozujete i platební bránu Barionu,
-nastavte ID zde a pole v bráně nechte prázdné; pokud základní pixel už načítáte přes Google Tag
-Manager, ten tag odstraňte. Skutečně nežádoucí je případ dvou různých ID Pixelu na jedné stránce
-— dvojí skript plugin potlačit umí, dvojí identitu ne.
+### Co s tím plugin dělá
 
-Když má ID Pixelu nastavené i Barion Payment Gateway, stránka nastavení zobrazí informační
-upozornění. Oba pluginy fungují dál tak jako tak: ten se stará o platby, tento o sledování.
+**Barion Payment Gateway.** Svůj pixel vypisuje z `wp_head` s prioritou 999999, kdykoli je
+vyplněné jeho pole ID Pixelu — bez ohledu na jeho vlastní nastavení sledování a i s vypnutou bránou
+samotnou. To je až za vším, co tento plugin dokáže zařadit, takže to žádná kontrola v JavaScriptu
+neuvidí. Tento plugin proto použije vlastní filtr brány `woocommerce_barion_disable_tracking` a
+základní pixel obsluhuje sám, ale jen po dobu, kdy je ID Pixelu nastavené zde. Ten filtr nemá v
+bráně žádného jiného konzumenta a brána implementuje základní pixel a nic nad jeho rámec, takže se
+nic neztratí. Web, který chce pixel ponechat bráně, může filtr odebrat přes `remove_filter()` a
+místo toho vymazat ID Pixelu zde.
+
+**Všechno ostatní.** Před načtením `bp.js` plugin ověří `window.bp`. Pokud ho definoval dřív
+jakýkoli jiný zdroj, načtení skriptu přeskočí a odešle jen volání `init`. V režimu ladění to hlásí
+zpráva `[Barion Pixel] bp.js already loaded by another plugin`.
+
+Úryvek, který běží *až za* tímto pluginem — tag v Google Tag Manageru, úryvek v hlavičce šablony —
+je mimo dosah: `bp.js` načte znovu, ať tento plugin udělá cokoli. V režimu ladění se tento případ
+pozná po načtení stránky a plugin upozorní, že něco jiného načítá druhou kopii `bp.js`.
+
+**Doporučení:** držte ID Pixelu na jednom místě, tady. Vymažte pole v bráně a odstraňte případný
+tag v Google Tag Manageru nebo úryvek v šabloně. Skutečně nežádoucí je případ dvou různých ID
+Pixelu na jedné stránce — dvojí skript plugin potlačit umí, dvojí identitu ne.
+
+Když má ID Pixelu nastavené i Barion Payment Gateway, stránka nastavení to oznámí. Oba pluginy
+fungují dál tak jako tak: ten se stará o platby, tento o sledování.
 
 ---
 

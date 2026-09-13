@@ -29,7 +29,7 @@ Integrare Barion Pixel pentru WooCommerce cu urmărirea completă a evenimentelo
 - **Fallback Cookie Law Info**: Integrare directă pentru site-urile care folosesc CookieYes/Cookie Law Info
 - **Panou de setări în administrare**: Configurare ușoară prin panoul de administrare WordPress
 - **Mod depanare**: Jurnalizare în consolă pentru testare și dezvoltare
-- **Detectarea dublei încărcări bp.js**: Coexistă în siguranță cu alte plugin-uri care încarcă bp.js (de ex., Barion Payment Gateway)
+- **Un singur pixel de bază**: Două copii ale bp.js pe o pagină opresc ajungerea evenimentelor la Barion. Plugin-ul omite propria încărcare a scriptului dacă o altă sursă a ajuns prima și dezactivează pixelul din Barion Payment Gateway cât timp aici este configurat un ID Pixel
 
 ## Instalare
 
@@ -82,7 +82,7 @@ Ghidurile proprii ale Barion pentru configurarea pixelului (în limba engleză).
 ## Compatibilitate
 
 - **WooCommerce**: Necesar pentru urmărirea completă a evenimentelor (pixelul de bază funcționează și fără el)
-- **Barion Payment Gateway** ([woocommerce-barion](https://github.com/szelpe/woocommerce-barion)): Coexistă perfect — acel plugin gestionează plățile, acesta gestionează urmărirea cu pixel
+- **Barion Payment Gateway**: Coexistă — acel plugin gestionează plățile și implementează pixelul de bază, acesta adaugă evenimentele Full Pixel și preia pixelul de bază. Golește ID-ul Pixel din setările gateway-ului, vezi [Compatibilitate](ro/compatibility.md)
 - **Cache de pagini**: Complet compatibil (addToCart folosește JavaScript pe partea clientului)
 - **Plugin-uri de cookie**: Orice plugin compatibil cu WP Consent API funcționează automat
 

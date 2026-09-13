@@ -149,6 +149,7 @@ directory. Load order is unaffected: every fixture hangs off a hook priority.
 | `inc/recorder.php` | Stands in for `bp()` so nothing reaches `pixel.barion.com`, and captures the console. |
 | `inc/stub-cmp.php` | Emulates the consent managers. Select one with `?cmp=`, and reproduce the awkward cases with `&late=1` and `&prior=1`. |
 | `inc/real-wpca.php` | No stub. Sets `window.wp_consent_type` and calls the real plugin's `wp_set_consent()`, which is what a bridged banner does. |
+| `inc/gateway-pixel.php` | The base pixel snippet a Barion payment gateway prints, from `wp_head` at priority 999999. Add it with `?gateway=1`, and take the plugin's off switch away with `&nofilter=1`. |
 | `inc/store.php` | Builds the shop: product, order, classic cart and checkout pages, Cash on Delivery. |
 | `inc/scenarios.php` | Every scenario, as data. |
 | `inc/runner.php` | The harness pages: loads each scenario in an iframe, acts on it, asserts. |
@@ -172,6 +173,10 @@ Add an entry to the matching function in `inc/scenarios.php`.
 For consent, set `expect` to the consent calls the page should make, in order,
 and `[]` when it should stay silent — staying silent before the visitor answers
 is a documented rule, not an omission.
+
+Set the last argument to the number of `init` calls the page should make when a
+scenario is about the base pixel itself rather than about consent. Two of them
+means two copies of `bp.js`, which drops every event instead of duplicating it.
 
 For events, set `expect` to the tracked event names in order, and `keys` to the
 payload rules: `require` for keys that must be present, `forbid` for keys that

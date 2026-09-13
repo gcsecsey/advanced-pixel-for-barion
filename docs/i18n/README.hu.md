@@ -29,7 +29,7 @@ Barion Pixel integráció WooCommerce-hez teljes e-kereskedelmi eseményköveté
 - **Cookie Law Info tartalék**: Közvetlen integráció CookieYes/Cookie Law Info-t használó oldalakhoz
 - **Adminisztrációs beállítások panel**: Egyszerű konfiguráció a WordPress adminisztrációs felületen keresztül
 - **Hibakeresési mód**: Konzolnaplózás teszteléshez és fejlesztéshez
-- **bp.js dupla betöltés észlelése**: Biztonságosan együttműködik más bővítményekkel, amelyek betöltik a bp.js fájlt (pl. Barion Payment Gateway)
+- **Egyetlen alap pixel**: Két bp.js példány egy oldalon megakadályozza, hogy az események eljussanak a Barionhoz. A bővítmény kihagyja a saját szkriptbetöltését, ha másik forrás megelőzte, és kikapcsolja a Barion Payment Gateway pixelét, amíg itt be van állítva Pixel azonosító
 
 ## Telepítés
 
@@ -85,7 +85,7 @@ A Barion saját útmutatói a pixel beállításához. A bővítmény **Teljes P
 ## Kompatibilitás
 
 - **WooCommerce**: A teljes eseménykövetéshez szükséges (az alap pixel nélküle is működik)
-- **Barion Payment Gateway** ([woocommerce-barion](https://github.com/szelpe/woocommerce-barion)): Tökéletesen együttműködik — az a bővítmény a fizetéseket kezeli, ez a pixel követést
+- **Barion Payment Gateway**: Együttműködik — az a bővítmény a fizetéseket kezeli és az alap pixelt valósítja meg, ez hozzáadja a Full Pixel eseményeket, és átveszi az alap pixelt. Töröld a Pixel azonosítót az átjáró beállításaiból, lásd [Kompatibilitás](hu/compatibility.md)
 - **Oldal gyorsítótárazás**: Teljesen kompatibilis (az addToCart kliensoldalú JS-t használ)
 - **Cookie bővítmények**: Bármely WP Consent API kompatibilis bővítmény automatikusan működik
 
