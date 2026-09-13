@@ -3,7 +3,7 @@ Contributors: mrdarkside
 Tags: barion, pixel, woocommerce, tracking, e-commerce
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -62,7 +62,7 @@ This plugin loads the Barion Pixel script (bp.js) from pixel.barion.com on all f
 * Variable product support (tracks variation prices)
 * Duplicate purchase prevention
 * Debug mode with console logging
-* Detects other plugins loading bp.js to avoid double-loading
+* Keeps one base pixel on the page, because two copies of bp.js stop events from reaching Barion
 
 == Installation ==
 
@@ -141,6 +141,12 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 
 == Changelog ==
 
+= 1.0.10 =
+* Fix: adding a product from a shop or category page reported a price of 0 to Barion. WooCommerce renders no price on the archive add-to-cart button and the plugin read one from it, so every add from an archive counted as worth nothing. The price now comes from the Store API cart line, which is where the checkout block path already read it.
+* Fix: a second base pixel on the page stopped every event from reaching Barion. The Barion Payment Gateway prints its own base pixel whenever its Pixel ID field is filled, whatever its own tracking setting says and even with the gateway itself switched off. Two copies of bp.js leave the page with two iframes under one id, and the copy that loses that race posts its events into an iframe that has not read the visitor's consent yet. bp.js throws there and nothing is sent. The plugin now switches the gateway's base pixel off while a Pixel ID is configured here.
+* Fix: the plugin loaded a second copy of bp.js on top of any plain Barion snippet that got there first, such as a Google Tag Manager tag or one pasted into the theme header. Its guard asked for a global that the snippet Barion documents never sets.
+* New: debug mode warns when something else on the page loads a second copy of bp.js. A snippet that runs after the plugin is out of its reach, and until now nothing said so.
+
 = 1.0.9 =
 * Fix: `grantConsent` was sent as the page loaded rather than when the visitor accepted the cookie banner. Barion rejects a Full Pixel integration for exactly that, because a shop reporting consent before anyone has answered looks the same as one that never asks. Consent is now sent only for a decision the visitor makes on that page load. A returning visitor triggers nothing, since bp.js keeps their answer in its own cookie and Barion already has it.
 * Fix: with the WP Consent API plugin active but no cookie banner registered against it, every visitor was reported as having granted marketing consent. An unset consent type is how that API says no banner is driving it, and the plugin read it as a real answer. It now ignores the API in that state.
@@ -193,6 +199,9 @@ The addToCart event uses client-side JavaScript instead of PHP sessions, so it w
 * bp.js double-load detection
 
 == Upgrade Notice ==
+
+= 1.0.10 =
+Important for any store that also runs a Barion payment gateway: a second base pixel on the page stopped every event from reaching Barion, and the plugin now prevents that. Also fixes add-to-cart from shop and category pages reporting a price of 0.
 
 = 1.0.9 =
 Required for Barion Full Pixel approval. grantConsent is now sent when the visitor accepts the cookie banner instead of at page load, which is what Barion checks for. Also stops the WP Consent API from reporting consent for visitors who never answered.

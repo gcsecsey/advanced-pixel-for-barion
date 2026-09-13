@@ -103,6 +103,12 @@ GPL-2.0-or-later — vezi [LICENSE](../../LICENSE) pentru detalii.
 
 ## Jurnal de modificări
 
+### 1.0.10
+- Remediat: adăugarea unui produs dintr-o pagină de magazin sau de categorie raporta către Barion un preț de 0. WooCommerce nu afișează niciun preț pe butonul de adăugare în coș din listă, iar plugin-ul îl citea totuși de acolo, așa că fiecare adăugare din listă valora zero. Prețul vine acum din linia de coș a Store API, de unde calea prin blocuri îl citea deja
+- Remediat: un al doilea pixel de bază pe pagină oprea complet ajungerea evenimentelor la Barion. Barion Payment Gateway își afișează propriul pixel de bază ori de câte ori câmpul său pentru ID Pixel este completat, indiferent de propria setare de urmărire și chiar cu gateway-ul însuși dezactivat. Două copii ale bp.js lasă în pagină două iframe-uri cu același id, iar copia care pierde această cursă își trimite evenimentele într-un iframe care nu a citit încă starea consimțământului vizitatorului. bp.js aruncă acolo o eroare și nu se trimite nimic. Plugin-ul dezactivează acum pixelul de bază al gateway-ului cât timp aici este configurat un ID Pixel
+- Remediat: plugin-ul încărca o a doua copie a bp.js peste orice fragment Barion simplu ajuns primul, de exemplu un tag Google Tag Manager sau unul lipit în header-ul temei. Verificarea lui cerea o variabilă pe care fragmentul documentat de Barion nu o setează niciodată
+- Nou: modul depanare avertizează când altceva din pagină încarcă a doua copie a bp.js. Un fragment care rulează după plugin este în afara razei lui de acțiune, iar până acum nimic nu spunea asta
+
 ### 1.0.9
 - Remediat: `grantConsent` era trimis la încărcarea paginii, nu atunci când vizitatorul accepta bara de cookie-uri. Exact pentru asta respinge Barion o integrare Full Pixel: un magazin care raportează consimțământ înainte ca cineva să fi răspuns arată la fel ca unul care nu întreabă niciodată. Consimțământul se trimite acum doar pentru o decizie luată de vizitator la acea încărcare de pagină. Un vizitator care revine nu declanșează nimic, pentru că bp.js îi păstrează răspunsul în propriul cookie, iar Barion îl are deja
 - Remediat: cu plugin-ul WP Consent API activ, dar fără nicio bară de cookie-uri înregistrată la el, fiecare vizitator era raportat ca având consimțământ de marketing. Un tip de consimțământ nesetat este felul în care acel API spune că nu îl conduce nicio bară, iar plugin-ul îl citea ca pe un răspuns real. În această stare, acum îl ignoră

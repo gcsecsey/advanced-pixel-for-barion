@@ -103,6 +103,12 @@ GPL-2.0-or-later — viz [LICENSE](../../LICENSE) pro podrobnosti.
 
 ## Historie změn
 
+### 1.0.10
+- Opraveno: přidání produktu ze stránky obchodu nebo kategorie hlásilo Barionu cenu 0. WooCommerce na tlačítku pro přidání do košíku v přehledu žádnou cenu nevykresluje, plugin ji odtud přesto četl, takže každé přidání z přehledu mělo nulovou hodnotu. Cena nyní pochází z položky košíku ze Store API, odkud ji cesta přes blok čtla už dřív
+- Opraveno: druhý základní pixel na stránce zastavil doručování všech událostí do Barionu. Barion Payment Gateway vypisuje vlastní základní pixel, kdykoli je vyplněné jeho pole ID Pixelu, bez ohledu na jeho vlastní nastavení sledování a i s vypnutou bránou samotnou. Dvě kopie bp.js zanechají na stránce dva iframy pod jedním id a ta kopie, která tento souboj prohraje, posílá své události do iframu, který ještě nenačetl stav souhlasu návštěvníka. bp.js tam spadne s chybou a neodešle se nic. Plugin nyní základní pixel brány vypíná po dobu, kdy je ID Pixelu nastavené zde
+- Opraveno: plugin načítal druhou kopii bp.js navrch každého prostého úryvku Barionu, který tam byl dřív, například tagu v Google Tag Manageru nebo úryvku v hlavičce šablony. Jeho kontrola vyžadovala proměnnou, kterou úryvek dokumentovaný Barionem nikdy nenastavuje
+- Nové: režim ladění upozorní, když něco jiného na stránce načítá druhou kopii bp.js. Úryvek, který běží až za pluginem, je mimo jeho dosah, a dosud to nic neřeklo
+
 ### 1.0.9
 - Opraveno: `grantConsent` se odesílal při načtení stránky, a ne ve chvíli, kdy návštěvník přijal cookie lištu. Právě za to Barion odmítá integraci Full Pixel: obchod, který hlásí souhlas dřív, než kdokoli odpověděl, vypadá stejně jako ten, který se nikdy neptá. Souhlas se nyní odesílá jen za rozhodnutí, které návštěvník učiní při tom načtení stránky. Vracející se návštěvník nevyvolá nic, protože bp.js si jeho odpověď drží ve vlastní cookie a Barion ji už má
 - Opraveno: při aktivním pluginu WP Consent API, u kterého se ale nezaregistrovala žádná cookie lišta, byl každý návštěvník hlášen jako ten, kdo marketingový souhlas udělil. Nenastavený typ souhlasu je způsob, jakým toto API říká, že jej neřídí žádná lišta, plugin to však četl jako skutečnou odpověď. V tomto stavu je nyní ignoruje

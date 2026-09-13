@@ -103,6 +103,12 @@ GPL-2.0-or-later — glejte [LICENSE](../../LICENSE) za podrobnosti.
 
 ## Dnevnik sprememb
 
+### 1.0.10
+- Popravljeno: dodajanje izdelka s strani trgovine ali kategorije je Barionu javljalo ceno 0. WooCommerce na gumbu za dodajanje v košarico na seznamu ne izpiše cene, vtičnik pa jo je od tam vseeno bral, zato je bilo vsako dodajanje s seznama vredno nič. Cena zdaj prihaja iz vrstice košarice prek Store API, od koder jo je pot prek blokov brala že prej
+- Popravljeno: drugi osnovni piksel na strani je povsem ustavil prihajanje dogodkov do Bariona. Barion Payment Gateway izpiše svoj osnovni piksel, kadar koli je njegovo polje Pixel ID izpolnjeno, ne glede na njegovo lastno nastavitev sledenja in tudi ob izklopljenem prehodu. Dve kopiji bp.js pustita na strani dva iframea pod istim id, kopija, ki to tekmo izgubi, pa svoje dogodke pošilja v iframe, ki še ni prebral statusa soglasja obiskovalca. bp.js tam vrže napako in ne pošlje se nič. Vtičnik zdaj izklopi osnovni piksel prehoda, dokler je Pixel ID nastavljen tukaj
+- Popravljeno: vtičnik je naložil drugo kopijo bp.js povrh vsakega preprostega Barionovega izseka, ki je prišel prej, na primer oznake v Google Tag Managerju ali izseka v glavi teme. Njegovo preverjanje je zahtevalo spremenljivko, ki je izsek, dokumentiran pri Barionu, nikoli ne nastavi
+- Novo: način za odpravljanje napak opozori, ko nekaj drugega na strani nalaga drugo kopijo bp.js. Izsek, ki se izvede za vtičnikom, je izven njegovega dosega, doslej pa tega ni povedalo nič
+
 ### 1.0.9
 - Popravljeno: `grantConsent` se je pošiljal ob nalaganju strani, ne pa takrat, ko je obiskovalec sprejel pasico za piškotke. Prav zaradi tega Barion zavrne integracijo Full Pixel: trgovina, ki javi soglasje, preden je kdor koli odgovoril, je videti enako kot tista, ki nikoli ne vpraša. Soglasje se zdaj pošlje samo za odločitev, ki jo obiskovalec sprejme ob tem nalaganju strani. Vračajoči se obiskovalec ne sproži ničesar, ker bp.js hrani njegov odgovor v svojem piškotku in ga Barion že ima
 - Popravljeno: ob aktivnem vtičniku WP Consent API, pri katerem se ni registrirala nobena pasica za piškotke, je bil vsak obiskovalec javljen, kot da je dal trženjsko soglasje. Nenastavljena vrsta soglasja je način, kako ta API pove, da ga ne poganja nobena pasica, vtičnik pa je to bral kot resničen odgovor. V tem stanju ga zdaj prezre

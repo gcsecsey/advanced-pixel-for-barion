@@ -106,6 +106,12 @@ GPL-2.0-or-later — részletekért lásd a [LICENSE](../../LICENSE) fájlt.
 
 ## Változásnapló
 
+### 1.0.10
+- Javítva: a termék kosárba tétele a bolt- vagy kategórialistáról 0 árat jelentett a Barionnak. A WooCommerce a listaoldali kosárgombra nem ír ki árat, a bővítmény mégis onnan olvasta, így a listáról indított minden kosárba tétel nulla értékű volt. Az ár mostantól a Store API kosártételéből jön, ahonnan a blokkos út már eddig is olvasta
+- Javítva: egy második alap pixel az oldalon megakadályozta, hogy bármelyik esemény eljusson a Barionhoz. A Barion Payment Gateway kiírja a saját alap pixelét, valahányszor a Pixel azonosító mezője ki van töltve, függetlenül a saját követési beállításától, és akkor is, ha maga az átjáró ki van kapcsolva. A bp.js két példánya két iframe-et hagy az oldalon ugyanazzal az id-vel, és amelyik példány veszít ezen a versenyen, abba az iframe-be küldi az eseményeit, amelyik még nem olvasta be a látogató hozzájárulási állapotát. A bp.js ott hibára fut, és semmi nem megy el. A bővítmény mostantól kikapcsolja az átjáró alap pixelét, amíg itt be van állítva Pixel azonosító
+- Javítva: a bővítmény egy második bp.js példányt töltött be minden olyan egyszerű Barion kódrészlet mellé, amelyik előbb ért oda, például egy Google Tag Manager tag vagy a sablon fejlécébe illesztett kódrészlet mellé. Az ellenőrzése olyan változót kért, amelyet a Barion által dokumentált kódrészlet soha nem állít be
+- Új: hibakeresési módban a bővítmény figyelmeztet, ha valami más az oldalon egy második bp.js példányt tölt be. Az a kódrészlet, amelyik a bővítmény után fut, kívül esik a hatókörén, és eddig ezt semmi nem mondta meg
+
 ### 1.0.9
 - Javítva: a `grantConsent` az oldal betöltésekor ment ki, nem akkor, amikor a látogató elfogadta a cookie-sávot. A Barion pontosan ezért utasítja el a Full Pixel integrációt: az a bolt, amelyik azelőtt jelent hozzájárulást, hogy bárki válaszolt volna, ugyanúgy néz ki, mint amelyik soha nem kérdez. A hozzájárulás mostantól csak arról megy el, amit a látogató azon az oldalbetöltésen dönt. A visszatérő látogató semmit nem vált ki, mert a bp.js a saját cookie-jában tárolja a válaszát, és a Barionnak már megvan
 - Javítva: ha a WP Consent API bővítmény aktív volt, de egyetlen cookie-sáv sem regisztrált nála, minden látogató úgy jelent meg, mintha megadta volna a marketing-hozzájárulást. A be nem állított hozzájárulási típussal az API éppen azt mondja, hogy nincs mögötte sáv, a bővítmény viszont valódi válaszként olvasta. Ilyen állapotban mostantól figyelmen kívül hagyja

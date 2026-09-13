@@ -104,6 +104,12 @@ GPL-2.0-or-later — see [LICENSE](LICENSE) for details.
 
 ## Changelog
 
+### 1.0.10
+- Fixed: adding a product from a shop or category page reported a price of 0 to Barion. WooCommerce renders no price on the archive add-to-cart button and the plugin read one from it, so every add from an archive counted as worth nothing. The price now comes from the Store API cart line, which is where the checkout block path already read it
+- Fixed: a second base pixel on the page stopped every event from reaching Barion. The Barion Payment Gateway prints its own base pixel whenever its Pixel ID field is filled, whatever its own tracking setting says and even with the gateway itself switched off. Two copies of bp.js leave the page with two iframes under one id, and the copy that loses that race posts its events into an iframe that has not read the visitor's consent yet. bp.js throws there and nothing is sent. The plugin now switches the gateway's base pixel off while a Pixel ID is configured here
+- Fixed: the plugin loaded a second copy of bp.js on top of any plain Barion snippet that got there first, such as a Google Tag Manager tag or one pasted into the theme header. Its guard asked for a global that the snippet Barion documents never sets
+- New: debug mode warns when something else on the page loads a second copy of bp.js. A snippet that runs after the plugin is out of its reach, and until now nothing said so
+
 ### 1.0.9
 - Fixed: `grantConsent` was sent as the page loaded rather than when the visitor accepted the cookie banner. Barion rejects a Full Pixel integration for exactly that, because a shop reporting consent before anyone has answered looks the same as one that never asks. Consent is now sent only for a decision the visitor makes on that page load. A returning visitor triggers nothing, since bp.js keeps their answer in its own cookie and Barion already has it
 - Fixed: with the WP Consent API plugin active but no cookie banner registered against it, every visitor was reported as having granted marketing consent. An unset consent type is how that API says no banner is driving it, and the plugin read it as a real answer. It now ignores the API in that state

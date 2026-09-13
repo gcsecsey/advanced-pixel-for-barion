@@ -103,6 +103,12 @@ GPL-2.0-or-later — pogledaj [LICENSE](../../LICENSE) za detalje.
 
 ## Evidencija promena
 
+### 1.0.10
+- Ispravljeno: dodavanje proizvoda sa stranice prodavnice ili kategorije javljalo je Barionu cenu 0. WooCommerce na dugmetu za dodavanje u korpu na spisku ne ispisuje cenu, a dodatak ju je odande ipak čitao, pa je svako dodavanje sa spiska vredelo ništa. Cena sada dolazi iz stavke korpe preko Store API-ja, odakle ju je put kroz blokove već čitao
+- Ispravljeno: drugi osnovni piksel na stranici zaustavio je dolazak svih događaja do Bariona. Barion Payment Gateway ispisuje sopstveni osnovni piksel kad god mu je polje Pixel ID popunjeno, bez obzira na njegovo sopstveno podešavanje praćenja, pa i kada je sam prolaz isključen. Dve kopije bp.js ostavljaju na stranici dva iframea pod istim id-om, a kopija koja izgubi tu trku šalje svoje događaje u iframe koji još nije pročitao status saglasnosti posetioca. bp.js tu baca grešku i ne pošalje se ništa. Dodatak sada isključuje osnovni piksel prolaza dok je Pixel ID podešen ovde
+- Ispravljeno: dodatak je učitavao drugu kopiju bp.js povrh svakog običnog Barionovog isečka koji je stigao prvi, na primer oznake u Google Tag Manageru ili isečka u zaglavlju teme. Njegova provera je tražila promenljivu koju isečak koji Barion dokumentuje nikada ne postavlja
+- Novo: režim za otklanjanje grešaka upozorava kada nešto drugo na stranici učitava drugu kopiju bp.js. Isečak koji se izvršava posle dodatka van je njegovog domašaja, a do sada to ništa nije javljalo
+
 ### 1.0.9
 - Ispravljeno: `grantConsent` se slao pri učitavanju stranice, a ne kada je posetilac prihvatio traku za kolačiće. Upravo zbog toga Barion odbija Full Pixel integraciju: prodavnica koja javlja saglasnost pre nego što je iko odgovorio izgleda isto kao ona koja nikada ne pita. Saglasnost se sada šalje samo za odluku koju posetilac donese pri tom učitavanju stranice. Posetilac koji se vraća ne pokreće ništa, jer bp.js čuva njegov odgovor u sopstvenom kolačiću i Barion ga već ima
 - Ispravljeno: uz aktivan dodatak WP Consent API kod kojeg se nije registrovala nijedna traka za kolačiće, svaki je posetilac javljan kao da je dao marketinšku saglasnost. Nepodešena vrsta saglasnosti je način na koji taj API kaže da ga ne pokreće nijedna traka, a dodatak je to čitao kao stvaran odgovor. U tom stanju ga sada zanemaruje

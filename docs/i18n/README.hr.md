@@ -103,6 +103,12 @@ GPL-2.0-or-later — pogledaj [LICENSE](../../LICENSE) za detalje.
 
 ## Dnevnik promjena
 
+### 1.0.10
+- Ispravljeno: dodavanje proizvoda sa stranice trgovine ili kategorije javljalo je Barionu cijenu 0. WooCommerce na gumbu za dodavanje u košaricu u pregledu ne ispisuje cijenu, a dodatak ju je ondje ipak čitao, pa je svako dodavanje iz pregleda vrijedilo ništa. Cijena sada dolazi iz stavke košarice preko Store API-ja, odakle ju je put kroz blok već čitao
+- Ispravljeno: drugi osnovni pixel na stranici zaustavio je dolazak svih događaja do Bariona. Barion Payment Gateway ispisuje vlastiti osnovni pixel kad god mu je polje Pixel ID popunjeno, bez obzira na njegovu vlastitu postavku praćenja i čak i kad je sam pristupnik isključen. Dvije kopije bp.js ostavljaju na stranici dva iframea pod jednim id-om, a kopija koja izgubi tu utrku šalje svoje događaje u iframe koji još nije pročitao status pristanka posjetitelja. bp.js ondje baca pogrešku i ne pošalje se ništa. Dodatak sada isključuje osnovni pixel pristupnika dok je Pixel ID postavljen ovdje
+- Ispravljeno: dodatak je učitavao drugu kopiju bp.js povrh svakog običnog Barionovog isječka koji je stigao prvi, primjerice oznake u Google Tag Manageru ili isječka u zaglavlju teme. Njegova je provjera tražila varijablu koju isječak koji Barion dokumentira nikad ne postavlja
+- Novo: način za otklanjanje pogrešaka upozorava kada nešto drugo na stranici učitava drugu kopiju bp.js. Isječak koji se izvodi nakon dodatka izvan je njegova dosega, a dosad to ništa nije javljalo
+
 ### 1.0.9
 - Ispravljeno: `grantConsent` se slao pri učitavanju stranice, a ne kada je posjetitelj prihvatio traku za kolačiće. Upravo zbog toga Barion odbija Full Pixel integraciju: trgovina koja javlja privolu prije nego što je itko odgovorio izgleda isto kao ona koja nikada ne pita. Privola se sada šalje samo za odluku koju posjetitelj donese pri tom učitavanju stranice. Posjetitelj koji se vraća ne pokreće ništa, jer bp.js čuva njegov odgovor u vlastitom kolačiću i Barion ga već ima
 - Ispravljeno: uz aktivan dodatak WP Consent API kod kojeg se nije registrirala nijedna traka za kolačiće, svaki je posjetitelj javljan kao da je dao marketinšku privolu. Nepostavljena vrsta privole način je na koji taj API kaže da ga ne pokreće nijedna traka, a dodatak je to čitao kao stvaran odgovor. U tom stanju ga sada zanemaruje

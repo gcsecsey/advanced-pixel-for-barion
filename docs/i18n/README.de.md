@@ -103,6 +103,12 @@ GPL-2.0-or-later — siehe [LICENSE](../../LICENSE) für Details.
 
 ## Änderungsprotokoll
 
+### 1.0.10
+- Behoben: Ein Produkt von einer Shop- oder Kategorieseite hinzuzufügen meldete Barion einen Preis von 0. WooCommerce rendert am Warenkorb-Button der Übersicht keinen Preis, das Plugin las dort trotzdem einen, sodass jedes Hinzufügen aus einer Übersicht nichts wert war. Der Preis kommt jetzt aus der Store-API-Warenkorbzeile, wo ihn der Block-Pfad ohnehin schon las
+- Behoben: Ein zweites Basis-Pixel auf der Seite verhinderte, dass überhaupt ein Event bei Barion ankam. Das Barion Payment Gateway gibt sein eigenes Basis-Pixel aus, sobald sein Pixel-ID-Feld gefüllt ist, unabhängig von seiner eigenen Tracking-Einstellung und sogar bei abgeschaltetem Gateway. Zwei Kopien von bp.js hinterlassen auf der Seite zwei iframes unter einer id, und die Kopie, die dieses Rennen verliert, schickt ihre Events in ein iframe, das den Consent-Status der Besucherin noch nicht gelesen hat. bp.js wirft dort einen Fehler und es wird nichts gesendet. Das Plugin schaltet das Basis-Pixel des Gateways jetzt ab, solange hier eine Pixel-ID konfiguriert ist
+- Behoben: Das Plugin lud eine zweite Kopie von bp.js zusätzlich zu jedem einfachen Barion-Snippet, das zuerst da war, etwa einem Google-Tag-Manager-Tag oder einem im Theme-Header. Seine Prüfung verlangte eine Variable, die das von Barion dokumentierte Snippet nie setzt
+- Neu: Der Debug-Modus warnt, wenn etwas anderes auf der Seite eine zweite Kopie von bp.js lädt. Ein Snippet, das nach dem Plugin läuft, ist außer seiner Reichweite, und bisher sagte das nichts
+
 ### 1.0.9
 - Behoben: `grantConsent` wurde beim Laden der Seite gesendet statt dann, wenn die Besucherin den Cookie-Banner akzeptierte. Genau dafür lehnt Barion eine Full-Pixel-Integration ab, denn ein Shop, der Einwilligung meldet, bevor jemand geantwortet hat, sieht aus wie einer, der nie fragt. Die Einwilligung wird jetzt nur noch für eine Entscheidung gesendet, die bei diesem Seitenaufruf getroffen wurde. Eine wiederkehrende Besucherin löst nichts aus, weil bp.js ihre Antwort im eigenen Cookie behält und Barion sie bereits hat
 - Behoben: Bei aktivem Plugin WP Consent API, aber ohne dort registrierten Cookie-Banner, wurde jede Besucherin als einwilligend gemeldet. Ein nicht gesetzter Consent-Typ ist die Art dieser API zu sagen, dass sie von keinem Banner gesteuert wird; das Plugin las das als echte Antwort. In diesem Zustand ignoriert es die API jetzt
