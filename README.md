@@ -59,7 +59,7 @@ Enable to log all Barion Pixel events to the browser console for testing.
 
 ## Documentation
 
-Detailed documentation is available in the [`docs/`](docs/) folder:
+Detailed documentation is available at [plottwist.hu/docs/advanced-pixel-for-barion](https://plottwist.hu/docs/advanced-pixel-for-barion/) and in the [`docs/`](docs/) folder:
 
 - [Events Reference](docs/events-reference.md) — All tracked events, fields, and data types
 - [Cookie Consent Integration](docs/cookie-consent.md) — WP Consent API, Cookie Law Info, and manual integration

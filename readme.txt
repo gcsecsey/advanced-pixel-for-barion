@@ -37,6 +37,10 @@ Barion requires a grantConsent event before it approves a Full Pixel integration
 
 For every other cookie banner, install the [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) plugin. It is the WordPress standard for passing consent between plugins, and Real Cookie Banner, GDPR Cookie Compliance (Moove) and Cookie Notice by dFactory all support it. You can also wire your banner up by hand in a few lines.
 
+= Documentation =
+
+The full documentation, with the event reference, cookie consent setup and testing notes, is at [plottwist.hu/docs/advanced-pixel-for-barion](https://plottwist.hu/docs/advanced-pixel-for-barion/). It is available in all the languages below.
+
 = Supported Languages =
 
 * English (default)
